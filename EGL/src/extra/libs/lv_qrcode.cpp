@@ -166,7 +166,7 @@ static void lv_qrcode_constructor(const EG_ClassType_t *class_p, EGObject *obj)
 	EG_ASSERT_MALLOC(buf);
 	if(buf == NULL) return;
 
-	lv_canvas_set_buffer(obj, buf, size_param, size_param, EG_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_buffer(obj, buf, size_param, size_param, EG_COLOR_FORMAT_INDEXED_1BIT);
 	lv_canvas_set_palette(obj, 0, dark_color_param);
 	lv_canvas_set_palette(obj, 1, light_color_param);
 }

@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -360,13 +360,13 @@ void EGInputDevice::PointerProcess(EG_InputData_t *pInData)
 	}
 	// Simple sanity check
 	if(pInData->Point.m_X < 0) {
-		EG_LOG_WARN("X is %d which is smaller than zero", (int)pInData->Point.m_X);
+		EG_LOG_WARN("X is %d which is less than zero", (int)pInData->Point.m_X);
 	}
 	if(pInData->Point.m_X >= m_pDisplay->GetHorizontalRes()) {
 		EG_LOG_WARN("X is %d which is greater than hor. res", (int)pInData->Point.m_X);
 	}
 	if(pInData->Point.m_Y < 0) {
-		EG_LOG_WARN("Y is %d which is smaller than zero", (int)pInData->Point.m_Y);
+		EG_LOG_WARN("Y is %d which is less than zero", (int)pInData->Point.m_Y);
 	}
 	if(pInData->Point.m_Y >= m_pDisplay->GetVerticalRes()) {
 		EG_LOG_WARN("Y is %d which is greater than ver. res", (int)pInData->Point.m_Y);
@@ -895,11 +895,11 @@ void EGInputDevice::ReleaseProcess(EG_ProcessedInput_t *pProcess)
 				pParent = pParent->GetParent();
 			}
 
-			if(Angle != 0 || Zoom != EG_IMG_ZOOM_NONE) {
+			if(Angle != 0 || Zoom != EG_SCALE_NONE) {
 				Angle = -Angle;
 				Zoom = (256 * 256) / Zoom;
-				pProcess->Pointer.ScrollThrowVector.PointTransform(Angle, Zoom, &Pivot);
-				pProcess->Pointer.LastScrollThrowVector.PointTransform(Angle, Zoom, &Pivot);
+				pProcess->Pointer.ScrollThrowVector.PointTransform(Angle, Zoom, Zoom, &Pivot);
+				pProcess->Pointer.LastScrollThrowVector.PointTransform(Angle, Zoom, Zoom, &Pivot);
 			}
 		}
 	}

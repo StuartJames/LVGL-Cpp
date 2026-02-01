@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -28,33 +28,36 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-#define FILL_NORMAL_MASK_PX(Color)                     \
-	if(*pMask == EG_OPA_COVER) *pDestBuffer = Color;     \
-	else *pDestBuffer = EG_ColorMix(Color, *pDestBuffer, *pMask); \
-	pMask++;                                             \
+#define FILL_NORMAL_MASK_PX(Color)                           \
+	if(*pMask == EG_OPA_COVER)                                 \
+		*pDestBuffer = Color;                                    \
+	else                                                       \
+		*pDestBuffer = EG_ColorMix(Color, *pDestBuffer, *pMask); \
+	pMask++;                                                   \
 	pDestBuffer++;
 
-#define MAP_NORMAL_MASK_PX(x)                                           \
-	if(*pMaskTempX) {                                                     \
-		if(*pMaskTempX == EG_OPA_COVER) pDestBuffer[x] = pSourceBuffer[x];  \
-		else pDestBuffer[x] = EG_ColorMix(pSourceBuffer[x], pDestBuffer[x], *pMaskTempX); \
-	}                                                                     \
+#define MAP_NORMAL_MASK_PX(x)                                                      \
+	if(*pMaskTempX) {                                                                \
+		if(*pMaskTempX == EG_OPA_COVER)                                                \
+			pDestBuffer[x] = pSourceBuffer[x];                                           \
+		else                                                                           \
+			pDestBuffer[x] = EG_ColorMix(pSourceBuffer[x], pDestBuffer[x], *pMaskTempX); \
+	}                                                                                \
 	pMaskTempX++;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGSoftBlend::EGSoftBlend(const EGSoftContext *pContext) :
-  m_pRect(nullptr),
-  m_pSourceBuffer(nullptr), 
-  m_Color(EG_ColorBlack()),
-  m_pMaskBuffer(nullptr),
-  m_MaskResult(EG_DRAW_MASK_RES_UNKNOWN),
-  m_pMaskRect(nullptr),
-  m_OPA(EG_OPA_COVER),
-  m_BlendMode(EG_BLEND_MODE_NORMAL),
-  m_pContext(pContext)
+EGSoftBlend::EGSoftBlend(const EGSoftContext *pContext) : m_pRect(nullptr),
+																													m_pSourceBuffer(nullptr),
+																													m_Color(EG_ColorBlack()),
+																													m_pMaskBuffer(nullptr),
+																													m_MaskResult(EG_DRAW_MASK_RES_UNKNOWN),
+																													m_pMaskRect(nullptr),
+																													m_OPA(EG_OPA_COVER),
+																													m_BlendMode(EG_BLEND_MODE_NORMAL),
+																													m_pContext(pContext)
 {
-  BlendProc = EGSoftBlend::BlendBasic;
+	BlendProc = EGSoftBlend::BlendBasic;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +70,8 @@ EGSoftBlend::~EGSoftBlend(void)
 
 void EGSoftBlend::DoBlend(void)
 {
-	if(m_OPA <= EG_OPA_MIN) return;	// Do not draw transparent things
-  EGRect Rect;
+	if(m_OPA <= EG_OPA_MIN) return;  // Do not draw transparent things
+	EGRect Rect;
 	if(!Rect.Intersect(m_pRect, m_pContext->m_pClipRect)) return;
 	m_pContext->WaitForFinish();
 	BlendProc(this);
@@ -78,24 +81,27 @@ void EGSoftBlend::DoBlend(void)
 
 void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::BlendBasic(EGSoftBlend *pBlend)
 {
-EG_OPA_t *pMask;
-const EGDrawContext *pContext = pBlend->m_pContext;
+	EG_OPA_t *pMask;
+	const EGDrawContext *pContext = pBlend->m_pContext;
 
 	if(pBlend->m_pMaskBuffer == nullptr) pMask = nullptr;
-	if(pBlend->m_pMaskBuffer && pBlend->m_MaskResult == EG_DRAW_MASK_RES_TRANSP) return;
-	else if(pBlend->m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER)	pMask = nullptr;
-	else pMask = pBlend->m_pMaskBuffer;
+	if(pBlend->m_pMaskBuffer && pBlend->m_MaskResult == EG_DRAW_MASK_RES_TRANSP)
+		return;
+	else if(pBlend->m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER)
+		pMask = nullptr;
+	else
+		pMask = pBlend->m_pMaskBuffer;
 	EG_Coord_t DestStep = pContext->m_pDrawRect->GetWidth();
 	EGRect DestRect;
 	if(!DestRect.Intersect(pBlend->m_pRect, pContext->m_pClipRect)) return;
 	EGDisplay *pDisplay = GetRefreshingDisplay();
-	EG_Color_t *pDestBuffer = (EG_Color_t*)pContext->m_pDrawBuffer;
+	EG_Color_t *pDestBuffer = (EG_Color_t *)pContext->m_pDrawBuffer;
 	if(pDisplay->m_pDriver->SetPixelCB == nullptr) {
 		if(pDisplay->m_pDriver->m_ScreenTransparent == 0) {
 			pDestBuffer += DestStep * (DestRect.GetY1() - pContext->m_pDrawRect->GetY1()) + (DestRect.GetX1() - pContext->m_pDrawRect->GetX1());
 		}
 		else {
-			uint8_t *pDestBuffer8 = (uint8_t *)pDestBuffer;			// With EG_COLOR_DEPTH 16 it means ARGB8565 (3 bytes format)
+			uint8_t *pDestBuffer8 = (uint8_t *)pDestBuffer;  // With EG_COLOR_DEPTH 16 it means ARGB8565 (3 bytes format)
 			pDestBuffer8 += DestStep * (DestRect.GetY1() - pContext->m_pDrawRect->GetY1()) * EG_IMG_PX_SIZE_ALPHA_BYTE;
 			pDestBuffer8 += (DestRect.GetX1() - pContext->m_pDrawRect->GetX1()) * EG_IMG_PX_SIZE_ALPHA_BYTE;
 			pDestBuffer = (EG_Color_t *)pDestBuffer8;
@@ -107,9 +113,10 @@ const EGDrawContext *pContext = pBlend->m_pContext;
 		SourceStep = pBlend->m_pRect->GetWidth();
 		pSourceBuffer += SourceStep * (DestRect.GetY1() - pBlend->m_pRect->GetY1()) + (DestRect.GetX1() - pBlend->m_pRect->GetX1());
 	}
-	else SourceStep = 0;
+	else
+		SourceStep = 0;
 	EG_Coord_t MaskStep = 0;
-	if(pMask) {	// Round the values in the mask if anti-aliasing is disabled
+	if(pMask) {  // Round the values in the mask if anti-aliasing is disabled
 		if(pDisplay->m_pDriver->m_Antialiasing == 0) {
 			const int32_t MaskSize = pBlend->m_pMaskRect->GetSize();
 			for(int32_t i = 0; i < MaskSize; i++) {
@@ -121,16 +128,18 @@ const EGDrawContext *pContext = pBlend->m_pContext;
 	}
 	DestRect.Move(-pContext->m_pDrawRect->GetX1(), -pContext->m_pDrawRect->GetY1());
 	if(pDisplay->m_pDriver->SetPixelCB) {
-		if(pBlend->m_pSourceBuffer == nullptr) FillSetPixel(pBlend, pDestBuffer, &DestRect, DestStep, pBlend->m_Color, pBlend->m_OPA, pMask, MaskStep);
-		else MapSetPixel(pBlend, pDestBuffer, &DestRect, DestStep, pSourceBuffer, SourceStep, pBlend->m_OPA, pMask, MaskStep);
+		if(pBlend->m_pSourceBuffer == nullptr)
+			FillSetPixel(pBlend, pDestBuffer, &DestRect, DestStep, pBlend->m_Color, pBlend->m_OPA, pMask, MaskStep);
+		else
+			MapSetPixel(pBlend, pDestBuffer, &DestRect, DestStep, pSourceBuffer, SourceStep, pBlend->m_OPA, pMask, MaskStep);
 	}
 #if EG_COLOR_SCREEN_TRANSP
 	else if(pDisplay->m_pDriver->m_ScreenTransparent) {
-		if(pBlend->pSourceBuffer == nullptr) {
-			FillaRGB(pBlend, pDestBuffer, &DestRect, DestStep, pBlend->m_Color, pBlend->m_OPA, pMask, MaskStep);
+		if(pBlend->m_pSourceBuffer == nullptr) {
+			FillARGB(pBlend, pDestBuffer, &DestRect, DestStep, pBlend->m_Color, pBlend->m_OPA, pMask, MaskStep);
 		}
 		else {
-			MapaRGB(pBlend, pDestBuffer, &DestRect, DestStep, pSourceBuffer, SourceStep, pBlend->m_OPA, pMask, MaskStep, pBlend->m_BlendMode);
+			MapARGB(pBlend, pDestBuffer, &DestRect, DestStep, pSourceBuffer, SourceStep, pBlend->m_OPA, pMask, MaskStep, pBlend->m_BlendMode);
 		}
 	}
 #endif
@@ -157,9 +166,9 @@ const EGDrawContext *pContext = pBlend->m_pContext;
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EGSoftBlend::FillSetPixel(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect, EG_Coord_t DestStep,
-												EG_Color_t Color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t mask_stide)
+															 EG_Color_t Color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t mask_stide)
 {
-int32_t x, y;
+	int32_t x, y;
 
 	EGDisplay *pDisplay = GetRefreshingDisplay();
 	if(pMask == nullptr) {
@@ -176,7 +185,7 @@ int32_t x, y;
 			for(x = 0; x < Width; x++) {
 				if(pMask[x]) {
 					pDisplay->m_pDriver->SetPixelCB(pDisplay->m_pDriver, (uint8_t *)pDestBuffer, DestStep, pDestRect->GetX1() + x, pDestRect->GetY1() + y, Color,
-																	(uint32_t)((uint32_t)OPA * pMask[x]) >> 8);
+																					(uint32_t)((uint32_t)OPA * pMask[x]) >> 8);
 				}
 			}
 			pMask += mask_stide;
@@ -186,29 +195,29 @@ int32_t x, y;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::FillNormal(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect,	EG_Coord_t DestStep,
-                           EG_Color_t Color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t MaskStep)
+void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::FillNormal(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect, EG_Coord_t DestStep,
+																									 EG_Color_t Color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t MaskStep)
 {
-int32_t x, y;
+	int32_t x, y;
 
 	int32_t Width = pDestRect->GetWidth();
 	int32_t Height = pDestRect->GetHeight();
-	if(pMask == nullptr) {	// No mask
-//    ESP_LOGI("[Blend ]", "Buffer no mask:%p", (void*)pDestBuffer);
+	if(pMask == nullptr) {  // No mask
+													//    ESP_LOGI("[Blend ]", "Buffer no mask:%p", (void*)pDestBuffer);
 		if(OPA >= EG_OPA_MAX) {
 			for(y = 0; y < Height; y++) {
 				EG_ColorFill(pDestBuffer, Color, Width);
 				pDestBuffer += DestStep;
 			}
 		}
-		else {		// Has opacity
+		else {  // Has opacity
 			EG_Color_t LastDestColor = EG_ColorBlack();
 			EG_Color_t LastColorMix = EG_ColorMix(Color, LastDestColor, OPA);
 #if EG_COLOR_MIX_ROUND_OFS == 0 && EG_COLOR_DEPTH == 16
 			/*EG_ColorMix work with an optimized algorithm with 16 bit color depth.
              *However, it introduces some rounded error on opa.
              *Introduce the same error here too to make EG_ColorPreMultiply produces the same result */
-  		OPA = (uint32_t)((uint32_t)OPA + 4) >> 3;
+			OPA = (uint32_t)((uint32_t)OPA + 4) >> 3;
 			OPA = OPA << 3;
 #endif
 			uint16_t ColorPremult[3];
@@ -226,13 +235,13 @@ int32_t x, y;
 			}
 		}
 	}
-	else {	// Masked
+	else {  // Masked
 //    ESP_LOGI("[Blend ]", "Buffer masked:%p", (void*)pDestBuffer);
 #if EG_COLOR_DEPTH == 16
 		uint32_t c32 = Color.full + ((uint32_t)Color.full << 16);
 #endif
-		if(OPA >= EG_OPA_MAX) {		// Only the mask matters
-//    ESP_LOGI("[Blend ]", "Masked");
+		if(OPA >= EG_OPA_MAX) {  // Only the mask matters
+														 //    ESP_LOGI("[Blend ]", "Masked");
 			int32_t x_end4 = Width - 4;
 			for(y = 0; y < Height; y++) {
 				for(x = 0; x < Width && ((eg_uintptr_t)(pMask)&0x3); x++) {
@@ -280,24 +289,26 @@ int32_t x, y;
 				pMask += (MaskStep - Width);
 			}
 		}
-		else {		// With opacity
-			EG_Color_t last_dest_color;	// Buffer the result color to avoid recalculating the same color
-			EG_Color_t last_res_color;
+		else {                         // With opacity
+			EG_Color_t DestColor;  // Buffer the result color to avoid recalculating the same color
+			EG_Color_t ResultColor;
 			EG_OPA_t last_mask = EG_OPA_TRANSP;
-			last_dest_color.full = pDestBuffer[0].full;
-			last_res_color.full = pDestBuffer[0].full;
+			DestColor.full = pDestBuffer[0].full;
+			ResultColor.full = pDestBuffer[0].full;
 			EG_OPA_t opa_tmp = EG_OPA_TRANSP;
 			for(y = 0; y < Height; y++) {
 				for(x = 0; x < Width; x++) {
 					if(*pMask) {
 						if(*pMask != last_mask) opa_tmp = *pMask == EG_OPA_COVER ? OPA : (uint32_t)((uint32_t)(*pMask) * OPA) >> 8;
-						if(*pMask != last_mask || last_dest_color.full != pDestBuffer[x].full) {
-							if(opa_tmp == EG_OPA_COVER)	last_res_color = Color;
-							else last_res_color = EG_ColorMix(Color, pDestBuffer[x], opa_tmp);
+						if(*pMask != last_mask || DestColor.full != pDestBuffer[x].full) {
+							if(opa_tmp == EG_OPA_COVER)
+								ResultColor = Color;
+							else
+								ResultColor = EG_ColorMix(Color, pDestBuffer[x], opa_tmp);
 							last_mask = *pMask;
-							last_dest_color.full = pDestBuffer[x].full;
+							DestColor.full = pDestBuffer[x].full;
 						}
-						pDestBuffer[x] = last_res_color;
+						pDestBuffer[x] = ResultColor;
 					}
 					pMask++;
 				}
@@ -311,16 +322,17 @@ int32_t x, y;
 //////////////////////////////////////////////////////////////////////////////////////
 
 #if EG_DRAW_COMPLEX
+
 void EGSoftBlend::FillBlended(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect,
-												 EG_Coord_t DestStep, EG_Color_t Color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t MaskStep,
-												 EG_BlendMode_e blend_mode)
+															EG_Coord_t DestStep, EG_Color_t Color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t MaskStep,
+															EG_BlendMode_e BlendMode)
 {
-int32_t x, y;
+	int32_t x, y;
 
 	int32_t Width = pDestRect->GetWidth();
 	int32_t Height = pDestRect->GetHeight();
 	EG_Color_t (*BlendFunc)(EGSoftBlend *, EG_Color_t, EG_Color_t, EG_OPA_t);
-	switch(blend_mode) {
+	switch(BlendMode) {
 		case EG_BLEND_MODE_ADDITIVE:
 			BlendFunc = BlendTrueColorAdditive;
 			break;
@@ -331,20 +343,20 @@ int32_t x, y;
 			BlendFunc = BlendTrueColorMultiply;
 			break;
 		default:
-			EG_LOG_WARN("fill_blended: unsupported blend mode");
+			EG_LOG_WARN("FillBlended: unsupported blend mode");
 			return;
 	}
 	// Simple fill (maybe with opacity), no masking
 	if(pMask == nullptr) {
-		EG_Color_t last_dest_color = pDestBuffer[0];
-		EG_Color_t last_res_color = BlendFunc(pBlend, Color, pDestBuffer[0], OPA);
+		EG_Color_t DestColor = pDestBuffer[0];
+		EG_Color_t ResultColor = BlendFunc(pBlend, Color, pDestBuffer[0], OPA);
 		for(y = 0; y < Height; y++) {
 			for(x = 0; x < Width; x++) {
-				if(last_dest_color.full != pDestBuffer[x].full) {
-					last_dest_color = pDestBuffer[x];
-					last_res_color = BlendFunc(pBlend, Color, pDestBuffer[x], OPA);
+				if(DestColor.full != pDestBuffer[x].full) {
+					DestColor = pDestBuffer[x];
+					ResultColor = BlendFunc(pBlend, Color, pDestBuffer[x], OPA);
 				}
-				pDestBuffer[x] = last_res_color;
+				pDestBuffer[x] = ResultColor;
 			}
 			pDestBuffer += DestStep;
 		}
@@ -352,22 +364,22 @@ int32_t x, y;
 	// Masked
 	else {
 		// Buffer the result color to avoid recalculating the same color
- 		EG_Color_t last_dest_color;
-		EG_Color_t last_res_color;
+		EG_Color_t DestColor;
+		EG_Color_t ResultColor;
 		EG_OPA_t last_mask = EG_OPA_TRANSP;
-		last_dest_color = pDestBuffer[0];
+		DestColor = pDestBuffer[0];
 		EG_OPA_t opa_tmp = pMask[0] >= EG_OPA_MAX ? OPA : (uint32_t)((uint32_t)pMask[0] * OPA) >> 8;
-		last_res_color = BlendFunc(pBlend, Color, last_dest_color, opa_tmp);
+		ResultColor = BlendFunc(pBlend, Color, DestColor, opa_tmp);
 		for(y = 0; y < Height; y++) {
 			for(x = 0; x < Width; x++) {
 				if(pMask[x] == 0) continue;
-				if(pMask[x] != last_mask || last_dest_color.full != pDestBuffer[x].full) {
+				if(pMask[x] != last_mask || DestColor.full != pDestBuffer[x].full) {
 					opa_tmp = pMask[x] >= EG_OPA_MAX ? OPA : (uint32_t)((uint32_t)pMask[x] * OPA) >> 8;
-					last_res_color = BlendFunc(pBlend, Color, pDestBuffer[x], opa_tmp);
+					ResultColor = BlendFunc(pBlend, Color, pDestBuffer[x], opa_tmp);
 					last_mask = pMask[x];
-					last_dest_color.full = pDestBuffer[x].full;
+					DestColor.full = pDestBuffer[x].full;
 				}
-				pDestBuffer[x] = last_res_color;
+				pDestBuffer[x] = ResultColor;
 			}
 			pDestBuffer += DestStep;
 			pMask += MaskStep;
@@ -379,11 +391,11 @@ int32_t x, y;
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EGSoftBlend::MapSetPixel(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect, EG_Coord_t DestStep,
-											 const EG_Color_t *pSourceBuffer, EG_Coord_t SourceStep, EG_OPA_t OPA,
-											 const EG_OPA_t *pMask, EG_Coord_t MaskStep)
+															const EG_Color_t *pSourceBuffer, EG_Coord_t SourceStep, EG_OPA_t OPA,
+															const EG_OPA_t *pMask, EG_Coord_t MaskStep)
 {
-int32_t x;
-int32_t y;
+	int32_t x;
+	int32_t y;
 
 	EGDisplay *pDisplay = GetRefreshingDisplay();
 	int32_t Width = pDestRect->GetWidth();
@@ -391,8 +403,7 @@ int32_t y;
 	if(pMask == nullptr) {
 		for(y = 0; y < Height; y++) {
 			for(x = 0; x < Width; x++) {
-				pDisplay->m_pDriver->SetPixelCB(pDisplay->m_pDriver, (uint8_t*)pDestBuffer, DestStep, pDestRect->GetX1() + x, pDestRect->GetY1() + y, pSourceBuffer[x],
-																OPA);
+				pDisplay->m_pDriver->SetPixelCB(pDisplay->m_pDriver, (uint8_t *)pDestBuffer, DestStep, pDestRect->GetX1() + x, pDestRect->GetY1() + y, pSourceBuffer[x], OPA);
 			}
 			pSourceBuffer += SourceStep;
 		}
@@ -401,8 +412,8 @@ int32_t y;
 		for(y = 0; y < Height; y++) {
 			for(x = 0; x < Width; x++) {
 				if(pMask[x]) {
-					pDisplay->m_pDriver->SetPixelCB(pDisplay->m_pDriver, (uint8_t*)pDestBuffer, DestStep, pDestRect->GetX1() + x, pDestRect->GetY1() + y, pSourceBuffer[x],
-																	(uint32_t)((uint32_t)OPA * pMask[x]) >> 8);
+					pDisplay->m_pDriver->SetPixelCB(pDisplay->m_pDriver, (uint8_t *)pDestBuffer, DestStep, pDestRect->GetX1() + x, pDestRect->GetY1() + y, pSourceBuffer[x],
+																					(uint32_t)((uint32_t)OPA * pMask[x]) >> 8);
 				}
 			}
 			pMask += MaskStep;
@@ -414,13 +425,13 @@ int32_t y;
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapNormal(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect,
-																						 EG_Coord_t DestStep, const EG_Color_t *pSourceBuffer,
-																						 EG_Coord_t SourceStep, EG_OPA_t OPA, const EG_OPA_t *pMask,
-																						 EG_Coord_t MaskStep)
+																									EG_Coord_t DestStep, const EG_Color_t *pSourceBuffer,
+																									EG_Coord_t SourceStep, EG_OPA_t OPA, const EG_OPA_t *pMask,
+																									EG_Coord_t MaskStep)
 
 {
-int32_t x;
-int32_t y;
+	int32_t x;
+	int32_t y;
 
 	int32_t Width = pDestRect->GetWidth();
 	int32_t Height = pDestRect->GetHeight();
@@ -506,12 +517,12 @@ int32_t y;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-#if LV_COLOR_SCREEN_TRANSP
+#if EG_COLOR_SCREEN_TRANSP
 
-void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::FillaRGB(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestArea, EG_Coord_t DestStride,
-                          EG_Color_t color, EG_OPA_t OPA,	const EG_OPA_t *pMask, EG_Coord_t MaskStride)
+void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::FillARGB(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestArea, EG_Coord_t DestStride,
+																								 EG_Color_t color, EG_OPA_t OPA, const EG_OPA_t *pMask, EG_Coord_t MaskStride)
 {
-int32_t x, y;
+	int32_t x, y;
 
 	uint8_t *dest_buf8 = (uint8_t *)pDestBuffer;
 	int32_t Width = pDestArea->GetWidth();
@@ -539,7 +550,7 @@ int32_t x, y;
 			uint8_t *dest_buf8_row = dest_buf8;
 			for(y = 0; y < Height; y++) {
 				for(x = 0; x < Width; x++) {
-					set_px_argb(dest_buf8, color, OPA);
+					SetPixelARGB(dest_buf8, color, OPA);
 					dest_buf8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 				}
 				dest_buf8_row += DestStride * EG_IMG_PX_SIZE_ALPHA_BYTE;
@@ -548,12 +559,12 @@ int32_t x, y;
 		}
 	}
 	// Masked
-	else {	// Only the mask matters
+	else {  // Only the mask matters
 		if(OPA >= EG_OPA_MAX) {
 			uint8_t *dest_buf8_row = dest_buf8;
 			for(y = 0; y < Height; y++) {
 				for(x = 0; x < Width; x++) {
-					set_px_argb(dest_buf8, color, *pMask);
+					SetPixelARGB(dest_buf8, color, *pMask);
 					pMask++;
 					dest_buf8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 				}
@@ -562,7 +573,7 @@ int32_t x, y;
 			}
 		}
 		// With opacity
-		else {			// Buffer the result color to avoid recalculating the same color
+		else {  // Buffer the result color to avoid recalculating the same color
 			EG_OPA_t last_mask = EG_OPA_TRANSP;
 			EG_OPA_t opa_tmp = EG_OPA_TRANSP;
 
@@ -572,7 +583,7 @@ int32_t x, y;
 					if(*pMask) {
 						if(*pMask != last_mask) opa_tmp = (*pMask == EG_OPA_COVER) ? OPA : (uint32_t)((uint32_t)(*pMask) * OPA) >> 8;
 
-						set_px_argb(dest_buf8, color, opa_tmp);
+						SetPixelARGB(dest_buf8, color, opa_tmp);
 					}
 					dest_buf8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					pMask++;
@@ -587,39 +598,34 @@ int32_t x, y;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect,
-																					 EG_Coord_t DestStep, const EG_Color_t *pSourceBuffer,
-																					 EG_Coord_t SourceStep, EG_OPA_t OPA, const EG_OPA_t *pMask,
-																					 EG_Coord_t MaskStep, EG_BlendMode_e blend_mode)
-
+void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapARGB(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect,
+																								EG_Coord_t DestStep, const EG_Color_t *pSourceBuffer,
+																								EG_Coord_t SourceStep, EG_OPA_t OPA, const EG_OPA_t *pMask,
+																								EG_Coord_t MaskStep, EG_BlendMode_e BlendMode)
 {
-	uint8_t *pDestBuffer8 = (uint8_t *)pDestBuffer;
-
-	int32_t Width = GetWidth(pDestRect);
-	int32_t Height = GetHeight(pDestRect);
-
 	int32_t x;
 	int32_t y;
+	uint8_t *pDestBuffer8 = (uint8_t *)pDestBuffer;
 
-	EG_Color_t (*blend_fp)(EG_Color_t, EG_Color_t, EG_OPA_t);
-	switch(blend_mode) {
+	int32_t Width = pDestRect->GetWidth();
+	int32_t Height = pDestRect->GetHeight();
+	EG_Color_t (*BlendFunc)(EGSoftBlend *, EG_Color_t, EG_Color_t, EG_OPA_t);
+	switch(BlendMode) {
 		case EG_BLEND_MODE_ADDITIVE:
-			blend_fp = color_blend_true_color_additive;
+			BlendFunc = BlendTrueColorAdditive;
 			break;
 		case EG_BLEND_MODE_SUBTRACTIVE:
-			blend_fp = color_blend_true_color_subtractive;
+			BlendFunc = BlendTrueColorSubtractive;
 			break;
 		case EG_BLEND_MODE_MULTIPLY:
-			blend_fp = color_blend_true_color_multiply;
+			BlendFunc = BlendTrueColorMultiply;
 			break;
 		default:
-			blend_fp = nullptr;
+			BlendFunc = nullptr;
 	}
-
-	// Simple fill (maybe with opacity), no masking
-	if(pMask == nullptr) {
+	if(pMask == nullptr) {  // Simple fill (maybe with opacity), no masking
 		if(OPA >= EG_OPA_MAX) {
-			if(blend_fp == nullptr && EG_COLOR_DEPTH == 32) {
+			if(BlendFunc == nullptr && EG_COLOR_DEPTH == 32) {
 				for(y = 0; y < Height; y++) {
 					EG_CopyMem(pDestBuffer, pSourceBuffer, Width * sizeof(EG_Color_t));
 					pDestBuffer += DestStep;
@@ -629,15 +635,15 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t 
 			else {
 				uint8_t *dest_buf8_row = pDestBuffer8;
 				for(y = 0; y < Height; y++) {
-					if(blend_fp == nullptr) {
+					if(BlendFunc == nullptr) {
 						for(x = 0; x < Width; x++) {
-							set_px_argb(pDestBuffer8, pSourceBuffer[x], EG_OPA_COVER);
+							SetPixelARGB(pDestBuffer8, pSourceBuffer[x], EG_OPA_COVER);
 							pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 						}
 					}
 					else {
 						for(x = 0; x < Width; x++) {
-							set_px_argb_blend(pDestBuffer8, pSourceBuffer[x], EG_OPA_COVER, blend_fp);
+							SetPixelBlendedARGB(pBlend, pDestBuffer8, pSourceBuffer[x], EG_OPA_COVER, BlendFunc);
 							pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 						}
 					}
@@ -648,19 +654,18 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t 
 				}
 			}
 		}
-		// No mask but opacity
-		else {
+		else {  // No mask but opacity
 			uint8_t *dest_buf8_row = pDestBuffer8;
 			for(y = 0; y < Height; y++) {
-				if(blend_fp == nullptr) {
+				if(BlendFunc == nullptr) {
 					for(x = 0; x < Width; x++) {
-						set_px_argb(pDestBuffer8, pSourceBuffer[x], OPA);
+						SetPixelARGB(pDestBuffer8, pSourceBuffer[x], OPA);
 						pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					}
 				}
 				else {
 					for(x = 0; x < Width; x++) {
-						set_px_argb_blend(pDestBuffer8, pSourceBuffer[x], OPA, blend_fp);
+						SetPixelBlendedARGB(pBlend, pDestBuffer8, pSourceBuffer[x], OPA, BlendFunc);
 						pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					}
 				}
@@ -677,15 +682,15 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t 
 		if(OPA > EG_OPA_MAX) {
 			uint8_t *dest_buf8_row = pDestBuffer8;
 			for(y = 0; y < Height; y++) {
-				if(blend_fp == nullptr) {
+				if(BlendFunc == nullptr) {
 					for(x = 0; x < Width; x++) {
-						set_px_argb(pDestBuffer8, pSourceBuffer[x], pMask[x]);
+						SetPixelARGB(pDestBuffer8, pSourceBuffer[x], pMask[x]);
 						pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					}
 				}
 				else {
 					for(x = 0; x < Width; x++) {
-						set_px_argb_blend(pDestBuffer8, pSourceBuffer[x], pMask[x], blend_fp);
+						SetPixelBlendedARGB(pBlend, pDestBuffer8, pSourceBuffer[x], pMask[x], BlendFunc);
 						pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					}
 				}
@@ -699,11 +704,11 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t 
 		else {
 			uint8_t *dest_buf8_row = pDestBuffer8;
 			for(y = 0; y < Height; y++) {
-				if(blend_fp == nullptr) {
+				if(BlendFunc == nullptr) {
 					for(x = 0; x < Width; x++) {
 						if(pMask[x]) {
 							EG_OPA_t opa_tmp = pMask[x] >= EG_OPA_MAX ? OPA : ((OPA * pMask[x]) >> 8);
-							set_px_argb(pDestBuffer8, pSourceBuffer[x], opa_tmp);
+							SetPixelARGB(pDestBuffer8, pSourceBuffer[x], opa_tmp);
 						}
 						pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					}
@@ -712,7 +717,7 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t 
 					for(x = 0; x < Width; x++) {
 						if(pMask[x]) {
 							EG_OPA_t opa_tmp = pMask[x] >= EG_OPA_MAX ? OPA : ((OPA * pMask[x]) >> 8);
-							set_px_argb_blend(pDestBuffer8, pSourceBuffer[x], opa_tmp, blend_fp);
+							SetPixelBlendedARGB(pBlend, pDestBuffer8, pSourceBuffer[x], opa_tmp, BlendFunc);
 						}
 						pDestBuffer8 += EG_IMG_PX_SIZE_ALPHA_BYTE;
 					}
@@ -732,11 +737,11 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftBlend::MapaRGB(EGSoftBlend *pBlend, EG_Color_t 
 #if EG_DRAW_COMPLEX
 
 void EGSoftBlend::MapBlended(EGSoftBlend *pBlend, EG_Color_t *pDestBuffer, const EGRect *pDestRect, EG_Coord_t DestStep,
-												const EG_Color_t *pSourceBuffer, EG_Coord_t SourceStep, EG_OPA_t OPA,
-												const EG_OPA_t *pMask, EG_Coord_t MaskStep, EG_BlendMode_e blend_mode)
+														 const EG_Color_t *pSourceBuffer, EG_Coord_t SourceStep, EG_OPA_t OPA,
+														 const EG_OPA_t *pMask, EG_Coord_t MaskStep, EG_BlendMode_e blend_mode)
 {
-EG_Color_t (*BlendFunc)(EGSoftBlend *pBlend, EG_Color_t, EG_Color_t, EG_OPA_t);
-int32_t x, y;
+	EG_Color_t (*BlendFunc)(EGSoftBlend * pBlend, EG_Color_t, EG_Color_t, EG_OPA_t);
+	int32_t x, y;
 
 	int32_t Width = pDestRect->GetWidth();
 	int32_t Height = pDestRect->GetHeight();
@@ -751,46 +756,46 @@ int32_t x, y;
 			BlendFunc = BlendTrueColorMultiply;
 			break;
 		default:
-			EG_LOG_WARN("fill_blended: unsupported blend mode");
+			EG_LOG_WARN("MapBlended: unsupported blend mode");
 			return;
 	}
 
-	EG_Color_t last_dest_color;
-	EG_Color_t last_src_color;
+	EG_Color_t DestColor;
+	EG_Color_t SrceColor;
 	// Simple fill (maybe with opacity), no masking
 	if(pMask == nullptr) {
-		last_dest_color = pDestBuffer[0];
-		last_src_color = pSourceBuffer[0];
-		EG_Color_t last_res_color = BlendFunc(pBlend, last_src_color, last_dest_color, OPA);
+		DestColor = pDestBuffer[0];
+		SrceColor = pSourceBuffer[0];
+		EG_Color_t ResultColor = BlendFunc(pBlend, SrceColor, DestColor, OPA);
 		for(y = 0; y < Height; y++) {
 			for(x = 0; x < Width; x++) {
-				if(last_src_color.full != pSourceBuffer[x].full || last_dest_color.full != pDestBuffer[x].full) {
-					last_dest_color = pDestBuffer[x];
-					last_src_color = pSourceBuffer[x];
-					last_res_color = BlendFunc(pBlend, last_src_color, last_dest_color, OPA);
+				if(SrceColor.full != pSourceBuffer[x].full || DestColor.full != pDestBuffer[x].full) {
+					DestColor = pDestBuffer[x];
+					SrceColor = pSourceBuffer[x];
+					ResultColor = BlendFunc(pBlend, SrceColor, DestColor, OPA);
 				}
-				pDestBuffer[x] = last_res_color;
+				pDestBuffer[x] = ResultColor;
 			}
 			pDestBuffer += DestStep;
 			pSourceBuffer += SourceStep;
 		}
 	}
-	else {	// Masked
-		last_dest_color = pDestBuffer[0];
-		last_src_color = pSourceBuffer[0];
-		EG_OPA_t last_opa = pMask[0] >= EG_OPA_MAX ? OPA : ((OPA * pMask[0]) >> 8);
-		EG_Color_t last_res_color = BlendFunc(pBlend, last_src_color, last_dest_color, last_opa);
+	else {  // Masked
+		DestColor = pDestBuffer[0];
+		SrceColor = pSourceBuffer[0];
+		EG_OPA_t LastOPA = pMask[0] >= EG_OPA_MAX ? OPA : ((OPA * pMask[0]) >> 8);
+		EG_Color_t ResultColor = BlendFunc(pBlend, SrceColor, DestColor, LastOPA);
 		for(y = 0; y < Height; y++) {
 			for(x = 0; x < Width; x++) {
 				if(pMask[x] == 0) continue;
 				EG_OPA_t opa_tmp = pMask[x] >= EG_OPA_MAX ? OPA : ((OPA * pMask[x]) >> 8);
-				if(last_src_color.full != pSourceBuffer[x].full || last_dest_color.full != pDestBuffer[x].full || last_opa != opa_tmp) {
-					last_dest_color = pDestBuffer[x];
-					last_src_color = pSourceBuffer[x];
-					last_opa = opa_tmp;
-					last_res_color = BlendFunc(pBlend, last_src_color, last_dest_color, last_opa);
+				if(SrceColor.full != pSourceBuffer[x].full || DestColor.full != pDestBuffer[x].full || LastOPA != opa_tmp) {
+					DestColor = pDestBuffer[x];
+					SrceColor = pSourceBuffer[x];
+					LastOPA = opa_tmp;
+					ResultColor = BlendFunc(pBlend, SrceColor, DestColor, LastOPA);
 				}
-				pDestBuffer[x] = last_res_color;
+				pDestBuffer[x] = ResultColor;
 			}
 			pDestBuffer += DestStep;
 			pSourceBuffer += SourceStep;
@@ -800,4 +805,3 @@ int32_t x, y;
 }
 
 #endif
-

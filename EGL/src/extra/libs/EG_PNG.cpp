@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -50,7 +50,7 @@ EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 			if(rn != 8) return EG_RES_INVALID;
 			// Save the m_pData in the pHeader
 			pHeader->AlwaysZero = 0;
-			pHeader->ColorFormat = EG_IMG_CF_TRUE_COLOR_ALPHA;
+			pHeader->ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;
 			// The width and height are stored in Big endian format so convert them to little endian
 			pHeader->Width = (EG_Coord_t)((size[0] & 0xff000000) >> 24) + ((size[0] & 0x00ff0000) >> 8);
 			pHeader->Height = (EG_Coord_t)((size[1] & 0xff000000) >> 24) + ((size[1] & 0x00ff0000) >> 8);
@@ -70,7 +70,7 @@ EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 			pHeader->ColorFormat = pImageBuffer->m_Header.ColorFormat; // Save the color format
 		}
 		else {
-			pHeader->ColorFormat = EG_IMG_CF_TRUE_COLOR_ALPHA;
+			pHeader->ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;
 		}
 		if(pImageBuffer->m_Header.Width) {
 			pHeader->Width = pImageBuffer->m_Header.Width; // Save the image width

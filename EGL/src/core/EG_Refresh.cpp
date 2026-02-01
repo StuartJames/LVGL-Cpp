@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -186,19 +186,23 @@ volatile uint32_t elaps = 0;
 	InvalidateAreas();
 	if(s_pRefreshDisplay->m_InvalidCount != 0) {	// If refresh happened ...
 		// Copy invalid areas for sync next refresh in double buffered direct mode
-		EG_LOG_WARN("Refreah happend");
+//		EG_LOG_WARN("Refreah happend");
 		if(s_pRefreshDisplay->m_pDriver->m_DirectMode && s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer2) {
 			for(uint16_t i = 0; i < s_pRefreshDisplay->m_InvalidCount; i++) {
 				if(s_pRefreshDisplay->m_InvalidAreasJoined[i]) continue;
-        EGRect *pSyncRect = &s_pRefreshDisplay->m_InvalidAreas[i];
+        EGRect *pSyncRect = new EGRect(&s_pRefreshDisplay->m_InvalidAreas[i]);
+//        EGRect *pSyncRect = &s_pRefreshDisplay->m_InvalidAreas[i];
         s_pRefreshDisplay->m_SyncAreas.AddTail(pSyncRect);
+//	EG_LOG_WARN("Count: %d, Rect %d-%d", s_pRefreshDisplay->m_SyncAreas.GetSize(), pSyncRect->GetWidth(), pSyncRect->GetHeight());
 			}
 		}
 		s_pRefreshDisplay->m_InvalidCount = 0;
+    for(int16_t i = 0; i < EG_INVAL_BUF_SIZE; ++i) s_pRefreshDisplay->m_InvalidAreas[0].Zero();
+    EG_ZeroMem(s_pRefreshDisplay->m_InvalidAreasJoined, sizeof(s_pRefreshDisplay->m_InvalidAreasJoined));
 		elaps = EG_TickElapse(start);
 		if(s_pRefreshDisplay->m_pDriver->MonitorCB) {		// Call monitor cb if present
 			s_pRefreshDisplay->m_pDriver->MonitorCB(s_pRefreshDisplay->m_pDriver, elaps, s_PixelCount);
-		}
+		}                   // Clean up
 	}
 	EG_FreeAllBuffers();
 	EG_FontCleanUpFmtText();
@@ -286,7 +290,6 @@ void JoinArea(void)
 uint32_t JoinFrom;
 uint32_t JoinIn;
 EGRect JoinedRect;
-
   
 	EG_ZeroMem(s_pRefreshDisplay->m_InvalidAreasJoined, sizeof(s_pRefreshDisplay->m_InvalidAreasJoined));
 	for(JoinIn = 0; JoinIn < s_pRefreshDisplay->m_InvalidCount; JoinIn++) {
@@ -320,37 +323,37 @@ void SyncAreas(void)
 	    (s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer2 == nullptr) ||	// Do not sync if not double buffered
 	    s_pRefreshDisplay->m_SyncAreas.IsEmpty()) return;	// Do not sync if no sync areas
 	// The active buffer is the off screen buffer where we will render
-	void *OffScreenBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
-	void *OnScreenBuffer = (s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer == s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer1) ?
+	void *pOffScreenBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
+	void *pOnScreenBuffer = (s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer == s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer1) ?
        s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer2 : s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer1;
 	EG_Coord_t Stride = s_pRefreshDisplay->GetHorizontalRes();	// Get Stride for buffer copy
-	EG_LOG_WARN("Buffer %p", OnScreenBuffer);
-	EGRect Result[4];	// Iterate through invalidated areas to see if sync area should be copied
-	int8_t Difference, j;
-	EGRect *pSyncRect, *pNewRect;
-  POSITION Pos;
+//	EG_LOG_WARN("Off Buffer %p", pOffScreenBuffer);
+	int8_t DifCount, j;
+	EGRect *pSyncRect, DifRects[4];
+  POSITION Current, Pos;	// Iterate through invalidated areas to see if sync area should be copied
 	for(uint32_t i = 0; i < s_pRefreshDisplay->m_InvalidCount; i++) {
 		if(s_pRefreshDisplay->m_InvalidAreasJoined[i]) continue;		// Skip joined areas
-	  pSyncRect = (EGRect *)s_pRefreshDisplay->m_SyncAreas.GetHead(Pos);
 		while(pSyncRect != nullptr) {		// Iterate over sync areas
-			// Remove intersect of redraw area from sync area and get remaining areas
-			Difference = pSyncRect->Difference(Result, &s_pRefreshDisplay->m_InvalidAreas[i]);
-			if(Difference != -1) {			// New sub areas created after removing intersect
-				for(j = 0; j < Difference; j++) {				// Replace old sync area with new areas
-					pNewRect = &Result[j];
-					s_pRefreshDisplay->m_SyncAreas.InsertBefore(Pos, pNewRect);
+			// Remove intersect of redrawn area from sync area and get remaining areas
+			DifCount = pSyncRect->Difference(DifRects, &s_pRefreshDisplay->m_InvalidAreas[i]);
+			if(DifCount != -1){			// New sub areas created after removing intersect
+				for(j = 0; j < DifCount; j++) {				// Replace old sync area with new areas
+          EGRect *pRect = new EGRect(DifRects[j]);    // generate new rects and place in the list
+					s_pRefreshDisplay->m_SyncAreas.InsertBefore(Current, pRect);
 				}
-				s_pRefreshDisplay->m_SyncAreas.RemoveAt(Pos);
-				delete pSyncRect;
+  			Current = Pos;			// Save the position for the deletion
+    	  pSyncRect = (EGRect*)s_pRefreshDisplay->m_SyncAreas.GetNext(Pos);
+  			delete (EGRect*)s_pRefreshDisplay->m_SyncAreas.RemoveAt(Current); // delete the original
 			}
-			pSyncRect = (EGRect *)s_pRefreshDisplay->m_SyncAreas.GetNext(Pos);			// Get next sync area
+  	  else pSyncRect = (EGRect*)s_pRefreshDisplay->m_SyncAreas.GetNext(Pos);
 		}
 	}
 	// Copy sync areas (if any remaining)
-  for(pSyncRect = (EGRect*)s_pRefreshDisplay->m_SyncAreas.GetHead(Pos); pSyncRect != nullptr; pSyncRect = (EGRect*)s_pRefreshDisplay->m_SyncAreas.GetNext(Pos)){
-		s_pRefreshDisplay->m_pDriver->m_pContext->CopyBufferProc(OffScreenBuffer, Stride, pSyncRect, OnScreenBuffer, Stride, pSyncRect);
+  for(pSyncRect = (EGRect*)s_pRefreshDisplay->m_SyncAreas.GetHead(Current); pSyncRect != nullptr; pSyncRect = (EGRect*)s_pRefreshDisplay->m_SyncAreas.GetNext(Current)){
+//	  EG_LOG_WARN("Rect %d-%d", pSyncRect->GetWidth(), pSyncRect->GetHeight());
+		s_pRefreshDisplay->m_pDriver->m_pContext->CopyBufferProc(pOffScreenBuffer, Stride, pSyncRect, pOnScreenBuffer, Stride, pSyncRect);
 	}
-	s_pRefreshDisplay->m_SyncAreas.RemoveAll();	// Clear sync areas
+  while(s_pRefreshDisplay->m_SyncAreas.GetCount() > 0) delete (EGRect*)s_pRefreshDisplay->m_SyncAreas.RemoveHead();// Clear sync areas
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -441,16 +444,16 @@ void RefreshAreaPart(EGDrawContext *pContext)
 	if(pContext->InitBuffer) pContext->InitBuffer(pContext);
 	// Below the `pRect` area will be redrawn into the draw buffer. In single buffered mode wait here until the buffer is freed.
   // In full double buffered mode wait here while the buffers are swapped and a buffer becomes available
-	bool full_sized = (pDrawBuffer->Size == (uint32_t)s_pRefreshDisplay->m_pDriver->m_HorizontalRes * s_pRefreshDisplay->m_pDriver->m_VerticalRes);
-	if((pDrawBuffer->pBuffer1 && !pDrawBuffer->pBuffer2) || (pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && full_sized)) {
+	bool FullScreen = (pDrawBuffer->Size == (uint32_t)s_pRefreshDisplay->m_pDriver->m_HorizontalRes * s_pRefreshDisplay->m_pDriver->m_VerticalRes);
+	if((pDrawBuffer->pBuffer1 && !pDrawBuffer->pBuffer2) || (pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && FullScreen)) {
 		while(pDrawBuffer->Flushing) {
 			if(s_pRefreshDisplay->m_pDriver->WaitCB) s_pRefreshDisplay->m_pDriver->WaitCB(s_pRefreshDisplay->m_pDriver);
 		}
 // If the screen is transparent initialize it when the flushing is ready
 #if EG_COLOR_SCREEN_TRANSP
-		if(s_pRefreshDisplay->m_pDriver->screen_transp) {
-			if(s_pRefreshDisplay->m_pDriver->clear_cb) {
-				s_pRefreshDisplay->m_pDriver->clear_cb(s_pRefreshDisplay->m_pDriver, s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer, s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->Size);
+		if(s_pRefreshDisplay->m_pDriver->m_ScreenTransparent) {
+			if(s_pRefreshDisplay->m_pDriver->ClearCB) {
+				s_pRefreshDisplay->m_pDriver->ClearCB(s_pRefreshDisplay->m_pDriver, (uint8_t*)s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer, s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->Size);
 			}
 			else {
 				EG_ZeroMem(s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer, s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->Size * EG_IMG_PX_SIZE_ALPHA_BYTE);
@@ -883,6 +886,38 @@ void RotateDrawBuffer90Square(bool Is270, EG_Coord_t Width, EG_Color_t *pColor)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+void FlushDrawBuffer(EGDisplay *pDisplay)
+{
+	EG_DisplayDrawBuffer_t *pDrawBuffer = s_pRefreshDisplay->GetDrawBuffer();
+	EGDrawContext *pContext = pDisplay->m_pDriver->m_pContext;	// Flush the rendered content to the display
+  pContext->WaitForFinish();
+	/* In partial double buffered mode wait until the other buffer is freed
+     * and driver is ready to receive the new buffer */
+	bool FullScreen = pDrawBuffer->Size == (uint32_t)s_pRefreshDisplay->m_pDriver->m_HorizontalRes * s_pRefreshDisplay->m_pDriver->m_VerticalRes;
+	if(pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && !FullScreen) {
+		while(pDrawBuffer->Flushing) {
+			if(s_pRefreshDisplay->m_pDriver->WaitCB) s_pRefreshDisplay->m_pDriver->WaitCB(s_pRefreshDisplay->m_pDriver);
+		}
+	}
+	pDrawBuffer->Flushing = 1;
+	if(s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastArea && s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart) pDrawBuffer->FlushingLast = 1;
+	else pDrawBuffer->FlushingLast = 0;
+  bool FlushingLast = pDrawBuffer->FlushingLast;
+	if(pDisplay->m_pDriver->FlushCB) {
+		// Rotate the buffer to the display's native orientation if necessary
+		if(pDisplay->m_pDriver->m_Rotated != EG_DISP_ROT_NONE && pDisplay->m_pDriver->m_SoftRotate) {
+			RotateDrawBuffer(pContext->m_pDrawRect, (EG_Color_t *)pContext->m_pDrawBuffer);
+		}
+		else DoFlushCB(pDisplay->m_pDriver, pContext->m_pDrawRect, (EG_Color_t *)pContext->m_pDrawBuffer);
+	}
+	// If there are 2 buffers swap them. With direct mode swap only on the last area
+	if(pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && (!pDisplay->m_pDriver->m_DirectMode || FlushingLast)) {
+		pDrawBuffer->pActiveBuffer = (pDrawBuffer->pActiveBuffer == pDrawBuffer->pBuffer1)	? pDrawBuffer->pBuffer2 : pDrawBuffer->pBuffer1;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 void RotateDrawBuffer(EGRect *pRect, EG_Color_t *pColor)
 {
 	EGDisplayDriver *pDriver = s_pRefreshDisplay->m_pDriver;
@@ -962,44 +997,11 @@ void RotateDrawBuffer(EGRect *pRect, EG_Color_t *pColor)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void FlushDrawBuffer(EGDisplay *pDisplay)
-{
-	EG_DisplayDrawBuffer_t *pDrawBuffer = s_pRefreshDisplay->GetDrawBuffer();
-	EGDrawContext *pContext = pDisplay->m_pDriver->m_pContext;	// Flush the rendered content to the display
-  pContext->WaitForFinish();
-	/* In partial double buffered mode wait until the other buffer is freed
-     * and driver is ready to receive the new buffer */
-	bool full_sized = pDrawBuffer->Size == (uint32_t)s_pRefreshDisplay->m_pDriver->m_HorizontalRes * s_pRefreshDisplay->m_pDriver->m_VerticalRes;
-	if(pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && !full_sized) {
-		while(pDrawBuffer->Flushing) {
-			if(s_pRefreshDisplay->m_pDriver->WaitCB) s_pRefreshDisplay->m_pDriver->WaitCB(s_pRefreshDisplay->m_pDriver);
-		}
-	}
-	pDrawBuffer->Flushing = 1;
-	if(s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastArea && s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart) pDrawBuffer->FlushingLast = 1;
-	else pDrawBuffer->FlushingLast = 0;
-	bool LastFlush = pDrawBuffer->FlushingLast;
-	if(pDisplay->m_pDriver->FlushCB) {
-		// Rotate the buffer to the display's native orientation if necessary
-		if(pDisplay->m_pDriver->m_Rotated != EG_DISP_ROT_NONE && pDisplay->m_pDriver->m_SoftRotate) {
-			RotateDrawBuffer(pContext->m_pDrawRect, (EG_Color_t *)pContext->m_pDrawBuffer);
-		}
-		else DoFlushCB(pDisplay->m_pDriver, pContext->m_pDrawRect, (EG_Color_t *)pContext->m_pDrawBuffer);
-	}
-	// If there are 2 buffers swap them. With direct mode swap only on the last area
-	if(pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && (!pDisplay->m_pDriver->m_DirectMode || LastFlush)) {
-		if(pDrawBuffer->pActiveBuffer == pDrawBuffer->pBuffer1)	pDrawBuffer->pActiveBuffer = pDrawBuffer->pBuffer2;
-		else pDrawBuffer->pActiveBuffer = pDrawBuffer->pBuffer1;
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-
 void DoFlushCB(EGDisplayDriver *pDriver, const EGRect *pRect, EG_Color_t *pBuffer)
 {
 	REFR_TRACE("Calling flush_cb on (%d;%d)(%d;%d) area with %p buffer pointer", pRect->GetX1(), pRect->GetY1(), pRect->GetX2(), pRect->GetY2(), (void *)pBuffer);
-  EGRect OffsetRect((EG_Coord_t)(pRect->GetX1() + pDriver->m_OffsetX), (EG_Coord_t)(pRect->GetY1() + pDriver->m_OffsetY),
-                    (EG_Coord_t)(pRect->GetX2() + pDriver->m_OffsetX), (EG_Coord_t)(pRect->GetY2() + pDriver->m_OffsetY));
+  EGRect OffsetRect(pRect);
+  OffsetRect.Move(pDriver->m_OffsetX, pDriver->m_OffsetY); // change to display absolute coordinates
   pDriver->FlushCB(pDriver, &OffsetRect, pBuffer);
 }
 

@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -29,8 +29,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define CF_BUILT_IN_FIRST EG_IMG_CF_TRUE_COLOR
-#define CF_BUILT_IN_LAST EG_IMG_CF_RGB565A8
+#define CF_BUILT_IN_FIRST EG_COLOR_FORMAT_NATIVE
+#define CF_BUILT_IN_LAST EG_COLOR_FORMAT_RGB565A8
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -63,8 +63,7 @@ void EGImageDecoder::Register(void *pDecoder)
 void EGImageDecoder::Delete(void *pDecoder)
 {
   POSITION Pos = m_DecoderList.Find(pDecoder);
-  if(Pos != nullptr) m_DecoderList.RemoveAt(Pos);
-  delete (EGImageDecoder*)pDecoder;
+  if(Pos != nullptr) delete (EGImageDecoder*)m_DecoderList.RemoveAt(Pos);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,7 +189,7 @@ EG_Result_t EGDecoderBuiltIn::Info(const void *pSource, EG_ImageHeader_t *pHeade
 		pHeader->Height = 1;
 		/* Symbols always have transparent parts. Important because of cover check in the draw
          *function. The actual value doesn't matter because lv_draw_label will draw it */
-		pHeader->ColorFormat = EG_IMG_CF_ALPHA_1BIT;
+		pHeader->ColorFormat = EG_COLOR_FORMAT_ALPHA_1BIT;
 	}
 	else {
 		EG_LOG_WARN("Image get info found unknown pSource type");
@@ -221,7 +220,7 @@ EG_Result_t EGDecoderBuiltIn::Open(ImageDecoderDescriptor_t *pDescriptor)
 	}
 	EG_ImageColorFormat_t ColorFormat = (EG_ImageColorFormat_t)pDescriptor->Header.ColorFormat;
 	// Process A8,  RGB565A8, need load file to ram after https://github.com/lvgl/lvgl/pull/3337
-	if(ColorFormat == EG_IMG_CF_ALPHA_8BIT || ColorFormat == EG_IMG_CF_RGB565A8) {
+	if(ColorFormat == EG_COLOR_FORMAT_ALPHA_8BIT || ColorFormat == EG_COLOR_FORMAT_RGB565A8) {
 		if(pDescriptor->SourceType == EG_IMG_SRC_VARIABLE) {
 			// In case of uncompressed formats the image stored in the ROM/RAM. So simply give its pointer
 			pDescriptor->pImageData = ((EGImageBuffer *)pDescriptor->pSource)->m_pData;
@@ -230,7 +229,7 @@ EG_Result_t EGDecoderBuiltIn::Open(ImageDecoderDescriptor_t *pDescriptor)
 		else {
 			// If it's a file, read all to memory
 			uint32_t Length = pDescriptor->Header.Width * pDescriptor->Header.Height;
-			Length *= ColorFormat == EG_IMG_CF_RGB565A8 ? 3 : 1;
+			Length *= ColorFormat == EG_COLOR_FORMAT_RGB565A8 ? 3 : 1;
 			uint8_t *fs_buf = (uint8_t*)EG_AllocMem(Length);
 			if(fs_buf == nullptr) return EG_RES_INVALID;
 			m_File.Seek(4, EG_FS_SEEK_SET); // +4 to skip the Header
@@ -243,8 +242,8 @@ EG_Result_t EGDecoderBuiltIn::Open(ImageDecoderDescriptor_t *pDescriptor)
 			return EG_RES_OK;
 		}
 	}	// Process true Color formats
-	else if(ColorFormat == EG_IMG_CF_TRUE_COLOR || ColorFormat == EG_IMG_CF_TRUE_COLOR_ALPHA ||
-					ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED) {
+	else if(ColorFormat == EG_COLOR_FORMAT_NATIVE || ColorFormat == EG_COLOR_FORMAT_NATIVE_ALPHA ||
+					ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED) {
 		if(pDescriptor->SourceType == EG_IMG_SRC_VARIABLE) {
 			// In case of uncompressed formats the image stored in the ROM/RAM. So simply give its pointer
 			pDescriptor->pImageData = ((EGImageBuffer *)pDescriptor->pSource)->m_pData;
@@ -255,8 +254,8 @@ EG_Result_t EGDecoderBuiltIn::Open(ImageDecoderDescriptor_t *pDescriptor)
 		}
 	}
 	// Process indexed images. Build a palette
-	else if(ColorFormat == EG_IMG_CF_INDEXED_1BIT || ColorFormat == EG_IMG_CF_INDEXED_2BIT ||
-          ColorFormat == EG_IMG_CF_INDEXED_4BIT || ColorFormat == EG_IMG_CF_INDEXED_8BIT) {
+	else if(ColorFormat == EG_COLOR_FORMAT_INDEXED_1BIT || ColorFormat == EG_COLOR_FORMAT_INDEXED_2BIT ||
+          ColorFormat == EG_COLOR_FORMAT_INDEXED_4BIT || ColorFormat == EG_COLOR_FORMAT_INDEXED_8BIT) {
 		uint8_t PixelSize = EGDrawImage::GetPixelSize(ColorFormat);
 		uint32_t palette_size = 1 << PixelSize;
 		m_pPalette = (EG_Color_t*)EG_AllocMem(palette_size * sizeof(EG_Color_t));
@@ -291,7 +290,7 @@ EG_Result_t EGDecoderBuiltIn::Open(ImageDecoderDescriptor_t *pDescriptor)
 		return EG_RES_OK;
 	}
 	// Alpha indexed images.
-	else if(ColorFormat == EG_IMG_CF_ALPHA_1BIT || ColorFormat == EG_IMG_CF_ALPHA_2BIT || ColorFormat == EG_IMG_CF_ALPHA_4BIT) {
+	else if(ColorFormat == EG_COLOR_FORMAT_ALPHA_1BIT || ColorFormat == EG_COLOR_FORMAT_ALPHA_2BIT || ColorFormat == EG_COLOR_FORMAT_ALPHA_4BIT) {
 		return EG_RES_OK; // Nothing to process
 	}
 	else {	// Unknown format. Can't decode it.
@@ -307,18 +306,18 @@ EG_Result_t EGDecoderBuiltIn::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG
 {
 	EG_Result_t Result = EG_RES_INVALID;
 
-	if(pDescriptor->Header.ColorFormat == EG_IMG_CF_TRUE_COLOR || pDescriptor->Header.ColorFormat == EG_IMG_CF_TRUE_COLOR_ALPHA ||
-		 pDescriptor->Header.ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED) {
+	if(pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_NATIVE || pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_ALPHA ||
+		 pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED) {
 		if(pDescriptor->SourceType == EG_IMG_SRC_FILE) {
 			Result = TrueColor(pDescriptor, X, Y, Length, pBuffer);
 		}
 	}
-	else if(pDescriptor->Header.ColorFormat == EG_IMG_CF_ALPHA_1BIT || pDescriptor->Header.ColorFormat == EG_IMG_CF_ALPHA_2BIT ||
-					pDescriptor->Header.ColorFormat == EG_IMG_CF_ALPHA_4BIT || pDescriptor->Header.ColorFormat == EG_IMG_CF_ALPHA_8BIT) {
+	else if(pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_1BIT || pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_2BIT ||
+					pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_4BIT || pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_8BIT) {
 		Result = Alpha(pDescriptor, X, Y, Length, pBuffer);
 	}
-	else if(pDescriptor->Header.ColorFormat == EG_IMG_CF_INDEXED_1BIT || pDescriptor->Header.ColorFormat == EG_IMG_CF_INDEXED_2BIT ||
-					pDescriptor->Header.ColorFormat == EG_IMG_CF_INDEXED_4BIT || pDescriptor->Header.ColorFormat == EG_IMG_CF_INDEXED_8BIT) {
+	else if(pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_INDEXED_1BIT || pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_INDEXED_2BIT ||
+					pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_INDEXED_4BIT || pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_INDEXED_8BIT) {
 		Result = Indexed(pDescriptor, X, Y, Length, pBuffer);
 	}
 	else {
@@ -400,25 +399,25 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 	uint32_t ofs = 0;
 	int8_t pos = 0;
 	switch(pDescriptor->Header.ColorFormat) {
-		case EG_IMG_CF_ALPHA_1BIT:
+		case EG_COLOR_FORMAT_ALPHA_1BIT:
 			Width = (pDescriptor->Header.Width + 7) >> 3; // E.g. Width = 20 -> Width = 2 + 1
 			ofs += Width * Y + (X >> 3);      // First pixel
 			pos = 7 - (X & 0x7);
 			opa_table = alpha1_opa_table;
 			break;
-		case EG_IMG_CF_ALPHA_2BIT:
+		case EG_COLOR_FORMAT_ALPHA_2BIT:
 			Width = (pDescriptor->Header.Width + 3) >> 2; // E.g. Width = 13 -> Width = 3 + 1 (bytes)
 			ofs += Width * Y + (X >> 2);      // First pixel
 			pos = 6 - (X & 0x3) * 2;
 			opa_table = alpha2_opa_table;
 			break;
-		case EG_IMG_CF_ALPHA_4BIT:
+		case EG_COLOR_FORMAT_ALPHA_4BIT:
 			Width = (pDescriptor->Header.Width + 1) >> 1; // E.g. Width = 13 -> Width = 6 + 1 (bytes)
 			ofs += Width * Y + (X >> 1);      // First pixel
 			pos = 4 - (X & 0x1) * 4;
 			opa_table = alpha4_opa_table;
 			break;
-		case EG_IMG_CF_ALPHA_8BIT:
+		case EG_COLOR_FORMAT_ALPHA_8BIT:
 			Width = pDescriptor->Header.Width; // E.g. X = 7 -> Width = 7 (bytes)
 			ofs += Width * Y + X;  // First pixel
 			pos = 0;
@@ -441,7 +440,7 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 		uint8_t val_act = (*data_tmp >> pos) & mask;
 
 		pBuffer[i * EG_IMG_PX_SIZE_ALPHA_BYTE + EG_IMG_PX_SIZE_ALPHA_BYTE - 1] =
-			pDescriptor->Header.ColorFormat == EG_IMG_CF_ALPHA_8BIT ? val_act : opa_table[val_act];
+			pDescriptor->Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_8BIT ? val_act : opa_table[val_act];
 
 		pos -= PixelSize;
 		if(pos < 0) {
@@ -464,25 +463,25 @@ EG_Result_t EGDecoderBuiltIn::Indexed(ImageDecoderDescriptor_t *pDescriptor, EG_
 	int8_t pos = 0;
 	uint32_t ofs = 0;
 	switch(pDescriptor->Header.ColorFormat) {
-		case EG_IMG_CF_INDEXED_1BIT:
+		case EG_COLOR_FORMAT_INDEXED_1BIT:
 			Width = (pDescriptor->Header.Width + 7) >> 3; // E.g. Width = 20 -> Width = 2 + 1
 			ofs += Width * Y + (X >> 3);      // First pixel
 			ofs += 8;                     // Skip the palette
 			pos = 7 - (X & 0x7);
 			break;
-		case EG_IMG_CF_INDEXED_2BIT:
+		case EG_COLOR_FORMAT_INDEXED_2BIT:
 			Width = (pDescriptor->Header.Width + 3) >> 2; // E.g. Width = 13 -> Width = 3 + 1 (bytes)
 			ofs += Width * Y + (X >> 2);      // First pixel
 			ofs += 16;                    // Skip the palette
 			pos = 6 - (X & 0x3) * 2;
 			break;
-		case EG_IMG_CF_INDEXED_4BIT:
+		case EG_COLOR_FORMAT_INDEXED_4BIT:
 			Width = (pDescriptor->Header.Width + 1) >> 1; // E.g. Width = 13 -> Width = 6 + 1 (bytes)
 			ofs += Width * Y + (X >> 1);      // First pixel
 			ofs += 64;                    // Skip the palette
 			pos = 4 - (X & 0x1) * 4;
 			break;
-		case EG_IMG_CF_INDEXED_8BIT:
+		case EG_COLOR_FORMAT_INDEXED_8BIT:
 			Width = pDescriptor->Header.Width; // E.g. X = 7 -> Width = 7 (bytes)
 			ofs += Width * Y + X;  // First pixel
 			ofs += 1024;       // Skip the palette

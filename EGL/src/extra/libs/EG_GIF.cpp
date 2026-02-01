@@ -89,7 +89,7 @@ void EGImageGIF::SetSource(const void *pSource)
 	}
 	m_ImageBuffer.m_pData = m_pGif->canvas;
 	m_ImageBuffer.m_Header.AlwaysZero = 0;
-	m_ImageBuffer.m_Header.ColorFormat = EG_IMG_CF_TRUE_COLOR_ALPHA;
+	m_ImageBuffer.m_Header.ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;
 	m_ImageBuffer.m_Header.Height = m_pGif->height;
 	m_ImageBuffer.m_Header.Width = m_pGif->width;
 	m_LastCall = EG_GetTick();

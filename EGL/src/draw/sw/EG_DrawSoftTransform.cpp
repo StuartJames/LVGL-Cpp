@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -82,8 +82,8 @@ void EGSoftContext::DrawTransform(const EGRect *pRect, const void *pSourceBuffer
 
 	tr_dsc.sinma = (s1 * (10 - angle_rem) + s2 * angle_rem) / 10;
 	tr_dsc.cosma = (c1 * (10 - angle_rem) + c2 * angle_rem) / 10;
-	tr_dsc.sinma = tr_dsc.sinma >> (LV_TRIGO_SHIFT - 10);
-	tr_dsc.cosma = tr_dsc.cosma >> (LV_TRIGO_SHIFT - 10);
+	tr_dsc.sinma = tr_dsc.sinma >> (EG_TRIGO_SHIFT - 10);
+	tr_dsc.cosma = tr_dsc.cosma >> (EG_TRIGO_SHIFT - 10);
 	tr_dsc.pivot_x_256 = tr_dsc.pivot.m_X * 256;
 	tr_dsc.pivot_y_256 = tr_dsc.pivot.m_Y * 256;
 
@@ -107,16 +107,16 @@ void EGSoftContext::DrawTransform(const EGRect *pRect, const void *pSourceBuffer
 
 		if(pImage->m_Antialias == 0) {
 			switch(ColorFormat) {
-				case EG_IMG_CF_TRUE_COLOR_ALPHA:
+				case EG_COLOR_FORMAT_NATIVE_ALPHA:
 					argb_no_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA);
 					break;
-				case EG_IMG_CF_TRUE_COLOR:
-				case EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED:
+				case EG_COLOR_FORMAT_NATIVE:
+				case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
 					rgb_no_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA, ColorFormat);
 					break;
 
 #if EG_COLOR_DEPTH == 16
-				case EG_IMG_CF_RGB565A8:
+				case EG_COLOR_FORMAT_RGB565A8:
 					rgb565a8_no_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA);
 					break;
 #endif
@@ -171,7 +171,7 @@ static void rgb_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t Sou
 			pColorBuffer[x].full = *((uint32_t *)src_tmp);
 #endif
 		}
-		if(ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED && pColorBuffer[x].full == ck.full) {
+		if(ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED && pColorBuffer[x].full == ck.full) {
 			pBufferOPA[x] = 0x00;
 		}
 	}
@@ -257,15 +257,15 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 	int32_t px_size;
 	EG_Color_t ck = _EG_COLOR_ZERO_INITIALIZER;
 	switch(ColorFormat) {
-		case EG_IMG_CF_TRUE_COLOR:
+		case EG_COLOR_FORMAT_NATIVE:
 			has_alpha = false;
 			px_size = sizeof(EG_Color_t);
 			break;
-		case EG_IMG_CF_TRUE_COLOR_ALPHA:
+		case EG_COLOR_FORMAT_NATIVE_ALPHA:
 			has_alpha = true;
 			px_size = EG_IMG_PX_SIZE_ALPHA_BYTE;
 			break;
-		case EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED: {
+		case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED: {
 			has_alpha = true;
 			px_size = sizeof(EG_Color_t);
 			EGDisplay *pDisplay = GetRefreshingDisplay();
@@ -273,7 +273,7 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 			break;
 		}
 #if EG_COLOR_DEPTH == 16
-		case EG_IMG_CF_RGB565A8:
+		case EG_COLOR_FORMAT_RGB565A8:
 			has_alpha = true;
 			px_size = sizeof(EG_Color_t);
 			break;
@@ -338,20 +338,20 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 				EG_OPA_t a_base;
 				EG_OPA_t a_ver;
 				EG_OPA_t a_hor;
-				if(ColorFormat == EG_IMG_CF_TRUE_COLOR_ALPHA) {
+				if(ColorFormat == EG_COLOR_FORMAT_NATIVE_ALPHA) {
 					a_base = px_base[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 					a_ver = px_ver[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 					a_hor = px_hor[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 				}
 #if EG_COLOR_DEPTH == 16
-				else if(ColorFormat == EG_IMG_CF_RGB565A8) {
+				else if(ColorFormat == EG_COLOR_FORMAT_RGB565A8) {
 					const EG_OPA_t *a_tmp = src + SourceStride * SourceHeight * sizeof(EG_Color_t);
 					a_base = *(a_tmp + (ys_int * SourceStride) + xs_int);
 					a_hor = *(a_tmp + (ys_int * SourceStride) + xs_int + x_next);
 					a_ver = *(a_tmp + ((ys_int + y_next) * SourceStride) + xs_int);
 				}
 #endif
-				else if(ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED) {
+				else if(ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED) {
 					if(((EG_Color_t *)px_base)->full == ck.full ||
 						 ((EG_Color_t *)px_ver)->full == ck.full ||
 						 ((EG_Color_t *)px_hor)->full == ck.full) {
@@ -418,14 +418,14 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 #endif
 			EG_OPA_t a;
 			switch(ColorFormat) {
-				case EG_IMG_CF_TRUE_COLOR_ALPHA:
+				case EG_COLOR_FORMAT_NATIVE_ALPHA:
 					a = src_tmp[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 					break;
-				case EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED:
+				case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
 					a = pColorBuffer[x].full == ck.full ? 0x00 : 0xff;
 					break;
 #if EG_COLOR_DEPTH == 16
-				case EG_IMG_CF_RGB565A8:
+				case EG_COLOR_FORMAT_RGB565A8:
 					a = *(src + SourceStride * SourceHeight * sizeof(EG_Color_t) + (ys_int * SourceStride) + xs_int);
 					break;
 #endif
@@ -451,7 +451,7 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 static void transform_point_upscaled(point_transform_dsc_t *t, int32_t xin, int32_t yin, int32_t *xout,
 																		 int32_t *yout)
 {
-	if(t->angle == 0 && t->zoom == EG_IMG_ZOOM_NONE) {
+	if(t->angle == 0 && t->zoom == EG_SCALE_NONE) {
 		*xout = xin * 256;
 		*yout = yin * 256;
 		return;
@@ -464,7 +464,7 @@ static void transform_point_upscaled(point_transform_dsc_t *t, int32_t xin, int3
 		*xout = ((int32_t)(xin * t->zoom)) + (t->pivot_x_256);
 		*yout = ((int32_t)(yin * t->zoom)) + (t->pivot_y_256);
 	}
-	else if(t->zoom == EG_IMG_ZOOM_NONE) {
+	else if(t->zoom == EG_SCALE_NONE) {
 		*xout = ((t->cosma * xin - t->sinma * yin) >> 2) + (t->pivot_x_256);
 		*yout = ((t->sinma * xin + t->cosma * yin) >> 2) + (t->pivot_y_256);
 	}

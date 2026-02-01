@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -135,13 +135,13 @@ void* EGList::RemoveTail()
 POSITION EGList::InsertBefore(POSITION Position, void* pNewElement)
 {
 	if(Position == 0) return AddHead(pNewElement); // insert before nothing -> head of the list
-	EG_Node_t* pCurrentNode = (EG_Node_t*) Position;	// Insert it before position
+	EG_Node_t* pCurrentNode = (EG_Node_t*)Position;	// Insert it before position
 	EG_Node_t* pNewNode = NewNode(pCurrentNode->m_pPrev, pCurrentNode);
 	pNewNode->m_pData = pNewElement;
 	if(pCurrentNode->m_pPrev != nullptr) pCurrentNode->m_pPrev->m_pNext = pNewNode;
 	else m_pNodeHead = pNewNode;
 	pCurrentNode->m_pPrev = pNewNode;
-	return (POSITION) pNewNode;
+	return (POSITION)pNewNode;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -155,19 +155,20 @@ POSITION EGList::InsertAfter(POSITION Position, void* pNewElement)
 	if(pCurrentNode->m_pNext != nullptr) pCurrentNode->m_pNext->m_pPrev = pNewNode;
 	else m_pNodeTail = pNewNode;
 	pCurrentNode->m_pNext = pNewNode;
-	return (POSITION) pNewNode;
+	return (POSITION)pNewNode;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGList::RemoveAt(POSITION &rPosition)
+void* EGList::RemoveAt(POSITION &rPosition)
 {
 int Mode = 0;
 
 	EG_Node_t* pDeleteNode = (EG_Node_t*)rPosition;
-	if(pDeleteNode == nullptr)	return;
+	if(pDeleteNode == nullptr)	return nullptr;
   if(pDeleteNode->m_pPrev == nullptr) Mode += 1;  // at the head
   if(pDeleteNode->m_pNext == nullptr) Mode += 2;  // at the tail
+	void* m_pData = pDeleteNode->m_pData;   // save the item reference
   switch(Mode){
     case 0:{    // delete node is between the tail and head
       pDeleteNode->m_pPrev->m_pNext = pDeleteNode->m_pNext;   // join the two ends
@@ -195,6 +196,7 @@ int Mode = 0;
     }
   }  
 	FreeNode(pDeleteNode);
+  return m_pData;
 }
 
 /////////////////////////////////////////////////////////////////////////////

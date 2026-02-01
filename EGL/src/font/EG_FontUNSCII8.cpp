@@ -4,7 +4,7 @@
  * Opts: --no-compress --no-prefilter --BitsPerPixel 1 --size 8 --font unscii-8.ttf -r 0x20-0x7F --format lvgl -o EG_FontUnscii8.c --force-fast-kern-format
  ******************************************************************************/
 
-#ifdef LV_LVGL_H_INCLUDE_SIMPLE
+#ifdef EG_EGL_H_INCLUDE_SIMPLE
     #include "EGL.h"
 #else
     #include "EGL.h"

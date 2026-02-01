@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -95,7 +95,7 @@ public:
   EG_OPA_t                m_BackgroundOPA;                      // Opacity of the background color or wallpaper
   EG_Color_t              m_BackgroundColor;                    // Default display color when screens are transparent
   const void             *m_BackgroundImage;                    // An image source to display as wallpaper
-  EGRect                  m_InvalidAreas[EG_INVAL_BUF_SIZE];      // Invalidated (marked to redraw) areas
+  EGRect                  m_InvalidAreas[EG_INVAL_BUF_SIZE];    // Invalidated (marked to redraw) areas
   uint8_t                 m_InvalidAreasJoined[EG_INVAL_BUF_SIZE]{0};
   uint16_t                m_InvalidCount;
   int32_t                 m_InvalidEnableCount;
@@ -127,7 +127,7 @@ public:
   void                UseGenericSetPixelCB(EGDisplayDriver *pDriver, EG_ImageColorFormat_t ColorFormat);
 
   static void         InitialiseDriver(EGDisplayDriver *pDriver); // Initialize a display driver with default values.
-  static void         InitialiseDrawBuffers(EG_DisplayDrawBuffer_t *pDrawBuffers, void *pBuffer1, void *pBuffer2, uint32_t SizeInPixels); // Initialize a display buffer
+  static bool         InitialiseDrawBuffers(EG_DisplayDrawBuffer_t **pDrawBuffers, void *pBuffer1, void *pBuffer2, uint32_t SizeInPixels); // Initialize a display buffer
   static EGDisplay*   RegisterDriver(EGDisplayDriver *pDriver); // Register an initialized display driver.
   static void         SetDefault(EGDisplay* pdisplay); // Set a default display. The new screens will be created on it by default.
   static void         FlushReady(EGDisplayDriver * pdriver); // Call in the display driver's `flush_cb` function when the flushing is finished

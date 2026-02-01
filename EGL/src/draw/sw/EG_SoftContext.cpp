@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -62,7 +62,7 @@ void EGSoftContext::BufferCopy(void *pDestBuffer, EG_Coord_t DestInc, EGRect *pD
 {
 	EG_Color_t *pDestCopy = (EG_Color_t*)pDestBuffer;
 	EG_Color_t *pSourceCopy = (EG_Color_t*)pSourceBuffer;
-	pDestCopy += DestInc * pDestRect->GetY1();	// Got the first pixel of each buffer
+	pDestCopy += DestInc * pDestRect->GetY1();	// Get the first pixel of each buffer
 	pDestCopy += pDestRect->GetX1();
 	pSourceCopy += SourceInc * pSourceRect->GetY1();
 	pSourceCopy += pSourceRect->GetX1();

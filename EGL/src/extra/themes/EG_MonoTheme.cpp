@@ -1,6 +1,6 @@
 
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This m_Pressedogram is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  

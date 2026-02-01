@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -48,7 +48,7 @@ EGImageButton::EGImageButton(void) : EGObject()
 	EG_ZeroMem(m_pImageSourceMid, sizeof(m_pImageSourceMid));
 	EG_ZeroMem(m_pImsgeSourceLeft, sizeof(m_pImsgeSourceLeft));
 	EG_ZeroMem(m_pImageSourceRight, sizeof(m_pImageSourceRight));
-	m_ColorFormat = EG_IMG_CF_UNKNOWN;
+	m_ColorFormat = EG_COLOR_FORMAT_UNKNOWN;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ void EGImageButton::Configure(void)
 	EG_ZeroMem(m_pImageSourceMid, sizeof(m_pImageSourceMid));
 	EG_ZeroMem(m_pImsgeSourceLeft, sizeof(m_pImsgeSourceLeft));
 	EG_ZeroMem(m_pImageSourceRight, sizeof(m_pImageSourceRight));
-	m_ColorFormat = EG_IMG_CF_UNKNOWN;
+	m_ColorFormat = EG_COLOR_FORMAT_UNKNOWN;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ void EGImageButton::RefreshImage(void)
 		RefreshSelfSize();
 		SetHeight(Header.Height); // Keep the user defined width*/
 	}
-	else m_ColorFormat = EG_IMG_CF_UNKNOWN;
+	else m_ColorFormat = EG_COLOR_FORMAT_UNKNOWN;
 	Invalidate();
 }
 

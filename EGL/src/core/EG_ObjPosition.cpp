@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -838,7 +838,7 @@ EG_Coord_t EGObject::ClampWidth(EG_Coord_t width, EG_Coord_t min_width, EG_Coord
 {
 	if(EG_COORD_IS_PCT(min_width)) min_width = (ref_width * EG_COORD_GET_PCT(min_width)) / 100;
 	if(EG_COORD_IS_PCT(max_width)) max_width = (ref_width * EG_COORD_GET_PCT(max_width)) / 100;
-	return LV_CLAMP(min_width, width, max_width);
+	return EG_CLAMP(min_width, width, max_width);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -847,7 +847,7 @@ EG_Coord_t EGObject::ClampHeight(EG_Coord_t height, EG_Coord_t min_height, EG_Co
 {
 	if(EG_COORD_IS_PCT(min_height)) min_height = (ref_height * EG_COORD_GET_PCT(min_height)) / 100;
 	if(EG_COORD_IS_PCT(max_height)) max_height = (ref_height * EG_COORD_GET_PCT(max_height)) / 100;
-	return LV_CLAMP(min_height, height, max_height);
+	return EG_CLAMP(min_height, height, max_height);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1006,7 +1006,7 @@ void EGObject::TransformCore(EGPoint *pPoint, bool Invert)
 {
 	int16_t Angle = GetStyleTransformAngle(0);
 	int16_t Zoom = GetStyleTransformZoom( 0);
-	if((Angle == 0) && (Zoom == EG_IMG_ZOOM_NONE)) return;
+	if((Angle == 0) && (Zoom == EG_SCALE_NONE)) return;
 	EGPoint Pivot(GetStyleTransformPivotX(0), GetStyleTransformPivotY(0));
 	if(EG_COORD_IS_PCT(Pivot.m_X)) {
 		Pivot.m_X = (EG_COORD_GET_PCT(Pivot.m_X) * m_Rect.GetWidth()) / 100;
@@ -1020,7 +1020,7 @@ void EGObject::TransformCore(EGPoint *pPoint, bool Invert)
 		Angle = -Angle;
 		Zoom = (256 * 256) / Zoom;
 	}
-	pPoint->PointTransform(Angle, Zoom, &Pivot);
+	pPoint->PointTransform(Angle, Zoom, Zoom, &Pivot);
 }
 
 

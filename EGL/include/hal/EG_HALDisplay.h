@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -74,12 +74,12 @@ public:
   virtual void    InitialiseContext(EGDrawContext *pDrawContext);
   virtual void    DeinitialiseContext(EGDrawContext *pDrawContext);
 
-  void            (*FlushCB)(EGDisplayDriver *pDriver, const EGRect * area, EG_Color_t * color_p); // * MANDATORY: Writes the internal buffer (draw_buf) to the display. 
-  void            (*RounderCB)(EGDisplayDriver *pDriver, EGRect * area); /// OPTIONAL: Extend the invalidated areas to match with the display drivers requirements
-  void            (*SetPixelCB)(EGDisplayDriver *pDriver, uint8_t * buf, EG_Coord_t buf_w, EG_Coord_t x, EG_Coord_t y, 
-                                EG_Color_t color, EG_OPA_t opa); // OPTIONAL: Set a pixel in a buffer
-  void            (*ClearCB)(EGDisplayDriver *pDriver, uint8_t * buf, uint32_t size); // OPTIONAL: Called after every refresh cycle to tell the rendering and flushing time + the number of flushed pixels
-  void            (*MonitorCB)(EGDisplayDriver *pDriver, uint32_t time, uint32_t px);
+  void            (*FlushCB)(EGDisplayDriver *pDriver, const EGRect *pRect, EG_Color_t *pColor); // * MANDATORY: Writes the internal buffer (draw_buf) to the display. 
+  void            (*RounderCB)(EGDisplayDriver *pDriver, EGRect *pRect); /// OPTIONAL: Extend the invalidated areas to match with the display drivers requirements
+  void            (*SetPixelCB)(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_Coord_t Width, EG_Coord_t X, EG_Coord_t Y, 
+                                EG_Color_t Color, EG_OPA_t OPA); // OPTIONAL: Set a pixel in a buffer
+  void            (*ClearCB)(EGDisplayDriver *pDriver, uint8_t *pBuffer, uint32_t Size); // OPTIONAL: Called after every refresh cycle to tell the rendering and flushing time + the number of flushed pixels
+  void            (*MonitorCB)(EGDisplayDriver *pDriver, uint32_t time, uint32_t X);
   void            (*WaitCB)(EGDisplayDriver *pDriver); // OPTIONAL: Called periodically while lvgl waits for operation to be completed. For example flushing or GPU
   void            (*CleanDcacheCB)(EGDisplayDriver *pDriver); // OPTIONAL: Called when lvgl needs any CPU cache that affects rendering to be cleaned
   void            (*UpdateCB)(EGDisplayDriver *pDriver); // OPTIONAL: called when driver parameters are updated 

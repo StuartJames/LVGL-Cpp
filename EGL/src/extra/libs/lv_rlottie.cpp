@@ -102,7 +102,7 @@ static void lv_rlottie_constructor(const EG_ClassType_t *class_p, EGObject *obj)
 	}
 
 	rlottie->imgdsc.header.always_zero = 0;
-	rlottie->imgdsc.header.cf = EG_IMG_CF_TRUE_COLOR_ALPHA;
+	rlottie->imgdsc.header.cf = EG_COLOR_FORMAT_NATIVE_ALPHA;
 	rlottie->imgdsc.header.h = create_height;
 	rlottie->imgdsc.header.w = create_width;
 	rlottie->imgdsc.data = (void *)rlottie->allocated_buf;

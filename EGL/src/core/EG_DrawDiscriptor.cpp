@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -244,7 +244,7 @@ void EGObject::InititialseDrawImage(uint32_t Part, EGDrawImage *pDrawImage)
 	if(OPA < EG_OPA_MAX) pDrawImage->m_OPA = (OPA * pDrawImage->m_OPA) >> 8;
 	if(pDrawImage->m_OPA <= EG_OPA_MIN) return;
 	pDrawImage->m_Angle = 0;
-	pDrawImage->m_Zoom = EG_IMG_ZOOM_NONE;
+	pDrawImage->m_Zoom = EG_SCALE_NONE;
 	pDrawImage->m_Pivot.m_X = m_Rect.GetWidth() / 2;
 	pDrawImage->m_Pivot.m_Y = m_Rect.GetHeight() / 2;
 	pDrawImage->m_RecolorOPA = GetStyleImageRecolorOPA(Part);

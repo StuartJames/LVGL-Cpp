@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -221,10 +221,10 @@ int32_t EGAnimate::PathLinear(EGAnimate *pAnimate)
 
 int32_t EGAnimate::PathEaseIn(EGAnimate *pAnimate)
 {
-	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, LV_BEZIER_VAL_MAX);
-	int32_t Step = EG_Bezier3(Time, 0, 50, 100, LV_BEZIER_VAL_MAX);
+	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, EG_BEZIER_VAL_MAX);
+	int32_t Step = EG_Bezier3(Time, 0, 50, 100, EG_BEZIER_VAL_MAX);
 	int32_t Value = Step * (pAnimate->m_EndValue - pAnimate->m_StartValue);
-	Value = Value >> LV_BEZIER_VAL_SHIFT;
+	Value = Value >> EG_BEZIER_VAL_SHIFT;
 	Value += pAnimate->m_StartValue;
 	return Value;
 }
@@ -233,10 +233,10 @@ int32_t EGAnimate::PathEaseIn(EGAnimate *pAnimate)
 
 int32_t EGAnimate::PathEaseOut(EGAnimate *pAnimate)
 {
-	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, LV_BEZIER_VAL_MAX);
-	int32_t Step = EG_Bezier3(Time, 0, 900, 950, LV_BEZIER_VAL_MAX);
+	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, EG_BEZIER_VAL_MAX);
+	int32_t Step = EG_Bezier3(Time, 0, 900, 950, EG_BEZIER_VAL_MAX);
 	int32_t Value = Step * (pAnimate->m_EndValue - pAnimate->m_StartValue);
-	Value = Value >> LV_BEZIER_VAL_SHIFT;
+	Value = Value >> EG_BEZIER_VAL_SHIFT;
 	Value += pAnimate->m_StartValue;
 	return Value;
 }
@@ -245,10 +245,10 @@ int32_t EGAnimate::PathEaseOut(EGAnimate *pAnimate)
 
 int32_t EGAnimate::PathEaseInOut(EGAnimate *pAnimate)
 {
-	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, LV_BEZIER_VAL_MAX);
-	int32_t Step = EG_Bezier3(Time, 0, 50, 952, LV_BEZIER_VAL_MAX);
+	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, EG_BEZIER_VAL_MAX);
+	int32_t Step = EG_Bezier3(Time, 0, 50, 952, EG_BEZIER_VAL_MAX);
 	int32_t Value = Step * (pAnimate->m_EndValue - pAnimate->m_StartValue);
-	Value = Value >> LV_BEZIER_VAL_SHIFT;
+	Value = Value >> EG_BEZIER_VAL_SHIFT;
 	Value += pAnimate->m_StartValue;
 	return Value;
 }
@@ -257,10 +257,10 @@ int32_t EGAnimate::PathEaseInOut(EGAnimate *pAnimate)
 
 int32_t EGAnimate::PathOvershoot(EGAnimate *pAnimate)
 {
-	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, LV_BEZIER_VAL_MAX);
-	int32_t Step = EG_Bezier3(Time, 0, 1000, 1300, LV_BEZIER_VAL_MAX);
+	uint32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, EG_BEZIER_VAL_MAX);
+	int32_t Step = EG_Bezier3(Time, 0, 1000, 1300, EG_BEZIER_VAL_MAX);
 	int32_t Value = Step * (pAnimate->m_EndValue - pAnimate->m_StartValue);
-	Value = Value >> LV_BEZIER_VAL_SHIFT;
+	Value = Value >> EG_BEZIER_VAL_SHIFT;
 	Value += pAnimate->m_StartValue;
 	return Value;
 }
@@ -269,16 +269,16 @@ int32_t EGAnimate::PathOvershoot(EGAnimate *pAnimate)
 
 int32_t EGAnimate::PathBounce(EGAnimate *pAnimate)
 {
-	int32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, LV_BEZIER_VAL_MAX);
+	int32_t Time = EG_Map(pAnimate->m_ActiveTime, 0, pAnimate->m_Time, 0, EG_BEZIER_VAL_MAX);
 	int32_t Difference = (pAnimate->m_EndValue - pAnimate->m_StartValue);
 
 	// 3 bounces has 5 parts: 3 down and 2 up. One part is Time / 5 long
 
-	if(Time < 408) Time = (Time * 2500) >> LV_BEZIER_VAL_SHIFT; // Go down [0..1024] range
+	if(Time < 408) Time = (Time * 2500) >> EG_BEZIER_VAL_SHIFT; // Go down [0..1024] range
 	else if(Time >= 408 && Time < 614) {
 		Time -= 408;		// First bounce back
 		Time = Time * 5; // to [0..1024] range
-		Time = LV_BEZIER_VAL_MAX - Time;
+		Time = EG_BEZIER_VAL_MAX - Time;
 		Difference = Difference / 20;
 	}
 	else if(Time >= 614 && Time < 819) {
@@ -289,19 +289,19 @@ int32_t EGAnimate::PathBounce(EGAnimate *pAnimate)
 	else if(Time >= 819 && Time < 921) {
 		Time -= 819;		// Second bounce back
 		Time = Time * 10; // to [0..1024] range
-		Time = LV_BEZIER_VAL_MAX - Time;
+		Time = EG_BEZIER_VAL_MAX - Time;
 		Difference = Difference / 40;
 	}
-	else if(Time >= 921 && Time <= LV_BEZIER_VAL_MAX) {
+	else if(Time >= 921 && Time <= EG_BEZIER_VAL_MAX) {
 		Time -= 921;		// Fall back
 		Time = Time * 10; // to [0..1024] range
 		Difference = Difference / 40;
 	}
-	if(Time > LV_BEZIER_VAL_MAX) Time = LV_BEZIER_VAL_MAX;
+	if(Time > EG_BEZIER_VAL_MAX) Time = EG_BEZIER_VAL_MAX;
 	if(Time < 0) Time = 0;
-	int32_t Step = EG_Bezier3(Time, LV_BEZIER_VAL_MAX, 800, 500, 0);
+	int32_t Step = EG_Bezier3(Time, EG_BEZIER_VAL_MAX, 800, 500, 0);
 	int32_t Value = Step * Difference;
-	Value = Value >> LV_BEZIER_VAL_SHIFT;
+	Value = Value >> EG_BEZIER_VAL_SHIFT;
 	Value = pAnimate->m_EndValue - Value;
 	return Value;
 }

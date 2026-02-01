@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -45,7 +45,7 @@ public:
 	void                operator-- (void);
   void                Offset(EG_Coord_t X, EG_Coord_t Y);
   void                Offset(const EGPoint *pPoint);
-  void                PointTransform(int32_t Angle, int32_t Zoom, const EGPoint *pPivot);
+  void                PointTransform(int32_t Angle, int32_t ScaleX, uint32_t ScaleY, const EGPoint *pPivot, bool ZoomFirst = false);
 
 	EG_Coord_t          m_X;
 	EG_Coord_t          m_Y;

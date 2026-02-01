@@ -73,7 +73,7 @@ void EGRoller::Configure(void)
 	m_FocusedItemIndex = 0;
 	ClearFlag(EG_OBJ_FLAG_SCROLLABLE);
 	ClearFlag(EG_OBJ_FLAG_SCROLL_CHAIN_VER);
-	EGLabel(this, &c_RollerLabelClass);
+	new EGLabel(this, &c_RollerLabelClass);
 	SetItems( "Item 1\nItem 2\nItem 3\nItem 4\nItem 5", EG_ROLLER_MODE_NORMAL);
 }
 

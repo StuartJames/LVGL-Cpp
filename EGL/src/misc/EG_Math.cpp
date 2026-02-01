@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -69,12 +69,12 @@ int16_t EG_ATTRIBUTE_FAST_MEM EG_TrigoSin(int16_t angle)
 
 /**
  * Calculate a value of a Cubic Bezier function.
- * @param t time in range of [0..LV_BEZIER_VAL_MAX]
- * @param u0 start values in range of [0..LV_BEZIER_VAL_MAX]
- * @param u1 control value 1 values in range of [0..LV_BEZIER_VAL_MAX]
- * @param u2 control value 2 in range of [0..LV_BEZIER_VAL_MAX]
- * @param u3 end values in range of [0..LV_BEZIER_VAL_MAX]
- * @return the value calculated from the given parameters in range of [0..LV_BEZIER_VAL_MAX]
+ * @param t time in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u0 start values in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u1 control value 1 values in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u2 control value 2 in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u3 end values in range of [0..EG_BEZIER_VAL_MAX]
+ * @return the value calculated from the given parameters in range of [0..EG_BEZIER_VAL_MAX]
  */
 uint32_t EG_Bezier3(uint32_t t, uint32_t u0, uint32_t u1, uint32_t u2, uint32_t u3)
 {

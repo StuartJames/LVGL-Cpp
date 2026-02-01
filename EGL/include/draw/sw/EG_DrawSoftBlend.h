@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -54,20 +54,22 @@ public:
 									        EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride);
 
 #if EG_DRAW_COMPLEX
- static  void       FillBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, 
+  static  void      FillBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, 
                           EG_Color_t color, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride, EG_BlendMode_e blend_mode);
   static void       MapBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, const EG_Color_t *src_buf,
                           EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride, EG_BlendMode_e blend_mode);
-  static EG_Color_t BlendTrueColorAdditive(EGSoftBlend *pBlend, EG_Color_t fg, EG_Color_t bg, EG_OPA_t opa);
-  static EG_Color_t BlendTrueColorSubtractive(EGSoftBlend *pBlend, EG_Color_t fg, EG_Color_t bg, EG_OPA_t opa);
-  static EG_Color_t BlendTrueColorMultiply(EGSoftBlend *pBlend, EG_Color_t fg, EG_Color_t bg, EG_OPA_t opa);
+  static EG_Color_t BlendTrueColorAdditive(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t opa);
+  static EG_Color_t BlendTrueColorSubtractive(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t opa);
+  static EG_Color_t BlendTrueColorMultiply(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t opa);
 #endif
 
 #if EG_COLOR_SCREEN_TRANSP
-  static void       FillaRGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride,
+  static void       FillARGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride,
                   EG_Color_t color, EG_OPA_t opa,	const EG_OPA_t *mask, EG_Coord_t mask_stride);
-  static void       MapaRGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, const EG_Color_t *src_buf,
+  static void       MapARGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, const EG_Color_t *src_buf,
 								  EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride, EG_BlendMode_e blend_mode);
+  static void       SetPixelARGB(uint8_t *buf, EG_Color_t Color, EG_OPA_t OPA);
+  static void       SetPixelBlendedARGB(EGSoftBlend *pBlend, uint8_t *pBuffer, EG_Color_t Color, EG_OPA_t OPA, EG_Color_t (*BlendFunc)(EGSoftBlend *, EG_Color_t, EG_Color_t, EG_OPA_t));
 #endif 
 
   const EGRect         *m_pRect;          // The area with absolute coordinates to draw on 
@@ -88,167 +90,170 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Color_t EGSoftBlend::BlendTrueColorAdditive(EGSoftBlend *pBlend, EG_Color_t fg, EG_Color_t bg, EG_OPA_t OPA)
+inline EG_Color_t EGSoftBlend::BlendTrueColorAdditive(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t OPA)
 {
-	if(OPA <= EG_OPA_MIN) return bg;
+	if(OPA <= EG_OPA_MIN) return BackColor;
 	uint32_t tmp;
 #if EG_COLOR_DEPTH == 1
-	tmp = bg.full + fg.full;
-	fg.full = EG_MIN(tmp, 1);
+	tmp = BackColor.full + ForeColor.full;
+	ForeColor.full = EG_MIN(tmp, 1);
 #else
-	tmp = bg.ch.red + fg.ch.red;
+	tmp = BackColor.ch.red + ForeColor.ch.red;
 #if EG_COLOR_DEPTH == 8
-	fg.ch.red = EG_MIN(tmp, 7);
+	ForeColor.ch.red = EG_MIN(tmp, 7);
 #elif EG_COLOR_DEPTH == 16
-	fg.ch.red = EG_MIN(tmp, 31);
+	ForeColor.ch.red = EG_MIN(tmp, 31);
 #elif EG_COLOR_DEPTH == 32
-	fg.ch.red = EG_MIN(tmp, 255);
+	ForeColor.ch.red = EG_MIN(tmp, 255);
 #endif
 #if EG_COLOR_DEPTH == 8
-	tmp = bg.ch.green + fg.ch.green;
-	fg.ch.green = EG_MIN(tmp, 7);
+	tmp = BackColor.ch.green + ForeColor.ch.green;
+	ForeColor.ch.green = EG_MIN(tmp, 7);
 #elif EG_COLOR_DEPTH == 16
 #if EG_COLOR_16_SWAP == 0
-	tmp = bg.ch.green + fg.ch.green;
-	fg.ch.green = EG_MIN(tmp, 63);
+	tmp = BackColor.ch.green + ForeColor.ch.green;
+	ForeColor.ch.green = EG_MIN(tmp, 63);
 #else
-	tmp = (bg.ch.green_h << 3) + bg.ch.green_l + (fg.ch.green_h << 3) + fg.ch.green_l;
+	tmp = (BackColor.ch.green_h << 3) + BackColor.ch.green_l + (ForeColor.ch.green_h << 3) + ForeColor.ch.green_l;
 	tmp = EG_MIN(tmp, 63);
-	fg.ch.green_h = tmp >> 3;
-	fg.ch.green_l = tmp & 0x7;
+	ForeColor.ch.green_h = tmp >> 3;
+	ForeColor.ch.green_l = tmp & 0x7;
 #endif
 #elif EG_COLOR_DEPTH == 32
-	tmp = bg.ch.green + fg.ch.green;
-	fg.ch.green = EG_MIN(tmp, 255);
+	tmp = BackColor.ch.green + ForeColor.ch.green;
+	ForeColor.ch.green = EG_MIN(tmp, 255);
 #endif
-	tmp = bg.ch.blue + fg.ch.blue;
+	tmp = BackColor.ch.blue + ForeColor.ch.blue;
 #if EG_COLOR_DEPTH == 8
-	fg.ch.blue = EG_MIN(tmp, 4);
+	ForeColor.ch.blue = EG_MIN(tmp, 4);
 #elif EG_COLOR_DEPTH == 16
-	fg.ch.blue = EG_MIN(tmp, 31);
+	ForeColor.ch.blue = EG_MIN(tmp, 31);
 #elif EG_COLOR_DEPTH == 32
-	fg.ch.blue = EG_MIN(tmp, 255);
+	ForeColor.ch.blue = EG_MIN(tmp, 255);
 #endif
 #endif
-	if(OPA == EG_OPA_COVER) return fg;
-	return EG_ColorMix(fg, bg, OPA);
+	if(OPA == EG_OPA_COVER) return ForeColor;
+	return EG_ColorMix(ForeColor, BackColor, OPA);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Color_t EGSoftBlend::BlendTrueColorSubtractive(EGSoftBlend *pBlend, EG_Color_t fg, EG_Color_t bg, EG_OPA_t OPA)
+inline EG_Color_t EGSoftBlend::BlendTrueColorSubtractive(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t OPA)
 {
-	if(OPA <= EG_OPA_MIN) return bg;
+	if(OPA <= EG_OPA_MIN) return BackColor;
 	int32_t tmp;
-	tmp = bg.ch.red - fg.ch.red;
-	fg.ch.red = EG_MAX(tmp, 0);
+	tmp = BackColor.ch.red - ForeColor.ch.red;
+	ForeColor.ch.red = EG_MAX(tmp, 0);
 #if EG_COLOR_16_SWAP == 0
-	tmp = bg.ch.green - fg.ch.green;
-	fg.ch.green = EG_MAX(tmp, 0);
+	tmp = BackColor.ch.green - ForeColor.ch.green;
+	ForeColor.ch.green = EG_MAX(tmp, 0);
 #else
-	tmp = (bg.ch.green_h << 3) + bg.ch.green_l + (fg.ch.green_h << 3) + fg.ch.green_l;
+	tmp = (BackColor.ch.green_h << 3) + BackColor.ch.green_l + (ForeColor.ch.green_h << 3) + ForeColor.ch.green_l;
 	tmp = EG_MAX(tmp, 0);
-	fg.ch.green_h = tmp >> 3;
-	fg.ch.green_l = tmp & 0x7;
+	ForeColor.ch.green_h = tmp >> 3;
+	ForeColor.ch.green_l = tmp & 0x7;
 #endif
-	tmp = bg.ch.blue - fg.ch.blue;
-	fg.ch.blue = EG_MAX(tmp, 0);
-	if(OPA == EG_OPA_COVER) return fg;
-	return EG_ColorMix(fg, bg, OPA);
+	tmp = BackColor.ch.blue - ForeColor.ch.blue;
+	ForeColor.ch.blue = EG_MAX(tmp, 0);
+	if(OPA == EG_OPA_COVER) return ForeColor;
+	return EG_ColorMix(ForeColor, BackColor, OPA);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Color_t EGSoftBlend::BlendTrueColorMultiply(EGSoftBlend *pBlend, EG_Color_t fg, EG_Color_t bg, EG_OPA_t OPA)
+inline EG_Color_t EGSoftBlend::BlendTrueColorMultiply(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t OPA)
 {
-	if(OPA <= EG_OPA_MIN) return bg;
+	if(OPA <= EG_OPA_MIN) return BackColor;
 #if EG_COLOR_DEPTH == 32
-	fg.ch.red = (fg.ch.red * bg.ch.red) >> 8;
-	fg.ch.green = (fg.ch.green * bg.ch.green) >> 8;
-	fg.ch.blue = (fg.ch.blue * bg.ch.blue) >> 8;
+	ForeColor.ch.red = (ForeColor.ch.red * BackColor.ch.red) >> 8;
+	ForeColor.ch.green = (ForeColor.ch.green * BackColor.ch.green) >> 8;
+	ForeColor.ch.blue = (ForeColor.ch.blue * BackColor.ch.blue) >> 8;
 #elif EG_COLOR_DEPTH == 16
-	fg.ch.red = (fg.ch.red * bg.ch.red) >> 5;
-	fg.ch.blue = (fg.ch.blue * bg.ch.blue) >> 5;
-	EG_COLOR_SET_G(fg, (EG_COLOR_GET_G(fg) * EG_COLOR_GET_G(bg)) >> 6);
+	ForeColor.ch.red = (ForeColor.ch.red * BackColor.ch.red) >> 5;
+	ForeColor.ch.blue = (ForeColor.ch.blue * BackColor.ch.blue) >> 5;
+	EG_COLOR_SET_G(ForeColor, (EG_COLOR_GET_G(ForeColor) * EG_COLOR_GET_G(BackColor)) >> 6);
 #elif EG_COLOR_DEPTH == 8
-	fg.ch.red = (fg.ch.red * bg.ch.red) >> 3;
-	fg.ch.green = (fg.ch.green * bg.ch.green) >> 3;
-	fg.ch.blue = (fg.ch.blue * bg.ch.blue) >> 2;
+	ForeColor.ch.red = (ForeColor.ch.red * BackColor.ch.red) >> 3;
+	ForeColor.ch.green = (ForeColor.ch.green * BackColor.ch.green) >> 3;
+	ForeColor.ch.blue = (ForeColor.ch.blue * BackColor.ch.blue) >> 2;
 #endif
-	if(OPA == EG_OPA_COVER) return fg;
-	return EG_ColorMix(fg, bg, OPA);
+	if(OPA == EG_OPA_COVER) return ForeColor;
+	return EG_ColorMix(ForeColor, BackColor, OPA);
 }
 
 #endif
+
+//////////////////////////////////////////////////////////////////////////////////////
 
 #if EG_COLOR_SCREEN_TRANSP
 
-inline void EGSoftBlend::SetPixelaRGB(EGSoftBlend *pBlend, uint8_t *buf, EG_Color_t color, EG_OPA_t OPA)
+inline void EGSoftBlend::SetPixelARGB(uint8_t *pBuffer, EG_Color_t Color, EG_OPA_t OPA)
 {
-	EG_Color_t bg_color;
-	EG_Color_t res_color;
-	EG_OPA_t bg_opa = buf[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
-#if EG_COLOR_DEPTH == 8
-	bg_color.full = buf[0];
-	EG_ColorMixWithAlpha(bg_color, bg_opa, color, OPA, &res_color, &buf[1]);
-	if(buf[1] <= EG_OPA_MIN) return;
-	buf[0] = res_color.full;
+EG_Color_t BackColor;
+EG_Color_t ResultColor;
+EG_OPA_t BackOPA = pBuffer[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
+
+#if LV_COLOR_DEPTH == 8
+	BackColor.full = pBuffer[0];
+	lv_color_mix_with_alpha(BackColor, BackOPA, color, opa, &ResultColor, &pBuffer[1]);
+	if(pBuffer[1] <= LV_OPA_MIN) return;
+	pBuffer[0] = ResultColor.full;
 #elif EG_COLOR_DEPTH == 16
-	bg_color.full = buf[0] + (buf[1] << 8);
-	EG_ColorMixWithAlpha(bg_color, bg_opa, color, OPA, &res_color, &buf[2]);
-	if(buf[2] <= EG_OPA_MIN) return;
-	buf[0] = res_color.full & 0xff;
-	buf[1] = res_color.full >> 8;
+	BackColor.full = pBuffer[0] + (pBuffer[1] << 8);
+	EG_ColorMixWithAlpha(BackColor, BackOPA, Color, OPA, &ResultColor, &pBuffer[2]);
+	if(pBuffer[2] <= EG_OPA_MIN) return;
+	pBuffer[0] = ResultColor.full & 0xff;
+	pBuffer[1] = ResultColor.full >> 8;
 #elif EG_COLOR_DEPTH == 32
-	bg_color = *((EG_Color_t *)buf);
-	EG_ColorMixWithAlpha(bg_color, bg_opa, color, OPA, &res_color, &buf[3]);
-	if(buf[3] <= EG_OPA_MIN) return;
-	buf[0] = res_color.ch.blue;
-	buf[1] = res_color.ch.green;
-	buf[2] = res_color.ch.red;
+	BackColor = *((EG_Color_t *)pBuffer);
+	lv_color_mix_with_alpha(BackColor, BackOPA, color, opa, &ResultColor, &pBuffer[3]);
+	if(pBuffer[3] <= LV_OPA_MIN) return;
+	pBuffer[0] = ResultColor.ch.blue;
+	pBuffer[1] = ResultColor.ch.green;
+	pBuffer[2] = ResultColor.ch.red;
 #endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGSoftBlend::SetPixelaRGBBlend(EGSoftBlend *pBlend, uint8_t *buf, EG_Color_t color, EG_OPA_t OPA, EG_Color_t (*blend_fp)(EG_Color_t,
-																																																					EG_Color_t, EG_OPA_t))
+inline void EGSoftBlend::SetPixelBlendedARGB(EGSoftBlend *pBlend, uint8_t *pBuffer, EG_Color_t Color, EG_OPA_t OPA, EG_Color_t (*BlendFunc)(EGSoftBlend *, EG_Color_t, EG_Color_t, EG_OPA_t))
 {
-	static EG_Color_t last_dest_color;
-	static EG_Color_t last_src_color;
-	static EG_Color_t last_res_color;
-	static uint32_t last_opa = 0xffff; // Set to an invalid value for first
+EG_Color_t DestColor;
+EG_Color_t SrceColor;
+EG_Color_t ResultColor;
+EG_Color_t BackColor;
+uint32_t LastOPA = 0xffff;  // Set to an invalid value for first
 
-	EG_Color_t bg_color;
 
 // Get the BG color
-#if EG_COLOR_DEPTH == 8
-	if(buf[1] <= EG_OPA_MIN) return;
-	bg_color.full = buf[0];
+#if LV_COLOR_DEPTH == 8
+	if(pBuffer[1] <= LV_OPA_MIN) return;
+	BackColor.full = pBuffer[0];
 #elif EG_COLOR_DEPTH == 16
-	if(buf[2] <= EG_OPA_MIN) return;
-	bg_color.full = buf[0] + (buf[1] << 8);
+	if(pBuffer[2] <= EG_OPA_MIN) return;
+	BackColor.full = pBuffer[0] + (pBuffer[1] << 8);
 #elif EG_COLOR_DEPTH == 32
-	if(buf[3] <= EG_OPA_MIN) return;
-	bg_color = *((EG_Color_t *)buf);
+	if(pBuffer[3] <= LV_OPA_MIN) return;
+	BackColor = *((EG_Color_t *)pBuffer);
 #endif
 	// Get the result color
-	if(last_dest_color.full != bg_color.full || last_src_color.full != color.full || last_opa != OPA) {
-		last_dest_color = bg_color;
-		last_src_color = color;
-		last_opa = OPA;
-		last_res_color = blend_fp(last_src_color, last_dest_color, last_opa);
+//	if(DestColor.full != BackColor.full || SrceColor.full != Color.full || LastOPA != OPA) {
+	if(LastOPA != OPA) {
+		DestColor = BackColor;
+		SrceColor = Color;
+		LastOPA = OPA;
+		ResultColor = BlendFunc(pBlend, SrceColor, DestColor, LastOPA);
 	}
 // Set the result color
-#if EG_COLOR_DEPTH == 8
-	buf[0] = last_res_color.full;
+#if LV_COLOR_DEPTH == 8
+	pBuffer[0] = ResultColor.full;
 #elif EG_COLOR_DEPTH == 16
-	buf[0] = last_res_color.full & 0xff;
-	buf[1] = last_res_color.full >> 8;
+	pBuffer[0] = ResultColor.full & 0xff;
+	pBuffer[1] = ResultColor.full >> 8;
 #elif EG_COLOR_DEPTH == 32
-	buf[0] = last_res_color.ch.blue;
-	buf[1] = last_res_color.ch.green;
-	buf[2] = last_res_color.ch.red;
+	pBuffer[0] = ResultColor.ch.blue;
+	pBuffer[1] = ResultColor.ch.green;
+	pBuffer[2] = ResultColor.ch.red;
 #endif
 }
 

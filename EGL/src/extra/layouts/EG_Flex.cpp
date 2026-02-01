@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -378,7 +378,7 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 				EG_ASSERT(grow_value_sum != 0);
 				grow_unit = grow_max_size / grow_value_sum;
 				EG_Coord_t size = grow_unit * t->grow_dsc[i].grow_value;
-				EG_Coord_t size_clamp = LV_CLAMP(t->grow_dsc[i].min_size, size, t->grow_dsc[i].max_size);
+				EG_Coord_t size_clamp = EG_CLAMP(t->grow_dsc[i].min_size, size, t->grow_dsc[i].max_size);
 
 				if(size_clamp != size) {
 					t->grow_dsc[i].clamped = 1;

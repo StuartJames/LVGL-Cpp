@@ -1,5 +1,5 @@
 /* 
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -35,7 +35,7 @@
 EGDrawImage::EGDrawImage(void) : 
   m_pContext(nullptr),
   m_Angle(0),
-  m_Zoom(EG_IMG_ZOOM_NONE),
+  m_Zoom(EG_SCALE_NONE),
   m_Pivot(0, 0),
   m_Recolor(EG_ColorBlack()),
   m_OPA(EG_OPA_COVER),
@@ -77,31 +77,31 @@ uint8_t EGDrawImage::GetPixelSize(EG_ImageColorFormat_t ColorFormat)
 	uint8_t px_size = 0;
 
 	switch((uint8_t)ColorFormat) {
-		case EG_IMG_CF_UNKNOWN:
-		case EG_IMG_CF_RAW:
+		case EG_COLOR_FORMAT_UNKNOWN:
+		case EG_COLOR_FORMAT_RAW:
 			px_size = 0;
 			break;
-		case EG_IMG_CF_TRUE_COLOR:
-		case EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED:
+		case EG_COLOR_FORMAT_NATIVE:
+		case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
 			px_size = EG_COLOR_SIZE;
 			break;
-		case EG_IMG_CF_TRUE_COLOR_ALPHA:
+		case EG_COLOR_FORMAT_NATIVE_ALPHA:
 			px_size = EG_IMG_PX_SIZE_ALPHA_BYTE << 3;
 			break;
-		case EG_IMG_CF_INDEXED_1BIT:
-		case EG_IMG_CF_ALPHA_1BIT:
+		case EG_COLOR_FORMAT_INDEXED_1BIT:
+		case EG_COLOR_FORMAT_ALPHA_1BIT:
 			px_size = 1;
 			break;
-		case EG_IMG_CF_INDEXED_2BIT:
-		case EG_IMG_CF_ALPHA_2BIT:
+		case EG_COLOR_FORMAT_INDEXED_2BIT:
+		case EG_COLOR_FORMAT_ALPHA_2BIT:
 			px_size = 2;
 			break;
-		case EG_IMG_CF_INDEXED_4BIT:
-		case EG_IMG_CF_ALPHA_4BIT:
+		case EG_COLOR_FORMAT_INDEXED_4BIT:
+		case EG_COLOR_FORMAT_ALPHA_4BIT:
 			px_size = 4;
 			break;
-		case EG_IMG_CF_INDEXED_8BIT:
-		case EG_IMG_CF_ALPHA_8BIT:
+		case EG_COLOR_FORMAT_INDEXED_8BIT:
+		case EG_COLOR_FORMAT_ALPHA_8BIT:
 			px_size = 8;
 			break;
 		default:
@@ -116,8 +116,8 @@ uint8_t EGDrawImage::GetPixelSize(EG_ImageColorFormat_t ColorFormat)
 bool EGDrawImage::IsChromaKeyed(EG_ImageColorFormat_t ColorFormat)
 {
 	switch(ColorFormat) {
-		case EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED:
-		case EG_IMG_CF_RAW_CHROMA_KEYED:
+		case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
+		case EG_COLOR_FORMAT_RAW_CHROMA_KEYED:
 			return true;
 			break;
 		default:
@@ -131,16 +131,16 @@ bool EGDrawImage::IsChromaKeyed(EG_ImageColorFormat_t ColorFormat)
 bool EGDrawImage::HasAlpha(EG_ImageColorFormat_t ColorFormat)
 {
 	switch(ColorFormat) {
-		case EG_IMG_CF_TRUE_COLOR_ALPHA:
-		case EG_IMG_CF_RAW_ALPHA:
-		case EG_IMG_CF_INDEXED_1BIT:
-		case EG_IMG_CF_INDEXED_2BIT:
-		case EG_IMG_CF_INDEXED_4BIT:
-		case EG_IMG_CF_INDEXED_8BIT:
-		case EG_IMG_CF_ALPHA_1BIT:
-		case EG_IMG_CF_ALPHA_2BIT:
-		case EG_IMG_CF_ALPHA_4BIT:
-		case EG_IMG_CF_ALPHA_8BIT:
+		case EG_COLOR_FORMAT_NATIVE_ALPHA:
+		case EG_COLOR_FORMAT_RAW_ALPHA:
+		case EG_COLOR_FORMAT_INDEXED_1BIT:
+		case EG_COLOR_FORMAT_INDEXED_2BIT:
+		case EG_COLOR_FORMAT_INDEXED_4BIT:
+		case EG_COLOR_FORMAT_INDEXED_8BIT:
+		case EG_COLOR_FORMAT_ALPHA_1BIT:
+		case EG_COLOR_FORMAT_ALPHA_2BIT:
+		case EG_COLOR_FORMAT_ALPHA_4BIT:
+		case EG_COLOR_FORMAT_ALPHA_8BIT:
 			return true;
 			break;
 		default:
@@ -196,14 +196,14 @@ EG_Result_t EG_ATTRIBUTE_FAST_MEM EGDrawImage::PreDraw(const EGRect *pRect, cons
 	ImageCacheEntry_t *pCachedDescriptor = ImageCacheOpen(pSource, m_Recolor, m_FrameID);
 	if(pCachedDescriptor == nullptr) return EG_RES_INVALID;
 	EG_ImageColorFormat_t ColorFormat;
-	if(IsChromaKeyed((EG_ImageColorFormat_t)pCachedDescriptor->DecoderDSC.Header.ColorFormat))	ColorFormat = EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED;
-	else if(EG_IMG_CF_ALPHA_8BIT == pCachedDescriptor->DecoderDSC.Header.ColorFormat)	ColorFormat = EG_IMG_CF_ALPHA_8BIT;
-	else if(EG_IMG_CF_RGB565A8 == pCachedDescriptor->DecoderDSC.Header.ColorFormat)	ColorFormat = EG_IMG_CF_RGB565A8;
-	else if(HasAlpha((EG_ImageColorFormat_t)pCachedDescriptor->DecoderDSC.Header.ColorFormat))	ColorFormat = EG_IMG_CF_TRUE_COLOR_ALPHA;
-	else ColorFormat = EG_IMG_CF_TRUE_COLOR;
-	if(ColorFormat == EG_IMG_CF_ALPHA_8BIT) {
-		if(m_Angle || m_Zoom != EG_IMG_ZOOM_NONE) {
-			ColorFormat = EG_IMG_CF_TRUE_COLOR_ALPHA;			//  resume normal method
+	if(IsChromaKeyed((EG_ImageColorFormat_t)pCachedDescriptor->DecoderDSC.Header.ColorFormat))	ColorFormat = EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED;
+	else if(EG_COLOR_FORMAT_ALPHA_8BIT == pCachedDescriptor->DecoderDSC.Header.ColorFormat)	ColorFormat = EG_COLOR_FORMAT_ALPHA_8BIT;
+	else if(EG_COLOR_FORMAT_RGB565A8 == pCachedDescriptor->DecoderDSC.Header.ColorFormat)	ColorFormat = EG_COLOR_FORMAT_RGB565A8;
+	else if(HasAlpha((EG_ImageColorFormat_t)pCachedDescriptor->DecoderDSC.Header.ColorFormat))	ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;
+	else ColorFormat = EG_COLOR_FORMAT_NATIVE;
+	if(ColorFormat == EG_COLOR_FORMAT_ALPHA_8BIT) {
+		if(m_Angle || m_Zoom != EG_SCALE_NONE) {
+			ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;			//  resume normal method
 			pCachedDescriptor->DecoderDSC.pImageData = nullptr;
 		}
 	}
@@ -213,10 +213,10 @@ EG_Result_t EG_ATTRIBUTE_FAST_MEM EGDrawImage::PreDraw(const EGRect *pRect, cons
 	}
 	else if(pCachedDescriptor->DecoderDSC.pImageData) {	// The decoder gave the entire uncompressed image.
 		EGRect MapRectRotate(pRect);
-		if(m_Angle || m_Zoom != EG_IMG_ZOOM_NONE) {
+		if(m_Angle || m_Zoom != EG_SCALE_NONE) {
 			int32_t Width = pRect->GetWidth();
 			int32_t Height = pRect->GetHeight();
-			EGImageBuffer::GetTransformedRect(&MapRectRotate, Width, Height, m_Angle, m_Zoom, &m_Pivot);
+			EGImageBuffer::GetTransformedRect(&MapRectRotate, Width, Height, m_Angle, m_Zoom, m_Zoom, &m_Pivot);
 			MapRectRotate.Move(pRect->GetX1(), pRect->GetY1());
 		}
 		EGRect CommonClip;          // Common area of mask and area

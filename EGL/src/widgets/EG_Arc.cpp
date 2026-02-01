@@ -344,8 +344,8 @@ EG_Coord_t Radius;
 	Radius -= GetStyleArcWidth(EG_PART_INDICATOR) / 2;
 	Radius += Offset;
 	uint16_t Angle = GetAngle();
-	EG_Coord_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> LV_TRIGO_SHIFT;
-	EG_Coord_t KnobY = (Radius * EG_TrigoSin(Angle)) >> LV_TRIGO_SHIFT;
+	EG_Coord_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> EG_TRIGO_SHIFT;
+	EG_Coord_t KnobY = (Radius * EG_TrigoSin(Angle)) >> EG_TRIGO_SHIFT;
 	pObj->AlignTo(this, EG_ALIGN_CENTER, KnobX, KnobY);
 }
 
@@ -681,8 +681,8 @@ void EGArc::GetKnobArea(const EGPoint *Center, EG_Coord_t Radius, EGRect *KnobRe
 	EG_Coord_t IndicHalfWidth = IndicWidth / 2;
 	Radius -= IndicHalfWidth;
 	EG_Coord_t Angle = GetAngle();
-	EG_Coord_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> LV_TRIGO_SHIFT;
-	EG_Coord_t KnobY = (Radius * EG_TrigoSin(Angle)) >> LV_TRIGO_SHIFT;
+	EG_Coord_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> EG_TRIGO_SHIFT;
+	EG_Coord_t KnobY = (Radius * EG_TrigoSin(Angle)) >> EG_TRIGO_SHIFT;
 	EG_Coord_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
 	EG_Coord_t KnobRight = GetStylePadRight(EG_PART_KNOB);
 	EG_Coord_t KnobTop = GetStylePadTop(EG_PART_KNOB);

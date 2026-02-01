@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -48,8 +48,8 @@
 #define EG_STYLE_PROP_LAYER_REFR            (1 << 4)  // Affects layer handling
 #define EG_STYLE_PROP_ALL                   (0x1F)     // Indicating all flags
 
-#define EG_IMG_ZOOM_NONE                    256        // Value for not zooming the image
-EG_EXPORT_CONST_INT(EG_IMG_ZOOM_NONE);
+#define EG_SCALE_NONE                    256        // Value for not zooming the image
+EG_EXPORT_CONST_INT(EG_SCALE_NONE);
 
 #define EG_STYLE_PROP_META_INHERIT 0x8000
 #define EG_STYLE_PROP_META_INITIAL 0x4000

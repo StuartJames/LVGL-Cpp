@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -101,7 +101,7 @@ void EGSoftContext::DrawLayerBlend(EGLayerContext *pDrawLayer, EGDrawImage *pIma
 	Image.m_Header.AlwaysZero = 0;
 	Image.m_Header.Width = pDrawLayer->m_pContext->m_pDrawRect->GetWidth();
 	Image.m_Header.Height = pDrawLayer->m_pContext->m_pDrawRect->GetHeight();
-	Image.m_Header.ColorFormat = pDrawLayer->m_HasAlpha ? EG_IMG_CF_TRUE_COLOR_ALPHA : EG_IMG_CF_TRUE_COLOR;
+	Image.m_Header.ColorFormat = pDrawLayer->m_HasAlpha ? EG_COLOR_FORMAT_NATIVE_ALPHA : EG_COLOR_FORMAT_NATIVE;
 	pDrawLayer->m_pContext->m_pDrawBuffer = pDrawLayer->m_Original.pBuffer;	// Restore the original draw_ctx
 	pDrawLayer->m_pContext->m_pDrawRect = pDrawLayer->m_Original.pBuferArea;
 	pDrawLayer->m_pContext->m_pClipRect = pDrawLayer->m_Original.pClipRect;

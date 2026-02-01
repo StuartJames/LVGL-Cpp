@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -130,7 +130,7 @@ EG_Result_t ret = EG_RES_OK;
 		if(!strncmp((char *)raw_sjpeg_data, "_SJPG__", strlen("_SJPG__"))) {
 			raw_sjpeg_data += 14;  //seek to res info ... refer pSJPEG format
 			pHeader->AlwaysZero = 0;
-			pHeader->ColorFormat = EG_IMG_CF_RAW;
+			pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
 			pHeader->Width = *raw_sjpeg_data++;
 			pHeader->Width |= *raw_sjpeg_data++ << 8;
 			pHeader->Height = *raw_sjpeg_data++;
@@ -139,7 +139,7 @@ EG_Result_t ret = EG_RES_OK;
 		}
 		else if(IsJPG(raw_sjpeg_data, raw_sjpeg_data_size) == true) {
 			pHeader->AlwaysZero = 0;
-			pHeader->ColorFormat = EG_IMG_CF_RAW;
+			pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
 			uint8_t *pWorkBuffer = (uint8_t*)EG_AllocMem(TJPGD_WORKBUFF_SIZE);
 			if(!pWorkBuffer) return EG_RES_INVALID;
 			IO_Source_t io_source_temp;
@@ -185,7 +185,7 @@ end:
 					return EG_RES_INVALID;
 				}
 				pHeader->AlwaysZero = 0;
-				pHeader->ColorFormat = EG_IMG_CF_RAW;
+				pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
 				uint8_t *raw_sjpeg_data = Buffer;
 				pHeader->Width = *raw_sjpeg_data++;
 				pHeader->Width |= *raw_sjpeg_data++ << 8;
@@ -215,7 +215,7 @@ end:
 			File.Close();
 			if(rc == JDR_OK) {
 				pHeader->AlwaysZero = 0;
-				pHeader->ColorFormat = EG_IMG_CF_RAW;
+				pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
 				pHeader->Width = TempJDEC.width;
 				pHeader->Height = TempJDEC.height;
 				return EG_RES_OK;

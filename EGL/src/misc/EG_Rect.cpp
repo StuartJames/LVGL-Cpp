@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -127,6 +127,16 @@ void EGRect::Set(EG_Coord_t X1, EG_Coord_t Y1, EG_Coord_t X2, EG_Coord_t Y2)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void EGRect::Zero(void)
+{
+	m_X1 = 0;
+	m_Y1 = 0;
+	m_X2 = 0;
+	m_Y2 = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void EGRect::SetWidth(EG_Coord_t Width)
 {
 	m_X2 = m_X1 + Width - 1;
@@ -206,6 +216,16 @@ void EGRect::Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY)
 	m_X2 += OffsetX;
 	m_Y1 += OffsetY;
 	m_Y2 += OffsetY;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void EGRect::Move(EG_Coord_t OffsetX1, EG_Coord_t OffsetY1, EG_Coord_t OffsetX2, EG_Coord_t OffsetY2)
+{
+	m_X1 += OffsetX1;
+	m_X2 += OffsetX2;
+	m_Y1 += OffsetY1;
+	m_Y2 += OffsetY2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

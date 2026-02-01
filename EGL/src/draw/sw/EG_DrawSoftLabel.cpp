@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -69,7 +69,6 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawCharacter(const EGDrawLabel *pDraw
 {
 EG_FontGlyphProps_t Glyph;
 
-	EG_LOG_WARN("Soft Char Draw");
 	bool g_ret = EG_FontGetGlyphProps(pDrawLabel->m_pFont, &Glyph, Character, '\0');
 	if(g_ret == false) {
 		// Add warning if the pDrawLabel is not found but do not print warning for non printable ASCII chars 
@@ -136,15 +135,14 @@ uint32_t shades;
 
 	if(BitsPerPixel == 3) BitsPerPixel = 4;
 #if EG_USE_IMGFONT
-	if(BitsPerPixel == LV_IMGFONT_BPP) {  //is imgfont
-		EGRect FillRect(pPos->m_X, pPos->m_Y, pPos->m_X + pGlyph->BoxWidth - 1, pPos->m_Y + pGlyph->BoxHeight - 1);
-		EGDrawImage img_dsc;
-		lv_draw_img_dsc_init(&img_dsc);
-		img_dsc.angle = 0;
-		img_dsc.zoom = EG_IMG_ZOOM_NONE;
-		img_dsc.opa = pDrawLabel->m_OPA;
-		img_dsc.blend_mode = pDrawLabel->blend_mode;
-		lv_draw_img(pDrawLabel, &img_dsc, &FillRect, pMap);
+	if(BitsPerPixel == EG_IMGFONT_BPP) {  //is imgfont
+		const EGRect FillRect(pPos->m_X, pPos->m_Y, pPos->m_X + pGlyph->BoxWidth - 1, pPos->m_Y + pGlyph->BoxHeight - 1);
+		EGDrawImage DrawImage;
+		DrawImage.m_Angle = 0;
+		DrawImage.m_Zoom = EG_SCALE_NONE;
+		DrawImage.m_OPA = pDrawLabel->m_OPA;
+		DrawImage.m_BlendMode = pDrawLabel->m_BlendMode;
+		DrawImage.Draw(pDrawLabel->m_pContext, &FillRect, pMap);
 		return;
 	}
 #endif

@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -34,12 +34,12 @@ uint32_t EG_SnapshotBufferSizeRequired(EGObject *pObj, EG_ImageColorFormat_t Col
 {
 	EG_ASSERT_NULL(pObj);
 	switch(ColorFormat) {
-		case EG_IMG_CF_TRUE_COLOR:
-		case EG_IMG_CF_TRUE_COLOR_ALPHA:
-		case EG_IMG_CF_ALPHA_1BIT:
-		case EG_IMG_CF_ALPHA_2BIT:
-		case EG_IMG_CF_ALPHA_4BIT:
-		case EG_IMG_CF_ALPHA_8BIT:
+		case EG_COLOR_FORMAT_NATIVE:
+		case EG_COLOR_FORMAT_NATIVE_ALPHA:
+		case EG_COLOR_FORMAT_ALPHA_1BIT:
+		case EG_COLOR_FORMAT_ALPHA_2BIT:
+		case EG_COLOR_FORMAT_ALPHA_4BIT:
+		case EG_COLOR_FORMAT_ALPHA_8BIT:
 			break;
 		default:
 			return 0;
@@ -65,12 +65,12 @@ EG_Result_t EG_TakeSnapshotToBuffer(EGObject *pObj, EG_ImageColorFormat_t ColorF
 	EG_ASSERT_NULL(pBuffer);
 
 	switch(ColorFormat) {
-		case EG_IMG_CF_TRUE_COLOR:
-		case EG_IMG_CF_TRUE_COLOR_ALPHA:
-		case EG_IMG_CF_ALPHA_1BIT:
-		case EG_IMG_CF_ALPHA_2BIT:
-		case EG_IMG_CF_ALPHA_4BIT:
-		case EG_IMG_CF_ALPHA_8BIT:
+		case EG_COLOR_FORMAT_NATIVE:
+		case EG_COLOR_FORMAT_NATIVE_ALPHA:
+		case EG_COLOR_FORMAT_ALPHA_1BIT:
+		case EG_COLOR_FORMAT_ALPHA_2BIT:
+		case EG_COLOR_FORMAT_ALPHA_4BIT:
+		case EG_COLOR_FORMAT_ALPHA_8BIT:
 			break;
 		default:
 			return EG_RES_INVALID;

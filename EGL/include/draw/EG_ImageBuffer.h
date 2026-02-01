@@ -1,5 +1,5 @@
 /* 
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -57,55 +57,6 @@
 
 #define _EG_ZOOM_INV_UPSCALE 5
 
-// Image color format
-typedef enum EG_ImageColorFormat_t : uint8_t{
-    EG_IMG_CF_UNKNOWN = 0,
-
-    EG_IMG_CF_RAW,              // Contains the file as it is. Needs custom decoder function
-    EG_IMG_CF_RAW_ALPHA,        // Contains the file as it is. The image has alpha. Needs custom decoder function
-    EG_IMG_CF_RAW_CHROMA_KEYED, // Contains the file as it is. The image is chroma keyed. Needs custom decoder function
-
-    EG_IMG_CF_TRUE_COLOR,               // Color format and depth should match with EG_COLOR settings
-    EG_IMG_CF_TRUE_COLOR_ALPHA,         // Same as `EG_IMG_CF_TRUE_COLOR` but every pixel has an alpha byte
-    EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED,  // Same as `EG_IMG_CF_TRUE_COLOR` but EG_COLOR_TRANSP pixels will be transparent
-
-    EG_IMG_CF_INDEXED_1BIT,             // Can have 2 different colors in a palette (can't be chroma keyed)
-    EG_IMG_CF_INDEXED_2BIT,             // Can have 4 different colors in a palette (can't be chroma keyed)
-    EG_IMG_CF_INDEXED_4BIT,             // Can have 16 different colors in a palette (can't be chroma keyed)
-    EG_IMG_CF_INDEXED_8BIT,             // Can have 256 different colors in a palette (can't be chroma keyed)
-
-    EG_IMG_CF_ALPHA_1BIT,               // Can have one color and it can be drawn or not
-    EG_IMG_CF_ALPHA_2BIT,               // Can have one color but 4 different alpha value
-    EG_IMG_CF_ALPHA_4BIT,               // Can have one color but 16 different alpha value
-    EG_IMG_CF_ALPHA_8BIT,               // Can have one color but 256 different alpha value
-
-    EG_IMG_CF_RGB888,
-    EG_IMG_CF_RGBA8888,
-    EG_IMG_CF_RGBX8888,
-    EG_IMG_CF_RGB565,
-    EG_IMG_CF_RGBA5658,
-    EG_IMG_CF_RGB565A8,
-
-    EG_IMG_CF_RESERVED_15,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_16,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_17,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_18,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_19,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_20,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_21,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_22,              // Reserved for further use.
-    EG_IMG_CF_RESERVED_23,              // Reserved for further use.
-
-    EG_IMG_CF_USER_ENCODED_0,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_1,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_2,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_3,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_4,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_5,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_6,           // User holder encoding format.
-    EG_IMG_CF_USER_ENCODED_7,           // User holder encoding format.
-} EG_ImageColorFormat_t;
-
 #if EG_BIG_ENDIAN_SYSTEM
 typedef struct {
 
@@ -145,8 +96,8 @@ public:
   void            SetPalette(uint8_t ID, EG_Color_t Color);
   uint32_t        CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat);
 
-  static void     GetTransformedRect(EGRect * res, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, uint16_t Zoom,
-                                        const EGPoint *pPivot);
+  static void     GetTransformedRect(EGRect * res, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, uint16_t ScaleX,
+                                        uint16_t ScaleY, const EGPoint *pPivot);
 
   EG_ImageHeader_t  m_Header; // A header describing the basics of the image
   uint32_t          m_DataSize;     // Size of the image in bytes

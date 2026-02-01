@@ -907,10 +907,10 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, 
 			}
 		}
 		// Clean the right side
-		cir_x_right = LV_CLAMP(0, cir_x_right + i, Length);
+		cir_x_right = EG_CLAMP(0, cir_x_right + i, Length);
 		EG_ZeroMem(&pMaskArray[cir_x_right], Length - cir_x_right);
 		// Clean the left side
-		cir_x_left = LV_CLAMP(0, cir_x_left - aa_len + 1, Length);
+		cir_x_left = EG_CLAMP(0, cir_x_left - aa_len + 1, Length);
 		EG_ZeroMem(&pMaskArray[0], cir_x_left);
 	}
 	else {
@@ -923,8 +923,8 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, 
 				pMaskArray[cir_x_left - i] = MaskMix(opa, pMaskArray[cir_x_left - i]);
 			}
 		}
-		EG_Coord_t clr_start = LV_CLAMP(0, cir_x_left + 1, Length);
-		EG_Coord_t clr_len = LV_CLAMP(0, cir_x_right - clr_start, Length - clr_start);
+		EG_Coord_t clr_start = EG_CLAMP(0, cir_x_left + 1, Length);
+		EG_Coord_t clr_len = EG_CLAMP(0, cir_x_right - clr_start, Length - clr_start);
 		EG_ZeroMem(&pMaskArray[clr_start], clr_len);
 	}
 
@@ -1262,7 +1262,7 @@ static inline EG_OPA_t EG_ATTRIBUTE_FAST_MEM MaskMix(EG_OPA_t Active, EG_OPA_t N
 {
 	if(New >= EG_OPA_MAX) return Active;
 	if(New <= EG_OPA_MIN) return 0;
-	return LV_UDIV255(Active * New);  // >> 8);
+	return EG_UDIV255(Active * New);  // >> 8);
 }
 
 #endif

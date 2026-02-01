@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -43,30 +43,6 @@
 
 EG_EXPORT_CONST_INT(EG_COLOR_DEPTH);
 EG_EXPORT_CONST_INT(EG_COLOR_16_SWAP);
-
-/**
- * Opacity percentages.
- */
-enum {
-	EG_OPA_TRANSP = 0,
-	EG_OPA_0 = 0,
-	EG_OPA_MIN = 2,
-	EG_OPA_10 = 25,
-	EG_OPA_20 = 51,
-	EG_OPA_30 = 76,
-	EG_OPA_40 = 102,
-	EG_OPA_50 = 127,
-	EG_OPA_60 = 153,
-	EG_OPA_70 = 178,
-	EG_OPA_80 = 204,
-	EG_OPA_90 = 229,
-	EG_OPA_MAX = 253,
-	EG_OPA_100 = 255,
-	EG_OPA_COVER = 255,
-};
-
-#define EG_OPA_MIN 2   /*Opacities below this will be transparent*/
-#define EG_OPA_MAX 253 /*Opacities above this will fully cover*/
 
 #if EG_COLOR_DEPTH == 1
 #define EG_COLOR_SIZE 8
@@ -162,7 +138,7 @@ enum {
 
 #if EG_COLOR_16_SWAP == 0
 #define _EG_COLOR_ZERO_INITIALIZER16 {{0x00, 0x00, 0x00 }}
-#define EG_COLOR_MAKE16(r8, g8, b8){{(uint8_t)((b8 >> 3) & 0x1FU), (uint8_t)((g8 >> 2) & 0x3FU), (uint8_t)((r8 >> 3) & 0x1FU)}
+#define EG_COLOR_MAKE16(r8, g8, b8){{(uint8_t)((b8 >> 3) & 0x1FU), (uint8_t)((g8 >> 2) & 0x3FU), (uint8_t)((r8 >> 3) & 0x1FU)}}
 #else
 #define _EG_COLOR_ZERO_INITIALIZER16 {{0x00, 0x00, 0x00, 0x00}}
 #define EG_COLOR_MAKE16(r8, g8, b8){{(uint8_t)((g8 >> 5) & 0x7U), (uint8_t)((r8 >> 3) & 0x1FU), (uint8_t)((b8 >> 3) & 0x1FU), (uint8_t)((g8 >> 2) & 0x7U)}}
@@ -269,6 +245,26 @@ typedef struct EG_ColorFilterProps_t {
 	void *pParam;
 } EG_ColorFilterProps_t;
 
+// Opacity percentages.
+enum {
+	EG_OPA_TRANSP = 0,
+	EG_OPA_0 = 0,
+	EG_OPA_MIN = 2,      // Opacities below this will be transparent
+	EG_OPA_10 = 25,
+	EG_OPA_20 = 51,
+	EG_OPA_30 = 76,
+	EG_OPA_40 = 102,
+	EG_OPA_50 = 127,
+	EG_OPA_60 = 153,
+	EG_OPA_70 = 178,
+	EG_OPA_80 = 204,
+	EG_OPA_90 = 229,
+	EG_OPA_MAX = 253,       // Opacities above this will fully cover
+	EG_OPA_100 = 255,
+	EG_OPA_COVER = 255,
+};
+
+
 typedef enum : uint8_t {
 	EG_PALETTE_RED,          // 00
 	EG_PALETTE_PINK,         // 01
@@ -292,6 +288,55 @@ typedef enum : uint8_t {
 	EG_PALETTE_LAST,         // 19
 	EG_PALETTE_NONE = 0xff,
 } EG_Palette_e;
+
+// Image color format
+typedef enum EG_ImageColorFormat_t : uint8_t{
+    EG_COLOR_FORMAT_UNKNOWN = 0,
+
+    EG_COLOR_FORMAT_RAW,              // Contains the file as it is. Needs custom decoder function
+    EG_COLOR_FORMAT_RAW_ALPHA,        // Contains the file as it is. The image has alpha. Needs custom decoder function
+    EG_COLOR_FORMAT_RAW_CHROMA_KEYED, // Contains the file as it is. The image is chroma keyed. Needs custom decoder function
+
+    EG_COLOR_FORMAT_NATIVE,               // Color format and depth should match with EG_COLOR settings
+    EG_COLOR_FORMAT_NATIVE_ALPHA,         // Same as `EG_COLOR_FORMAT_NATIVE` but every pixel has an alpha byte
+    EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED,  // Same as `EG_COLOR_FORMAT_NATIVE` but EG_COLOR_TRANSP pixels will be transparent
+
+    EG_COLOR_FORMAT_INDEXED_1BIT,             // Can have 2 different colors in a palette (can't be chroma keyed)
+    EG_COLOR_FORMAT_INDEXED_2BIT,             // Can have 4 different colors in a palette (can't be chroma keyed)
+    EG_COLOR_FORMAT_INDEXED_4BIT,             // Can have 16 different colors in a palette (can't be chroma keyed)
+    EG_COLOR_FORMAT_INDEXED_8BIT,             // Can have 256 different colors in a palette (can't be chroma keyed)
+
+    EG_COLOR_FORMAT_ALPHA_1BIT,               // Can have one color and it can be drawn or not
+    EG_COLOR_FORMAT_ALPHA_2BIT,               // Can have one color but 4 different alpha value
+    EG_COLOR_FORMAT_ALPHA_4BIT,               // Can have one color but 16 different alpha value
+    EG_COLOR_FORMAT_ALPHA_8BIT,               // Can have one color but 256 different alpha value
+
+    EG_COLOR_FORMAT_RGB888,
+    EG_COLOR_FORMAT_RGBA8888,
+    EG_COLOR_FORMAT_RGBX8888,
+    EG_COLOR_FORMAT_RGB565,
+    EG_COLOR_FORMAT_RGBA5658,
+    EG_COLOR_FORMAT_RGB565A8,
+
+    EG_COLOR_FORMAT_RESERVED_15,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_16,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_17,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_18,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_19,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_20,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_21,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_22,              // Reserved for further use.
+    EG_COLOR_FORMAT_RESERVED_23,              // Reserved for further use.
+
+    EG_COLOR_FORMAT_USER_ENCODED_0,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_1,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_2,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_3,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_4,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_5,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_6,           // User holder encoding format.
+    EG_COLOR_FORMAT_USER_ENCODED_7,           // User holder encoding format.
+} EG_ImageColorFormat_t;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -474,9 +519,9 @@ EG_Color_t ColorOut;
 	ColorOut.full = ColorOut.full << 8 | ColorOut.full >> 8;
 #endif
 #elif EG_COLOR_DEPTH != 1	// EG_COLOR_DEPTH == 8, 16 or 32
-	EG_COLOR_SET_R(ColorOut, LV_UDIV255((uint16_t)EG_COLOR_GET_R(Color1) * Mix + EG_COLOR_GET_R(Color2) * (255 - Mix) + EG_COLOR_MIX_ROUND_OFS));
-	EG_COLOR_SET_G(ColorOut, LV_UDIV255((uint16_t)EG_COLOR_GET_G(Color1) * Mix + EG_COLOR_GET_G(Color2) * (255 - Mix) + EG_COLOR_MIX_ROUND_OFS));
-	EG_COLOR_SET_B(ColorOut, LV_UDIV255((uint16_t)EG_COLOR_GET_B(Color1) * Mix + EG_COLOR_GET_B(Color2) * (255 - Mix) + EG_COLOR_MIX_ROUND_OFS));
+	EG_COLOR_SET_R(ColorOut, EG_UDIV255((uint16_t)EG_COLOR_GET_R(Color1) * Mix + EG_COLOR_GET_R(Color2) * (255 - Mix) + EG_COLOR_MIX_ROUND_OFS));
+	EG_COLOR_SET_G(ColorOut, EG_UDIV255((uint16_t)EG_COLOR_GET_G(Color1) * Mix + EG_COLOR_GET_G(Color2) * (255 - Mix) + EG_COLOR_MIX_ROUND_OFS));
+	EG_COLOR_SET_B(ColorOut, EG_UDIV255((uint16_t)EG_COLOR_GET_B(Color1) * Mix + EG_COLOR_GET_B(Color2) * (255 - Mix) + EG_COLOR_MIX_ROUND_OFS));
 	EG_COLOR_SET_A(ColorOut, 0xFF);
 #else                   	// EG_COLOR_DEPTH == 1
 	ColorOut.full = (Mix > EG_OPA_50) ? Color1.full : Color2.full;
@@ -517,9 +562,9 @@ static inline EG_Color_t EG_ATTRIBUTE_FAST_MEM EG_ColorMixPreMultiply(uint16_t *
 	EG_Color_t ColorOut;
 #if EG_COLOR_DEPTH != 1
 	// EG_COLOR_DEPTH == 8 or 32
-	EG_COLOR_SET_R(ColorOut, LV_UDIV255(premult_c1[0] + EG_COLOR_GET_R(Color2) * Mix + EG_COLOR_MIX_ROUND_OFS));
-	EG_COLOR_SET_G(ColorOut, LV_UDIV255(premult_c1[1] + EG_COLOR_GET_G(Color2) * Mix + EG_COLOR_MIX_ROUND_OFS));
-	EG_COLOR_SET_B(ColorOut, LV_UDIV255(premult_c1[2] + EG_COLOR_GET_B(Color2) * Mix + EG_COLOR_MIX_ROUND_OFS));
+	EG_COLOR_SET_R(ColorOut, EG_UDIV255(premult_c1[0] + EG_COLOR_GET_R(Color2) * Mix + EG_COLOR_MIX_ROUND_OFS));
+	EG_COLOR_SET_G(ColorOut, EG_UDIV255(premult_c1[1] + EG_COLOR_GET_G(Color2) * Mix + EG_COLOR_MIX_ROUND_OFS));
+	EG_COLOR_SET_B(ColorOut, EG_UDIV255(premult_c1[2] + EG_COLOR_GET_B(Color2) * Mix + EG_COLOR_MIX_ROUND_OFS));
 	EG_COLOR_SET_A(ColorOut, 0xFF);
 #else
 	// EG_COLOR_DEPTH == 1
@@ -667,7 +712,7 @@ static inline void EG_ColorFilterInitialise(EG_ColorFilterProps_t *pFilter, EG_C
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EG_ColorFill(EG_Color_t *buf, EG_Color_t Color, uint32_t px_num);
+void /*EG_ATTRIBUTE_FAST_MEM*/ EG_ColorFill(EG_Color_t *buf, EG_Color_t Color, uint32_t px_num);
 
 EG_Color_t EG_LightenColor(EG_Color_t Color, EG_OPA_t Level);
 

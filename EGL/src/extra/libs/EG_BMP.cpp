@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -54,9 +54,9 @@ EG_Result_t EGDecoderBMP::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 #if EG_COLOR_DEPTH == 32
 			uint16_t BitsPerPixel;
 			memcpy(&BitsPerPixel, Header + 28, 2);
-			pHeader->ColorFormat = BitsPerPixel == 32 ? EG_IMG_CF_TRUE_COLOR_ALPHA : EG_IMG_CF_TRUE_COLOR;
+			pHeader->ColorFormat = BitsPerPixel == 32 ? EG_COLOR_FORMAT_NATIVE_ALPHA : EG_COLOR_FORMAT_NATIVE;
 #else
-			pHeader->ColorFormat = EG_IMG_CF_TRUE_COLOR;
+			pHeader->ColorFormat = EG_COLOR_FORMAT_NATIVE;
 #endif
 			return EG_RES_OK;
 		}

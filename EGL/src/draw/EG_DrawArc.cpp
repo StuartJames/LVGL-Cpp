@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -78,53 +78,53 @@ void EGDrawArc::GetArcRect(EG_Coord_t x, EG_Coord_t y, uint16_t Radius, uint16_t
 	if(EndQuarter == 4) EndQuarter = 3;
 	if(StartQuarter == EndQuarter && StartAngle <= EndAngle) {
 		if(StartQuarter == 0) {
-			pRect->SetY1(y + ((EG_TrigoSin(StartAngle) * InsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-			pRect->SetX2(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-			pRect->SetY2(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-			pRect->SetX1(x + ((EG_TrigoSin(EndAngle + 90) * InsideRad) >> LV_TRIGO_SHIFT) - Inflate);
+			pRect->SetY1(y + ((EG_TrigoSin(StartAngle) * InsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+			pRect->SetX2(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+			pRect->SetY2(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+			pRect->SetX1(x + ((EG_TrigoSin(EndAngle + 90) * InsideRad) >> EG_TRIGO_SHIFT) - Inflate);
 		}
 		else if(StartQuarter == 1) {
-			pRect->SetY2(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-			pRect->SetX2(x + ((EG_TrigoSin(StartAngle + 90) * InsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-			pRect->SetY1(y + ((EG_TrigoSin(EndAngle) * InsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-			pRect->SetX1(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
+			pRect->SetY2(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+			pRect->SetX2(x + ((EG_TrigoSin(StartAngle + 90) * InsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+			pRect->SetY1(y + ((EG_TrigoSin(EndAngle) * InsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+			pRect->SetX1(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
 		}
 		else if(StartQuarter == 2) {
-			pRect->SetX1(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-			pRect->SetY2(y + ((EG_TrigoSin(StartAngle) * InsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-			pRect->SetY1(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-			pRect->SetX2(x + ((EG_TrigoSin(EndAngle + 90) * InsideRad) >> LV_TRIGO_SHIFT) + Inflate);
+			pRect->SetX1(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+			pRect->SetY2(y + ((EG_TrigoSin(StartAngle) * InsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+			pRect->SetY1(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+			pRect->SetX2(x + ((EG_TrigoSin(EndAngle + 90) * InsideRad) >> EG_TRIGO_SHIFT) + Inflate);
 		}
 		else if(StartQuarter == 3) {
-			pRect->SetX1(x + ((EG_TrigoSin(StartAngle + 90) * InsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-			pRect->SetY1(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-			pRect->SetX2(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-			pRect->SetY2(y + ((EG_TrigoSin(EndAngle) * InsideRad) >> LV_TRIGO_SHIFT) + Inflate);
+			pRect->SetX1(x + ((EG_TrigoSin(StartAngle + 90) * InsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+			pRect->SetY1(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+			pRect->SetX2(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+			pRect->SetY2(y + ((EG_TrigoSin(EndAngle) * InsideRad) >> EG_TRIGO_SHIFT) + Inflate);
 		}
 	}
 	else if(StartQuarter == 0 && EndQuarter == 1) {
-		pRect->SetX1(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-		pRect->SetY1(y + ((EG_MIN(EG_TrigoSin(EndAngle), EG_TrigoSin(StartAngle)) * InsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-		pRect->SetX2(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
+		pRect->SetX1(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+		pRect->SetY1(y + ((EG_MIN(EG_TrigoSin(EndAngle), EG_TrigoSin(StartAngle)) * InsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+		pRect->SetX2(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
 		pRect->SetY2(y + OutsideRad + Inflate);
 	}
 	else if(StartQuarter == 1 && EndQuarter == 2) {
 		pRect->SetX1(x - OutsideRad - Inflate);
-		pRect->SetY1(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-		pRect->SetX2(x + ((EG_MAX(EG_TrigoSin(StartAngle + 90), EG_TrigoSin(EndAngle + 90)) * InsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-		pRect->SetY2(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
+		pRect->SetY1(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+		pRect->SetX2(x + ((EG_MAX(EG_TrigoSin(StartAngle + 90), EG_TrigoSin(EndAngle + 90)) * InsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+		pRect->SetY2(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
 	}
 	else if(StartQuarter == 2 && EndQuarter == 3) {
-		pRect->SetX1(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
+		pRect->SetX1(x + ((EG_TrigoSin(StartAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
 		pRect->SetY1(y - OutsideRad - Inflate);
-		pRect->SetX2(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
-		pRect->SetY2(y + (EG_MAX(EG_TrigoSin(EndAngle) * InsideRad, EG_TrigoSin(StartAngle) * InsideRad) >> LV_TRIGO_SHIFT) + Inflate);
+		pRect->SetX2(x + ((EG_TrigoSin(EndAngle + 90) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
+		pRect->SetY2(y + (EG_MAX(EG_TrigoSin(EndAngle) * InsideRad, EG_TrigoSin(StartAngle) * InsideRad) >> EG_TRIGO_SHIFT) + Inflate);
 	}
 	else if(StartQuarter == 3 && EndQuarter == 0) {
-		pRect->SetX1(x + ((EG_MIN(EG_TrigoSin(EndAngle + 90), EG_TrigoSin(StartAngle + 90)) * InsideRad) >> LV_TRIGO_SHIFT) - Inflate);
-		pRect->SetY1(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> LV_TRIGO_SHIFT) - Inflate);
+		pRect->SetX1(x + ((EG_MIN(EG_TrigoSin(EndAngle + 90), EG_TrigoSin(StartAngle + 90)) * InsideRad) >> EG_TRIGO_SHIFT) - Inflate);
+		pRect->SetY1(y + ((EG_TrigoSin(StartAngle) * OutsideRad) >> EG_TRIGO_SHIFT) - Inflate);
 		pRect->SetX2(x + OutsideRad + Inflate);
-		pRect->SetY2(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> LV_TRIGO_SHIFT) + Inflate);
+		pRect->SetY2(y + ((EG_TrigoSin(EndAngle) * OutsideRad) >> EG_TRIGO_SHIFT) + Inflate);
 	}
 	else {
 		pRect->SetX1(x - OutsideRad);

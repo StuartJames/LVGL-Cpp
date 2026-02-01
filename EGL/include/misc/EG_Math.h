@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -28,11 +28,11 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
-#define LV_TRIGO_SIN_MAX 32767
-#define LV_TRIGO_SHIFT 15 /**<  >> LV_TRIGO_SHIFT to normalize*/
+#define EG_TRIGO_SIN_MAX 32767
+#define EG_TRIGO_SHIFT 15 /**<  >> EG_TRIGO_SHIFT to normalize*/
 
-#define LV_BEZIER_VAL_MAX 1024 /**< Max time in Bezier functions (not [0..1] to use integers)*/
-#define LV_BEZIER_VAL_SHIFT 10 /**< log2(LV_BEZIER_VAL_MAX): used to normalize up scaled values*/
+#define EG_BEZIER_VAL_MAX 1024 /**< Max time in Bezier functions (not [0..1] to use integers)*/
+#define EG_BEZIER_VAL_SHIFT 10 /**< log2(EG_BEZIER_VAL_MAX): used to normalize up scaled values*/
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -60,12 +60,12 @@ static inline int16_t EG_ATTRIBUTE_FAST_MEM lv_trigo_cos(int16_t angle)
 
 /**
  * Calculate a value of a Cubic Bezier function.
- * @param t time in range of [0..LV_BEZIER_VAL_MAX]
- * @param u0 start values in range of [0..LV_BEZIER_VAL_MAX]
- * @param u1 control value 1 values in range of [0..LV_BEZIER_VAL_MAX]
- * @param u2 control value 2 in range of [0..LV_BEZIER_VAL_MAX]
- * @param u3 end values in range of [0..LV_BEZIER_VAL_MAX]
- * @return the value calculated from the given parameters in range of [0..LV_BEZIER_VAL_MAX]
+ * @param t time in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u0 start values in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u1 control value 1 values in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u2 control value 2 in range of [0..EG_BEZIER_VAL_MAX]
+ * @param u3 end values in range of [0..EG_BEZIER_VAL_MAX]
+ * @return the value calculated from the given parameters in range of [0..EG_BEZIER_VAL_MAX]
  */
 uint32_t EG_Bezier3(uint32_t t, uint32_t u0, uint32_t u1, uint32_t u2, uint32_t u3);
 
@@ -130,13 +130,13 @@ uint32_t EG_Rand(uint32_t min, uint32_t max);
 #define EG_MAX3(a, b, c) (EG_MAX(EG_MAX(a,b), c))
 #define EG_MAX4(a, b, c, d) (EG_MAX(EG_MAX(a,b), EG_MAX(c,d)))
 
-#define LV_CLAMP(min, val, max) (EG_MAX(min, (EG_MIN(val, max))))
+#define EG_CLAMP(min, val, max) (EG_MAX(min, (EG_MIN(val, max))))
 
 #define EG_ABS(x) ((x) > 0 ? (x) : (-(x)))
-#define LV_UDIV255(x) (((x) * 0x8081U) >> 0x17)
+#define EG_UDIV255(x) (((x) * 0x8081U) >> 0x17)
 
-#define LV_IS_SIGNED(t) (((t)(-1)) < ((t)0))
-#define LV_UMAX_OF(t) (((0x1ULL << ((sizeof(t) * 8ULL) - 1ULL)) - 1ULL) | (0xFULL << ((sizeof(t) * 8ULL) - 4ULL)))
-#define LV_SMAX_OF(t) (((0x1ULL << ((sizeof(t) * 8ULL) - 1ULL)) - 1ULL) | (0x7ULL << ((sizeof(t) * 8ULL) - 4ULL)))
-#define EG_MAX_OF(t) ((unsigned long)(LV_IS_SIGNED(t) ? LV_SMAX_OF(t) : LV_UMAX_OF(t)))
+#define EG_IS_SIGNED(t) (((t)(-1)) < ((t)0))
+#define EG_UMAX_OF(t) (((0x1ULL << ((sizeof(t) * 8ULL) - 1ULL)) - 1ULL) | (0xFULL << ((sizeof(t) * 8ULL) - 4ULL)))
+#define EG_SMAX_OF(t) (((0x1ULL << ((sizeof(t) * 8ULL) - 1ULL)) - 1ULL) | (0x7ULL << ((sizeof(t) * 8ULL) - 4ULL)))
+#define EG_MAX_OF(t) ((unsigned long)(EG_IS_SIGNED(t) ? EG_SMAX_OF(t) : EG_UMAX_OF(t)))
 

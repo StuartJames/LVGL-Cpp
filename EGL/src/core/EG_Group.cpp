@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -79,8 +79,7 @@ void EGGroup::Delete(EGGroup *pGroup)
 	}
 	if(m_pDefaultGroup == pGroup) m_pDefaultGroup = nullptr;
 	pGroup->m_ObjectList.RemoveAll();
-  if((Pos = m_GroupList.Find(pGroup)) != 0) m_GroupList.RemoveAt(Pos);
-	delete pGroup;
+  if((Pos = m_GroupList.Find(pGroup)) != 0) delete (EGGroup*)m_GroupList.RemoveAt(Pos);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

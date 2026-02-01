@@ -681,7 +681,7 @@ void EGTable::RefreshSizeFormRow(uint32_t StartRow)
 	uint32_t i;
 	for(i = StartRow; i < m_RowCount; i++) {
 		EG_Coord_t RowHeight = GetRowHeight(i, pFont, Kerning, LineSpace, PadLeft, PadRight, PadTop, PadBottom);
-		m_pRowHeight[i] = LV_CLAMP(minh, RowHeight, maxh);
+		m_pRowHeight[i] = EG_CLAMP(minh, RowHeight, maxh);
 	}
 	RefreshSelfSize();
 	Invalidate();
@@ -705,7 +705,7 @@ void EGTable::RefreshCellSize(uint32_t Row, uint32_t Column)
 
 	EG_Coord_t RowHeight = GetRowHeight(Row, pFont, Kerning, LineSpace, PadLeft, PadRight, PadTop, PadBottom);
 	EG_Coord_t PreviousRowHeight = m_pRowHeight[Row];
-	m_pRowHeight[Row] = LV_CLAMP(minh, RowHeight, maxh);
+	m_pRowHeight[Row] = EG_CLAMP(minh, RowHeight, maxh);
 
 	// If the Row height havn't changed invalidate only this Cell
 	if(PreviousRowHeight == m_pRowHeight[Row]) {

@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -34,12 +34,12 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 //  imgfont identifier 
-#define LV_IMGFONT_BPP 9
+#define EG_IMGFONT_BPP 9
 
 struct EG_Font_t;
 // Describes the properties of a glyph.
 typedef struct {
-    const struct EG_Font_t *ResolvedFont; //  Pointer to a font where the glyph was actually found after handling fallbacks
+    const struct EG_Font_t *ResolvedFont; //  Pointer to a font where the glyph was actually found after handling callbacks
     uint16_t AdvWidth; //  The glyph needs this space. Draw the next glyph after this width.
     uint16_t BoxWidth; //  Width of the glyph's bounding box
     uint16_t BoxHeight; //  Height of the glyph's bounding box
@@ -64,17 +64,17 @@ typedef struct EG_Font_t {
     bool (*GetGlyphPropsCB)(const struct EG_Font_t *, EG_FontGlyphProps_t *, uint32_t , uint32_t);  // Get a glyph's properties from a font
     const uint8_t * (*GetGlyphBitmapCB)(const struct EG_Font_t *, uint32_t);   // Get a glyph's bitmap from a font
     // Pointer to the font in a font pack (must have the same line height)
-    EG_Coord_t  LineHeight;         //  The real line height where any text fits
-    EG_Coord_t  BaseLine;           //  Base line measured from the top of the LineHeight
-    uint8_t     SubPixel  : 2;             //  An element of `EG_FontSubPixel_t`
+    EG_Coord_t  LineHeight;             //  The real line height where any text fits
+    EG_Coord_t  BaseLine;               //  Base line measured from the top of the LineHeight
+    uint8_t     SubPixel  : 2;          //  An element of `EG_FontSubPixel_t`
 
-    int8_t UnderlinePosition;      //  Distance between the top of the underline and base line (< 0 means below the base line)
-    int8_t UnderlineThickness;     //  Thickness of the underline
+    int8_t UnderlinePosition;           //  Distance between the top of the underline and base line (< 0 means below the base line)
+    int8_t UnderlineThickness;          //  Thickness of the underline
 
-    const void  *pProperties;               //  Store implementation specific or run_time data or caching here
-    const struct EG_Font_t *pFallback;   //  Fallback font for missing glyph. Resolved recursively 
+    const void  *pProperties;           //  Store implementation specific or run_time data or caching here
+    const struct EG_Font_t *pFallback;  //  Fallback font for missing glyph. Resolved recursively 
 #if EG_USE_USER_DATA
-    void        *pExtData;               //  Custom user data for font.
+    void        *pExtData;              //  Custom user data for font.
 #endif
 } EG_Font_t;
 

@@ -72,7 +72,7 @@ void EGLed::SetColor(EG_Color_t Color)
 void EGLed::SetBrightness(uint8_t Brightness)
 {
 	if(m_Brightness == Brightness) return;
-	m_Brightness = LV_CLAMP(EG_LED_BRIGHT_MIN, Brightness, EG_LED_BRIGHT_MAX);
+	m_Brightness = EG_CLAMP(EG_LED_BRIGHT_MIN, Brightness, EG_LED_BRIGHT_MAX);
 	Invalidate();
 }
 

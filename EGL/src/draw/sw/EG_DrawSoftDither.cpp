@@ -44,11 +44,11 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(EG_Gradient_t *grad, EG_Co
 	/*The apply the algorithm for this patch*/
 	for(EG_Coord_t j = 0; j < w; j++) {
 		int8_t factor = dither_ordered_threshold_matrix[(y & 7) * 8 + ((j)&7)] - 32;
-		EG_Color32_t tmp = grad->hmap[LV_CLAMP(0, j - 4, grad->size)];
+		EG_Color32_t tmp = grad->hmap[EG_CLAMP(0, j - 4, grad->size)];
 		EG_Color32_t t;
-		t.ch.red = LV_CLAMP(0, tmp.ch.red + factor, 255);
-		t.ch.green = LV_CLAMP(0, tmp.ch.green + factor, 255);
-		t.ch.blue = LV_CLAMP(0, tmp.ch.blue + factor, 255);
+		t.ch.red = EG_CLAMP(0, tmp.ch.red + factor, 255);
+		t.ch.green = EG_CLAMP(0, tmp.ch.green + factor, 255);
+		t.ch.blue = EG_CLAMP(0, tmp.ch.blue + factor, 255);
 
 		grad->map[j] = EG_ColorHex(t.full);
 	}
@@ -65,15 +65,15 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(EG_Gradient_t *grad, EG_Coor
        Then we compute a complete row of ordered dither and store it in out. */
 
 	/*Extract patch for working with, selected pseudo randomly*/
-	EG_Color32_t tmp = grad->hmap[LV_CLAMP(0, y - 4, grad->size)];
+	EG_Color32_t tmp = grad->hmap[EG_CLAMP(0, y - 4, grad->size)];
 
 	/*The apply the algorithm for this patch*/
 	for(EG_Coord_t j = 0; j < 8; j++) {
 		int8_t factor = dither_ordered_threshold_matrix[(y & 7) * 8 + ((j + x) & 7)] - 32;
 		EG_Color32_t t;
-		t.ch.red = LV_CLAMP(0, tmp.ch.red + factor, 255);
-		t.ch.green = LV_CLAMP(0, tmp.ch.green + factor, 255);
-		t.ch.blue = LV_CLAMP(0, tmp.ch.blue + factor, 255);
+		t.ch.red = EG_CLAMP(0, tmp.ch.red + factor, 255);
+		t.ch.green = EG_CLAMP(0, tmp.ch.green + factor, 255);
+		t.ch.blue = EG_CLAMP(0, tmp.ch.blue + factor, 255);
 
 		grad->map[j] = EG_ColorHex(t.full);
 	}
@@ -111,9 +111,9 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(EG_Gradient_t *grad, EG_
 		coef[3] = e;            \
 	}
 #define FS_COMPONENTS(A, OP, B, C)                         \
-	A.ch.red = LV_CLAMP(0, A.ch.red OP B.r OP C.r, 255);     \
-	A.ch.green = LV_CLAMP(0, A.ch.green OP B.g OP C.g, 255); \
-	A.ch.blue = LV_CLAMP(0, A.ch.blue OP B.b OP C.b, 255);
+	A.ch.red = EG_CLAMP(0, A.ch.red OP B.r OP C.r, 255);     \
+	A.ch.green = EG_CLAMP(0, A.ch.green OP B.g OP C.g, 255); \
+	A.ch.blue = EG_CLAMP(0, A.ch.blue OP B.b OP C.b, 255);
 #define FS_QUANT_ERROR(e, t, q)              \
 	{                                          \
 		EG_Color32_t u;                          \
@@ -186,9 +186,9 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffVertical(EG_Gradient_t *grad, EG_Co
 	d.g = (int8_t)(s.g * c) >> 4; \
 	d.b = (int8_t)(s.b * c) >> 4;
 #define FS_COMPONENTS3(A, OP, B, b, C, c, D, d)                                       \
-	A.ch.red = LV_CLAMP(0, A.ch.red OP((B.r * b OP C.r * c OP D.r * d) >> 4), 255);     \
-	A.ch.green = LV_CLAMP(0, A.ch.green OP((B.r * b OP C.r * c OP D.r * d) >> 4), 255); \
-	A.ch.blue = LV_CLAMP(0, A.ch.blue OP((B.r * b OP C.r * c OP D.r * d) >> 4), 255);
+	A.ch.red = EG_CLAMP(0, A.ch.red OP((B.r * b OP C.r * c OP D.r * d) >> 4), 255);     \
+	A.ch.green = EG_CLAMP(0, A.ch.green OP((B.r * b OP C.r * c OP D.r * d) >> 4), 255); \
+	A.ch.blue = EG_CLAMP(0, A.ch.blue OP((B.r * b OP C.r * c OP D.r * d) >> 4), 255);
 
 	EG_SColor24_t next_px_err, prev_l = grad->error_acc[0];
 	/*Compute the error term for the current pixel (first pixel is never dithered)*/

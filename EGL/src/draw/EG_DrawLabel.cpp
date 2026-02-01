@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -74,7 +74,6 @@ EGDrawLabel::EGDrawLabel(void) :
 
 void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext, const EGRect *pRect, const char *pText, EG_DrawLabelHint_t *Hint)
 {
-	EG_LOG_WARN("Label Draw");
 	if(m_OPA <= EG_OPA_MIN) return;
 	if(m_pFont == nullptr) {
 		EG_LOG_WARN("m_pFont == nullptr");

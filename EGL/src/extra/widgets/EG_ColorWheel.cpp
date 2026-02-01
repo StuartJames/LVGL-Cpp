@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -368,10 +368,10 @@ void EGColorWheel::DrawDiscGrad(EGEvent *pEvent)
 		DrawLine.m_Color = AngleToModeColorFast(i);
 		uint16_t angle_trigo = (uint16_t)(a >> 8); // i * 360 / 256 is the scale to apply, but we can skip multiplication here*/
 		EGPoint Point[2];
-		Point[0].m_X = cx + ((Radius + cir_w_extra) * EG_TrigoSin(angle_trigo) >> LV_TRIGO_SHIFT);
-		Point[0].m_Y = cy + ((Radius + cir_w_extra) * lv_trigo_cos(angle_trigo) >> LV_TRIGO_SHIFT);
-		Point[1].m_X = cx + ((Radius - cir_w - cir_w_extra) * EG_TrigoSin(angle_trigo) >> LV_TRIGO_SHIFT);
-		Point[1].m_Y = cy + ((Radius - cir_w - cir_w_extra) * lv_trigo_cos(angle_trigo) >> LV_TRIGO_SHIFT);
+		Point[0].m_X = cx + ((Radius + cir_w_extra) * EG_TrigoSin(angle_trigo) >> EG_TRIGO_SHIFT);
+		Point[0].m_Y = cy + ((Radius + cir_w_extra) * lv_trigo_cos(angle_trigo) >> EG_TRIGO_SHIFT);
+		Point[1].m_X = cx + ((Radius - cir_w - cir_w_extra) * EG_TrigoSin(angle_trigo) >> EG_TRIGO_SHIFT);
+		Point[1].m_Y = cy + ((Radius - cir_w - cir_w_extra) * lv_trigo_cos(angle_trigo) >> EG_TRIGO_SHIFT);
 		DrawLine.Draw(draw_ctx, &Point[0], &Point[1]);
 	}
 #if EG_DRAW_COMPLEX
@@ -452,8 +452,8 @@ void EGColorWheel::RefreshKnobPosition(void)
 	EG_Coord_t scale_w = GetStyleArcWidth(EG_PART_MAIN);
 	EG_Coord_t Radius = (Width - scale_w) / 2;
 	uint16_t angle = GetAngle();
-	m_Knob.Position.m_X = (((int32_t)Radius * EG_TrigoSin(angle)) >> LV_TRIGO_SHIFT);
-	m_Knob.Position.m_Y = (((int32_t)Radius * lv_trigo_cos(angle)) >> LV_TRIGO_SHIFT);
+	m_Knob.Position.m_X = (((int32_t)Radius * EG_TrigoSin(angle)) >> EG_TRIGO_SHIFT);
+	m_Knob.Position.m_Y = (((int32_t)Radius * lv_trigo_cos(angle)) >> EG_TRIGO_SHIFT);
 	m_Knob.Position.m_X = m_Knob.Position.m_X + Width / 2;
 	m_Knob.Position.m_Y = m_Knob.Position.m_Y + Width / 2;
 	InvalidateKnob();

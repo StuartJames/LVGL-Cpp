@@ -54,7 +54,7 @@ const EG_ClassType_t c_CanvasClass = {
 EGCanvas::EGCanvas(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_LedClass*/) : EGObject()
 {
 	m_ImageBuffer.m_Header.AlwaysZero = 0;
-	m_ImageBuffer.m_Header.ColorFormat = EG_IMG_CF_TRUE_COLOR;
+	m_ImageBuffer.m_Header.ColorFormat = EG_COLOR_FORMAT_NATIVE;
 	m_ImageBuffer.m_Header.Height = 0;
 	m_ImageBuffer.m_Header.Width = 0;
 	m_ImageBuffer.m_DataSize = 0;
@@ -76,7 +76,7 @@ void EGCanvas::Configure(void)
 {
   EGObject::Configure();
 	m_ImageBuffer.m_Header.AlwaysZero = 0;
-	m_ImageBuffer.m_Header.ColorFormat = EG_IMG_CF_TRUE_COLOR;
+	m_ImageBuffer.m_Header.ColorFormat = EG_COLOR_FORMAT_NATIVE;
 	m_ImageBuffer.m_Header.Height = 0;
 	m_ImageBuffer.m_Header.Width = 0;
 	m_ImageBuffer.m_DataSize = 0;
@@ -409,12 +409,12 @@ void EGCanvas::BlurVertical(const EGRect *pRect, uint16_t Radius)
 
 void EGCanvas::FillBackground(EG_Color_t Color, EG_OPA_t BlurOPA)
 {
-	if(m_ImageBuffer.m_Header.ColorFormat == EG_IMG_CF_INDEXED_1BIT) {
+	if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_INDEXED_1BIT) {
 		uint32_t row_byte_cnt = (m_ImageBuffer.m_Header.Width + 7) >> 3;
 		// +8 skip the palette
 		EG_SetMem((uint8_t *)m_ImageBuffer.m_pData + 8, Color.full ? 0xff : 0x00, row_byte_cnt * m_ImageBuffer.m_Header.Height);
 	}
-	else if(m_ImageBuffer.m_Header.ColorFormat == EG_IMG_CF_ALPHA_1BIT) {
+	else if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_1BIT) {
 		uint32_t row_byte_cnt = (m_ImageBuffer.m_Header.Width + 7) >> 3;
 		EG_SetMem((uint8_t *)m_ImageBuffer.m_pData, BlurOPA > EG_OPA_50 ? 0xff : 0x00, row_byte_cnt * m_ImageBuffer.m_Header.Height);
 	}
@@ -436,8 +436,8 @@ void EGCanvas::FillBackground(EG_Color_t Color, EG_OPA_t BlurOPA)
 void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t Height, EGDrawRect *pDrawRect)
 {
 
-	if(m_ImageBuffer.m_Header.ColorFormat >= EG_IMG_CF_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_IMG_CF_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_rect: can't draw to EG_IMG_CF_INDEXED canvas");
+	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
+		EG_LOG_WARN("lv_canvas_draw_rect: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -447,7 +447,7 @@ void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t
 	EGDisplay *pOriginalRefresh = GetRefreshingDisplay();
 	SetRefreshingDisplay(&FakeDisplay);
 	EG_Color_t ctransp = EG_COLOR_CHROMA_KEY;
-	if(m_ImageBuffer.m_Header.ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED && pDrawRect->m_BackgroundColor.full == ctransp.full) {
+	if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED && pDrawRect->m_BackgroundColor.full == ctransp.full) {
 		FakeDisplay.m_pDriver->m_Antialiasing = 0;
 	}
 	EGRect Rect(X, Y, X + Width - 1, Y + Height - 1);
@@ -461,8 +461,8 @@ void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t
 
 void EGCanvas::DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t MaxWidth, EGDrawLabel * pDrawLabel, const char *pText)
 {
-	if(m_ImageBuffer.m_Header.ColorFormat >= EG_IMG_CF_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_IMG_CF_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_text: can't draw to EG_IMG_CF_INDEXED canvas");
+	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
+		EG_LOG_WARN("lv_canvas_draw_text: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -482,8 +482,8 @@ void EGCanvas::DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t MaxWidth, EGDrawL
 
 void EGCanvas::DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDrawImage * pDrawImage)
 {
-	if(m_ImageBuffer.m_Header.ColorFormat >= EG_IMG_CF_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_IMG_CF_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_img: can't draw to EG_IMG_CF_INDEXED canvas");
+	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
+		EG_LOG_WARN("lv_canvas_draw_img: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EG_ImageHeader_t m_Header;
@@ -509,8 +509,8 @@ void EGCanvas::DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDraw
 
 void EGCanvas::DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine *pDrawLine)
 {
-	if(m_ImageBuffer.m_Header.ColorFormat >= EG_IMG_CF_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_IMG_CF_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_line: can't draw to EG_IMG_CF_INDEXED canvas");
+	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
+		EG_LOG_WARN("lv_canvas_draw_line: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -520,7 +520,7 @@ void EGCanvas::DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine 
 	EGDisplay *pOriginalRefresh = GetRefreshingDisplay();
 	SetRefreshingDisplay(&FakeDisplay);
 	EG_Color_t ctransp = EG_COLOR_CHROMA_KEY;
-	if(m_ImageBuffer.m_Header.ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED && pDrawLine->m_Color.full == ctransp.full) {
+	if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED && pDrawLine->m_Color.full == ctransp.full) {
 		FakeDisplay.m_pDriver->m_Antialiasing = 0;
 	}
 	for(uint32_t i = 0; i < PointCount - 1; i++) {
@@ -535,8 +535,8 @@ void EGCanvas::DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine 
 
 void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawRect *pDrawRect)
 {
-	if(m_ImageBuffer.m_Header.ColorFormat >= EG_IMG_CF_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_IMG_CF_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_polygon: can't draw to EG_IMG_CF_INDEXED canvas");
+	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
+		EG_LOG_WARN("lv_canvas_draw_polygon: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -546,7 +546,7 @@ void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawRe
 	EGDisplay *pOriginalRefresh = GetRefreshingDisplay();
 	SetRefreshingDisplay(&FakeDisplay);
 	EG_Color_t ctransp = EG_COLOR_CHROMA_KEY;
-	if(m_ImageBuffer.m_Header.ColorFormat == EG_IMG_CF_TRUE_COLOR_CHROMA_KEYED && pDrawRect->m_BackgroundColor.full == ctransp.full) {
+	if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED && pDrawRect->m_BackgroundColor.full == ctransp.full) {
 		FakeDisplay.m_pDriver->m_Antialiasing = 0;
 	}
 	EGDrawPolygon DrawPolygon;
@@ -561,8 +561,8 @@ void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawRe
 void EGCanvas::DrawArc(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Radius, int32_t StartAngle, int32_t EndAngle, EGDrawArc *pDrawArc)
 {
 #if EG_DRAW_COMPLEX
-	if(m_ImageBuffer.m_Header.ColorFormat >= EG_IMG_CF_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_IMG_CF_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_arc: can't draw to EG_IMG_CF_INDEXED canvas");
+	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
+		EG_LOG_WARN("lv_canvas_draw_arc: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -604,7 +604,7 @@ void EGCanvas::InitFakeDisplay(EGDisplay *pDisplay, EGDisplayDriver *pDriver, EG
 	pContext->m_pDrawRect = ClipRect;
 	pContext->m_pDrawBuffer = (void*)m_ImageBuffer.m_pData;
 	pDisplay->UseGenericSetPixelCB(pDisplay->m_pDriver, (EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
-	if(EG_COLOR_SCREEN_TRANSP && m_ImageBuffer.m_Header.ColorFormat != EG_IMG_CF_TRUE_COLOR_ALPHA) {
+	if(EG_COLOR_SCREEN_TRANSP && m_ImageBuffer.m_Header.ColorFormat != EG_COLOR_FORMAT_NATIVE_ALPHA) {
 		pDriver->m_ScreenTransparent = 0;
 	}
 }

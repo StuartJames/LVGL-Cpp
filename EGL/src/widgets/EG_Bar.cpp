@@ -114,7 +114,7 @@ void EGBar::Configure(void)
 void EGBar::SetValue(int32_t Value, EG_AnimateEnable_e Animate)
 {
 	if(m_CurrentValue == Value) return;
-	Value = LV_CLAMP(m_MinimumValue, Value, m_MaximumValue);
+	Value = EG_CLAMP(m_MinimumValue, Value, m_MaximumValue);
 	Value = Value < m_StartValue ? m_StartValue : Value; // Can't be smaller than the left Value
 	if(m_CurrentValue == Value) return;
 	SetValueWithAnimation(Value, &m_CurrentValue, &m_CurrentValueAnimation, Animate);
@@ -125,7 +125,7 @@ void EGBar::SetValue(int32_t Value, EG_AnimateEnable_e Animate)
 void EGBar::SetStartValue(int32_t Value, EG_AnimateEnable_e Animate)
 {
 	if(m_Mode != EG_BAR_MODE_RANGE) return;
-	Value = LV_CLAMP(m_MinimumValue, Value, m_MaximumValue);
+	Value = EG_CLAMP(m_MinimumValue, Value, m_MaximumValue);
 	Value = Value > m_CurrentValue ? m_CurrentValue : Value; // Can't be greater than the right Value
 	if(m_StartValue == Value) return;
 	SetValueWithAnimation(Value, &m_StartValue, &m_StartValueAnimation, Animate);

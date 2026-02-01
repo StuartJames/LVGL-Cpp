@@ -119,7 +119,7 @@ c_code = c_code + "\t.header.always_zero = 0,\n"
 c_code = c_code + "\t.header.w = " + str(width) + ",\n"
 c_code = c_code + "\t.header.h = " + str(height) + ",\n"
 c_code = c_code + "\t.data_size = " + str(len(sjpeg)) + ",\n"
-c_code = c_code + "\t.header.cf = EG_IMG_CF_RAW,\n"
+c_code = c_code + "\t.header.cf = EG_COLOR_FORMAT_RAW,\n"
 c_code = c_code + "\t.data = " + OUTPUT_FILE_NAME+"_map" + ",\n};"
 
 

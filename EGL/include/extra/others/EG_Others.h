@@ -9,7 +9,7 @@
 #include "lv_monkey.h"
 #include "EG_GridNavigation.h"
 #include "EG_Fragment.h"
-#include "lv_imgfont.h"
+#include "EG_ImageFont.h"
 #include "EG_Message.h"
 #include "lv_ime_pinyin.h"
 

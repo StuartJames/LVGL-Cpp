@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -66,7 +66,7 @@ typedef struct EG_GradCacheItem_t {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-EG_GradientColor_t EG_ATTRIBUTE_FAST_MEM EG_GradientCalculate(const EG_GradDescriptor_t *dsc, EG_Coord_t range,
+EG_GradientColor_t /*EG_ATTRIBUTE_FAST_MEM*/ EG_GradientCalculate(const EG_GradDescriptor_t *dsc, EG_Coord_t range,
 																																	EG_Coord_t frac);
 
 void EG_GradientSetCacheSize(size_t max_bytes);

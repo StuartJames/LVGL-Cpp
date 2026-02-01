@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -125,14 +125,14 @@ void EGPoint::Offset(const EGPoint *pPoint)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGPoint::PointTransform(int32_t Angle, int32_t Zoom, const EGPoint *pPivot)
+void EGPoint::PointTransform(int32_t Angle, int32_t ScaleX, uint32_t ScaleY, const EGPoint *pPivot, bool ZoomFirst /*= false*/)
 {
-	if(Angle == 0 && Zoom == 256) return;
+	if((Angle == 0) && (ScaleX == 256) && (ScaleY == 256)) return;
 	m_X -= pPivot->m_X;
 	m_Y -= pPivot->m_Y;
 	if(Angle == 0) {
-		m_X = (((int32_t)(m_X) * Zoom) >> 8) + pPivot->m_X;
-		m_Y = (((int32_t)(m_Y) * Zoom) >> 8) + pPivot->m_Y;
+		m_X = (((int32_t)(m_X) * ScaleX) >> 8) + pPivot->m_X;
+		m_Y = (((int32_t)(m_Y) * ScaleY) >> 8) + pPivot->m_Y;
 		return;
 	}
 	if(m_PreviousAngle != Angle){
@@ -141,26 +141,34 @@ void EGPoint::PointTransform(int32_t Angle, int32_t Zoom, const EGPoint *pPivot)
 		if(AngleLimited < 0) AngleLimited += 3600;
 		int32_t AngleLow = AngleLimited / 10;
 		int32_t AngleHigh = AngleLow + 1;
-		int32_t angle_rem = AngleLimited - (AngleLow * 10);
+		int32_t AngleRemain = AngleLimited - (AngleLow * 10);
 		int32_t s1 = EG_TrigoSin(AngleLow);
 		int32_t s2 = EG_TrigoSin(AngleHigh);
 		int32_t c1 = EG_TrigoSin(AngleLow + 90);
 		int32_t c2 = EG_TrigoSin(AngleHigh + 90);
-		m_SIN = (s1 * (10 - angle_rem) + s2 * angle_rem) / 10;
-		m_COS = (c1 * (10 - angle_rem) + c2 * angle_rem) / 10;
-		m_SIN = m_SIN >> (LV_TRIGO_SHIFT - _EG_TRANSFORM_TRIGO_SHIFT);
-		m_COS = m_COS >> (LV_TRIGO_SHIFT - _EG_TRANSFORM_TRIGO_SHIFT);
+		m_SIN = (s1 * (10 - AngleRemain) + s2 * AngleRemain) / 10;
+		m_COS = (c1 * (10 - AngleRemain) + c2 * AngleRemain) / 10;
+		m_SIN = m_SIN >> (EG_TRIGO_SHIFT - _EG_TRANSFORM_TRIGO_SHIFT);
+		m_COS = m_COS >> (EG_TRIGO_SHIFT - _EG_TRANSFORM_TRIGO_SHIFT);
 		m_PreviousAngle = Angle;
 	}
 	int32_t x = m_X;
 	int32_t y = m_Y;
-	if(Zoom == 256) {
+	if((ScaleX == 256) && (ScaleY == 256)) {
 		m_X = ((m_COS * x - m_SIN * y) >> _EG_TRANSFORM_TRIGO_SHIFT) + pPivot->m_X;
 		m_Y = ((m_SIN * x + m_COS * y) >> _EG_TRANSFORM_TRIGO_SHIFT) + pPivot->m_Y;
 	}
-	else {
-		m_X = (((m_COS * x - m_SIN * y) * Zoom) >> (_EG_TRANSFORM_TRIGO_SHIFT + 8)) + pPivot->m_X;
-		m_Y = (((m_SIN * x + m_COS * y) * Zoom) >> (_EG_TRANSFORM_TRIGO_SHIFT + 8)) + pPivot->m_Y;
+	else{
+    if(ZoomFirst){
+      x *= ScaleX;
+      y *= ScaleY;
+      m_X = (((m_COS * x - m_SIN * y)) >> (_EG_TRANSFORM_TRIGO_SHIFT + 8)) + pPivot->m_X;
+      m_Y = (((m_SIN * x + m_COS * y)) >> (_EG_TRANSFORM_TRIGO_SHIFT + 8)) + pPivot->m_Y;
+    }
+    else{
+  		m_X = (((m_COS * x - m_SIN * y) * ScaleX) >> (_EG_TRANSFORM_TRIGO_SHIFT + 8)) + pPivot->m_X;
+	  	m_Y = (((m_SIN * x + m_COS * y) * ScaleY) >> (_EG_TRANSFORM_TRIGO_SHIFT + 8)) + pPivot->m_Y;
+    }
 	}
 }
 

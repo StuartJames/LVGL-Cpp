@@ -204,7 +204,7 @@ void EGSlider::Event(EGEvent *pEvent)
         // Figure out the min. and max. for this SliderMode
         if(m_pValueToSet == &m_StartValue) MaxValue = m_CurrentValue;
         else MinValue = m_StartValue;
-        Value = LV_CLAMP(MinValue, Value, MaxValue);
+        Value = EG_CLAMP(MinValue, Value, MaxValue);
         if(*m_pValueToSet != Value) {
           if(m_pValueToSet == &m_StartValue) SetStartValue(Value, EG_ANIM_ON);
           else SetValue(Value, EG_ANIM_ON);

@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -384,7 +384,7 @@ EG_StyleValue_t Value;
 
 	switch(Property) {
 		case EG_STYLE_TRANSFORM_ZOOM:
-			Value.Number = EG_IMG_ZOOM_NONE;
+			Value.Number = EG_SCALE_NONE;
 			break;
 		case EG_STYLE_BG_COLOR:
 			Value.Color = EG_ColorWhite();

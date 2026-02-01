@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -88,13 +88,17 @@ void EGDisplay::InitialiseDriver(EGDisplayDriver *pDriver)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::InitialiseDrawBuffers(EG_DisplayDrawBuffer_t *pDrawBuffers, void *pBuffer1, void *pBuffer2, uint32_t SizeInPixels)
+bool EGDisplay::InitialiseDrawBuffers(EG_DisplayDrawBuffer_t **pDrawBuffers, void *pBuffer1, void *pBuffer2, uint32_t SizeInPixels)
 {
-	EG_ZeroMem(pDrawBuffers, sizeof(EG_DisplayDrawBuffer_t));
-	pDrawBuffers->pBuffer1 = pBuffer1;
-	pDrawBuffers->pBuffer2 = pBuffer2;
-	pDrawBuffers->pActiveBuffer = pDrawBuffers->pBuffer1;
-	pDrawBuffers->Size = SizeInPixels;
+	(*pDrawBuffers) = (EG_DisplayDrawBuffer_t*)malloc(sizeof(EG_DisplayDrawBuffer_t));
+	if((*pDrawBuffers) == nullptr) return false;
+//	ESP_LOGI("[Dsip  ]", "Buffer: %p, Buf1: %p, Buf2: %p, Size: %d.", (void *)(*pDrawBuffers), (void *)pBuffer1, (void *)pBuffer2, SizeInPixels);
+	EG_ZeroMem(*pDrawBuffers, sizeof(EG_DisplayDrawBuffer_t));
+	(*pDrawBuffers)->pBuffer1 = pBuffer1;
+	(*pDrawBuffers)->pBuffer2 = pBuffer2;
+	(*pDrawBuffers)->pActiveBuffer = (*pDrawBuffers)->pBuffer1;
+	(*pDrawBuffers)->Size = SizeInPixels;
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,7 +214,7 @@ bool WasDefault = false;
 	while(pDisplay->m_ScreenCount != 0) EGObject::Delete(pDisplay->m_pScreens[0]); // Delete the screenst
   POSITION Pos = m_DisplayList.Find(pDisplay);
   if(Pos != nullptr) m_DisplayList.RemoveAt(Pos);
-	pDisplay->m_SyncAreas.RemoveAll();
+  while(pDisplay->m_SyncAreas.GetCount() > 0) delete (EGRect*)pDisplay->m_SyncAreas.RemoveHead();
 	if(pDisplay->m_pRefreshTimer) EGTimer::Delete(pDisplay->m_pRefreshTimer);
 	EG_FreeMem(pDisplay);
 	if(WasDefault) m_pDefaultDisplay = (EGDisplay*)m_DisplayList.GetHead();
@@ -382,19 +386,19 @@ EG_DisplayRotation_t EGDisplay::GetRotation(void)
 void EGDisplay::UseGenericSetPixelCB(EGDisplayDriver *pDriver, EG_ImageColorFormat_t ColorFormat)
 {
 	switch(ColorFormat) {
-		case EG_IMG_CF_TRUE_COLOR_ALPHA:
+		case EG_COLOR_FORMAT_NATIVE_ALPHA:
 			pDriver->SetPixelCB = SetPixelTrueColorAlpha;
 			break;
-		case EG_IMG_CF_ALPHA_1BIT:
+		case EG_COLOR_FORMAT_ALPHA_1BIT:
 			pDriver->SetPixelCB = SetPixelAlpha1CB;
 			break;
-		case EG_IMG_CF_ALPHA_2BIT:
+		case EG_COLOR_FORMAT_ALPHA_2BIT:
 			pDriver->SetPixelCB = SetPixelAlpha2CB;
 			break;
-		case EG_IMG_CF_ALPHA_4BIT:
+		case EG_COLOR_FORMAT_ALPHA_4BIT:
 			pDriver->SetPixelCB = SetPixelAlpha4CB;
 			break;
-		case EG_IMG_CF_ALPHA_8BIT:
+		case EG_COLOR_FORMAT_ALPHA_8BIT:
 			pDriver->SetPixelCB = SetPixelAlpha8CB;
 			break;
 		default:
@@ -421,7 +425,7 @@ void EGDisplay::SetPixelAlpha1CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 	EGImageBuffer Image;
 	Image.m_pData = pBuffer;
 	Image.m_Header.Width = Width;
-	Image.m_Header.ColorFormat = EG_IMG_CF_ALPHA_1BIT;
+	Image.m_Header.ColorFormat = EG_COLOR_FORMAT_ALPHA_1BIT;
 	SetPixelAlphaGeneric(&Image, x, y, color, opa);
 }
 
@@ -435,7 +439,7 @@ void EGDisplay::SetPixelAlpha2CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 	EGImageBuffer Image;
 	Image.m_pData = pBuffer;
 	Image.m_Header.Width = Width;
-	Image.m_Header.ColorFormat = EG_IMG_CF_ALPHA_2BIT;
+	Image.m_Header.ColorFormat = EG_COLOR_FORMAT_ALPHA_2BIT;
 	SetPixelAlphaGeneric(&Image, x, y, color, opa);
 }
 
@@ -449,7 +453,7 @@ void EGDisplay::SetPixelAlpha4CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 	EGImageBuffer Image;
 	Image.m_pData = pBuffer;
 	Image.m_Header.Width = Width;
-	Image.m_Header.ColorFormat = EG_IMG_CF_ALPHA_4BIT;
+	Image.m_Header.ColorFormat = EG_COLOR_FORMAT_ALPHA_4BIT;
 	SetPixelAlphaGeneric(&Image, x, y, color, opa);
 }
 
@@ -463,7 +467,7 @@ void EGDisplay::SetPixelAlpha8CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 	EGImageBuffer Image;
 	Image.m_pData = pBuffer;
 	Image.m_Header.Width = Width;
-	Image.m_Header.ColorFormat = EG_IMG_CF_ALPHA_8BIT;
+	Image.m_Header.ColorFormat = EG_COLOR_FORMAT_ALPHA_8BIT;
 	SetPixelAlphaGeneric(&Image, x, y, color, opa);
 }
 
@@ -500,8 +504,10 @@ void EGDisplay::SetPixelTrueColorAlpha(EGDisplayDriver *pDriver, uint8_t *buf, E
 	bg_color.full = buf_px[0] + (buf_px[1] << 8);
 	EG_ColorMixWithAlpha(bg_color, bg_opa, color, opa, &res_color, &buf_px[2]);
 	if(buf_px[2] <= EG_OPA_MIN) return;
-	buf_px[0] = res_color.full & 0xff;
-	buf_px[1] = res_color.full >> 8;
+//	buf_px[0] = res_color.full & 0xff;
+//	buf_px[1] = res_color.full >> 8;
+	buf_px[1] = res_color.full & 0xff;
+	buf_px[0] = res_color.full >> 8;
 #elif EG_COLOR_DEPTH == 32
 	bg_color = *((EG_Color_t *)buf_px);
 	EG_ColorMixWithAlpha(bg_color, bg_opa, color, opa, &res_color, &buf_px[3]);

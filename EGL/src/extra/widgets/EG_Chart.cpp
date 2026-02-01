@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -117,8 +117,8 @@ void EGChart::Configure(void)
 	m_SelectPointIndex = EG_CHART_POINT_NONE;
 	m_ChartType = EG_CHART_TYPE_LINE;
 	m_UpdateMode = EG_CHART_UPDATE_MODE_SHIFT;
-	m_ZoomX = EG_IMG_ZOOM_NONE;
-	m_ZoomY = EG_IMG_ZOOM_NONE;
+	m_ZoomX = EG_SCALE_NONE;
+	m_ZoomY = EG_SCALE_NONE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -113,8 +113,7 @@ bool WasTop = false;
 	pFragment->Destroy();
   pFragment->Detached();
 	pFragment->m_Managed = false;
-  if((Pos = m_Attached.Find(pFragment)) != nullptr) m_Attached.RemoveAt(Pos);
-	delete pFragment;
+  if((Pos = m_Attached.Find(pFragment)) != nullptr) delete (EGFragment*)m_Attached.RemoveAt(Pos);
 	if(pPrevious && WasTop) pPrevious->Create(pPrevious->m_pContainer);
 }
 

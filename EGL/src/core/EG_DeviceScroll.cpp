@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -51,11 +51,11 @@ void EGInputDevice::ScrollHandler(EG_ProcessedInput_t *pProcess)
 		Zoom *= (pParent->GetStyleTransformZoom(0) / 256);
 		pParent = pParent->GetParent();
 	}
-	if(Angle != 0 || Zoom != EG_IMG_ZOOM_NONE) {
+	if(Angle != 0 || Zoom != EG_SCALE_NONE) {
 		Angle = -Angle;
 		Zoom = (256 * 256) / Zoom;
 		EGPoint Pivot = {0, 0};
-		pProcess->Pointer.Vector.PointTransform(Angle, Zoom, &Pivot);
+		pProcess->Pointer.Vector.PointTransform(Angle, Zoom, Zoom, &Pivot);
 	}
 	EG_Coord_t DifferenceX = 0;
 	EG_Coord_t DifferenceY = 0;
@@ -231,10 +231,10 @@ bool HorizontalEnable = false, VerticalEnable = false;
 			pParent = pParent->GetParent();
 		}
 		EGPoint ScrollSum = pProcess->Pointer.ScrollSum;
-		if(Angle != 0 || Zoom != EG_IMG_ZOOM_NONE) {
+		if(Angle != 0 || Zoom != EG_SCALE_NONE) {
 			Angle = -Angle;
 			Zoom = (256 * 256) / Zoom;
-			ScrollSum.PointTransform(Angle, Zoom, &Pivot);
+			ScrollSum.PointTransform(Angle, Zoom, Zoom, &Pivot);
 		}
 		if(EG_ABS(ScrollSum.m_X) > EG_ABS(ScrollSum.m_Y)) HorizontalEnable = true; // Decide if it's a horizontal or vertical scroll
 		else VerticalEnable = true;

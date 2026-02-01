@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -347,8 +347,8 @@ EG_GradientColor_t EG_ATTRIBUTE_FAST_MEM EG_GradientCalculate(const EG_GradDescr
 	frac -= min;
 	EG_OPA_t mix = (frac * 255) / d;
 	EG_OPA_t imix = 255 - mix;
-	EG_GradientColor_t r = GRAD_CM(LV_UDIV255(two.ch.red * mix + one.ch.red * imix), LV_UDIV255(two.ch.green * mix + one.ch.green * imix),
-															LV_UDIV255(two.ch.blue * mix + one.ch.blue * imix));
+	EG_GradientColor_t r = GRAD_CM(EG_UDIV255(two.ch.red * mix + one.ch.red * imix), EG_UDIV255(two.ch.green * mix + one.ch.green * imix),
+															EG_UDIV255(two.ch.blue * mix + one.ch.blue * imix));
 	return r;
 }
 

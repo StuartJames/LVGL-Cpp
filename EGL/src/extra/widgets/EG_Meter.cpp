@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -414,7 +414,7 @@ void EGMeter::DrawTicksLabels(EGDrawContext *pContext, const EGRect *pScaleArea)
 			EGPoint OuterPoint;
 			OuterPoint.m_X = CenterPoint.m_X + OutsideRadius + EG_MAX(EG_DPI_DEF, OutsideRadius);
 			OuterPoint.m_Y = CenterPoint.m_Y;
-			OuterPoint.PointTransform(UpscaleAngle, 256, &CenterPoint);
+			OuterPoint.PointTransform(UpscaleAngle, 256, 256, &CenterPoint);
 			DrawDiscriptor.m_pPoint1 = &CenterPoint;
 			DrawDiscriptor.m_pPoint2 = &OuterPoint;
 			DrawDiscriptor.m_Index = i;
@@ -425,7 +425,7 @@ void EGMeter::DrawTicksLabels(EGDrawContext *pContext, const EGRect *pScaleArea)
 				EGPoint Point;
 				Point.m_X = CenterPoint.m_X + r_text;
 				Point.m_Y = CenterPoint.m_Y;
-				Point.PointTransform(UpscaleAngle, 256, &CenterPoint);
+				Point.PointTransform(UpscaleAngle, 256, 256, &CenterPoint);
 				EGDrawLabel DrawLabel;
 				EG_CopyMem(&DrawLabel, &label_dsc, sizeof(DrawLabel));
 
@@ -490,8 +490,8 @@ void EGMeter::DrawNeedles(EGDrawContext *pContext, const EGRect *pScaleArea)
 			int32_t Angle = EG_Map(pIndicator->EndValue, pScale->Minimum, pScale->Maximum, pScale->Rotation, pScale->Rotation + pScale->AngleRange);
 			EG_Coord_t OutsideRadius = EdgeRadius + pScale->RadiusMod + pIndicator->TypeData.NeedleLine.RadiusMod;
 			EGPoint EndPoint;
-			EndPoint.m_Y = (EG_TrigoSin(Angle) * (OutsideRadius)) / LV_TRIGO_SIN_MAX + ScaleCenter.m_Y;
-			EndPoint.m_X = (lv_trigo_cos(Angle) * (OutsideRadius)) / LV_TRIGO_SIN_MAX + ScaleCenter.m_X;
+			EndPoint.m_Y = (EG_TrigoSin(Angle) * (OutsideRadius)) / EG_TRIGO_SIN_MAX + ScaleCenter.m_Y;
+			EndPoint.m_X = (lv_trigo_cos(Angle) * (OutsideRadius)) / EG_TRIGO_SIN_MAX + ScaleCenter.m_X;
 			DrawLine.m_Color = pIndicator->TypeData.NeedleLine.Color;
 			DrawLine.m_Width = pIndicator->TypeData.NeedleLine.Width;
 			DrawLine.m_OPA = pIndicator->OPA > EG_OPA_MAX ? MainOPA : (MainOPA * pIndicator->OPA) >> 8;
@@ -562,8 +562,8 @@ void EGMeter::InvLine(EG_Indicator_t *pIndicator, int32_t Value)
 		int32_t Angle = EG_Map(Value, pScale->Minimum, pScale->Maximum, pScale->Rotation, pScale->Rotation + pScale->AngleRange);
 		OutsideRadius += pScale->RadiusMod + pIndicator->TypeData.NeedleLine.RadiusMod;
 		EGPoint EndPoint;
-		EndPoint.m_Y = (EG_TrigoSin(Angle) * (OutsideRadius)) / LV_TRIGO_SIN_MAX + ScaleCenter.m_Y;
-		EndPoint.m_X = (lv_trigo_cos(Angle) * (OutsideRadius)) / LV_TRIGO_SIN_MAX + ScaleCenter.m_X;
+		EndPoint.m_Y = (EG_TrigoSin(Angle) * (OutsideRadius)) / EG_TRIGO_SIN_MAX + ScaleCenter.m_Y;
+		EndPoint.m_X = (lv_trigo_cos(Angle) * (OutsideRadius)) / EG_TRIGO_SIN_MAX + ScaleCenter.m_X;
 		EGRect Rect;
 		Rect.SetX1(EG_MIN(ScaleCenter.m_X, EndPoint.m_X) - pIndicator->TypeData.NeedleLine.Width - 2);
 		Rect.SetY1(EG_MIN(ScaleCenter.m_Y, EndPoint.m_Y) - pIndicator->TypeData.NeedleLine.Width - 2);
@@ -580,7 +580,7 @@ void EGMeter::InvLine(EG_Indicator_t *pIndicator, int32_t Value)
 		ScaleCenter.m_X -= pIndicator->TypeData.NeedleImage.Pivot.m_X;
 		ScaleCenter.m_Y -= pIndicator->TypeData.NeedleImage.Pivot.m_Y;
 		EGRect Rect2;
-		EGImageBuffer::GetTransformedRect(&Rect2, info.Width, info.Height, Angle, EG_IMG_ZOOM_NONE, &pIndicator->TypeData.NeedleImage.Pivot);
+		EGImageBuffer::GetTransformedRect(&Rect2, info.Width, info.Height, Angle, EG_SCALE_NONE, EG_SCALE_NONE, &pIndicator->TypeData.NeedleImage.Pivot);
 		Rect2.IncX1(ScaleCenter.m_X - 2);
 		Rect2.IncY1(ScaleCenter.m_Y - 2);
 		Rect2.IncX2(ScaleCenter.m_X + 2);

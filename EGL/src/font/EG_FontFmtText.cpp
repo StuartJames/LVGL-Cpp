@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -36,19 +36,19 @@ typedef enum {
 	RLE_STATE_COUNTER,
 } rle_state_t;
 
-static uint32_t get_glyph_dsc_id(const EG_Font_t *font, uint32_t letter);
-static int8_t get_kern_value(const EG_Font_t *font, uint32_t gid_left, uint32_t gid_right);
-static int32_t unicode_list_compare(const void *ref, const void *element);
-static int32_t kern_pair_8_compare(const void *ref, const void *element);
-static int32_t kern_pair_16_compare(const void *ref, const void *element);
+static uint32_t GetGlyphDiscriptorID(const EG_Font_t *pFont, uint32_t letter);
+static int8_t GetKerningValue(const EG_Font_t *pFont, uint32_t gid_left, uint32_t gid_right);
+static int32_t UnicodeListCompare(const void *ref, const void *element);
+static int32_t KernPair8Compare(const void *ref, const void *element);
+static int32_t KernPair16Compare(const void *ref, const void *element);
 
 #if EG_USE_FONT_COMPRESSED
-static void decompress(const uint8_t *in, uint8_t *out, EG_Coord_t w, EG_Coord_t h, uint8_t BitsPerPixel, bool prefilter);
-static inline void decompress_line(uint8_t *out, EG_Coord_t w);
-static inline uint8_t get_bits(const uint8_t *in, uint32_t bit_pos, uint8_t len);
-static inline void bits_write(uint8_t *out, uint32_t bit_pos, uint8_t val, uint8_t len);
-static inline void rle_init(const uint8_t *in, uint8_t BitsPerPixel);
-static inline uint8_t rle_next(void);
+static void Decompress(const uint8_t *in, uint8_t *out, EG_Coord_t Width, EG_Coord_t Height, uint8_t BitsPerPixel, bool prefilter);
+static inline void DecompressLine(uint8_t *out, EG_Coord_t Width);
+static inline uint8_t GetBits(const uint8_t *in, uint32_t bit_pos, uint8_t len);
+static inline void WriteBits(uint8_t *out, uint32_t bit_pos, uint8_t val, uint8_t len);
+static inline void InitialiseRLE(const uint8_t *in, uint8_t BitsPerPixel);
+static inline uint8_t NextRLE(void);
 #endif /*EG_USE_FONT_COMPRESSED*/
 
 #if EG_USE_FONT_COMPRESSED
@@ -62,15 +62,15 @@ static rle_state_t rle_state;
 
 /**
  * Used as `GetGlyphBitmapCB` callback in LittelvGL's native font format if the font is uncompressed.
- * @param font pointer to font
- * @param unicode_letter a unicode letter which bitmap should be get
+ * @param pFont pointer to font
+ * @param UnicodeChar a unicode letter which bitmap should be get
  * @return pointer to the bitmap or NULL if not found
  */
-const uint8_t *EG_FontGetBitmapFmtText(const EG_Font_t *font, uint32_t unicode_letter)
+const uint8_t* EG_FontGetBitmapFmtText(const EG_Font_t *pFont, uint32_t UnicodeChar)
 {
-	if(unicode_letter == '\t') unicode_letter = ' ';
-	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)font->pProperties;
-	uint32_t gid = get_glyph_dsc_id(font, unicode_letter);
+	if(UnicodeChar == '\t') UnicodeChar = ' ';
+	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)pFont->pProperties;
+	uint32_t gid = GetGlyphDiscriptorID(pFont, UnicodeChar);
 	if(!gid) return NULL;
 	const EG_FontFmtTextGlyphProps_t *gdsc = &fdsc->pGlyphProps[gid];
 	if(fdsc->BitmapFormat == EG_FONT_FMT_TXT_PLAIN) {
@@ -79,8 +79,8 @@ const uint8_t *EG_FontGetBitmapFmtText(const EG_Font_t *font, uint32_t unicode_l
 	/*Handle compressed bitmap*/
 	else {
 #if EG_USE_FONT_COMPRESSED
-		static size_t last_buf_size = 0;
-		if(EG_GC_ROOT(_lv_font_decompr_buf) == NULL) last_buf_size = 0;
+		static size_t LastBufferSize = 0;
+		if(EG_GC_ROOT(_lv_font_decompr_buf) == NULL) LastBufferSize = 0;
 
 		uint32_t gsize = gdsc->BoxWidth * gdsc->BoxHeight;
 		if(gsize == 0) return NULL;
@@ -102,20 +102,20 @@ const uint8_t *EG_FontGetBitmapFmtText(const EG_Font_t *font, uint32_t unicode_l
 				break;
 		}
 
-		if(last_buf_size < buf_size) {
-			uint8_t *tmp = EG_ReallocMem(EG_GC_ROOT(_lv_font_decompr_buf), buf_size);
+		if(LastBufferSize < buf_size) {
+			uint8_t *tmp = (uint8_t*)EG_ReallocMem(EG_GC_ROOT(_lv_font_decompr_buf), buf_size);
 			EG_ASSERT_MALLOC(tmp);
 			if(tmp == NULL) return NULL;
 			EG_GC_ROOT(_lv_font_decompr_buf) = tmp;
-			last_buf_size = buf_size;
+			LastBufferSize = buf_size;
 		}
 
 		bool prefilter = fdsc->BitmapFormat == EG_FONT_FMT_TXT_COMPRESSED ? true : false;
-		decompress(&fdsc->GlyphBitmap[gdsc->BitmapIndex], EG_GC_ROOT(_lv_font_decompr_buf), gdsc->BoxWidth, gdsc->BoxHeight,
+		Decompress(&fdsc->GlyphBitmap[gdsc->BitmapIndex], EG_GC_ROOT(_lv_font_decompr_buf), gdsc->BoxWidth, gdsc->BoxHeight,
 							 (uint8_t)fdsc->BitsPerPixel, prefilter);
 		return EG_GC_ROOT(_lv_font_decompr_buf);
 #else /*!EG_USE_FONT_COMPRESSED*/
-		EG_LOG_WARN("Compressed fonts is used but EG_USE_FONT_COMPRESSED is not enabled in EG_Config.h");
+		EG_LOG_WARN("Compressed fonts is used but EG_USE_FONT_COMPRESSED is not enabled in EG_Config.Height");
 		return NULL;
 #endif
 	}
@@ -132,23 +132,23 @@ const uint8_t *EG_FontGetBitmapFmtText(const EG_Font_t *font, uint32_t unicode_l
  * @return true: descriptor is successfully loaded into `dsc_out`.
  *         false: the letter was not found, no data is loaded to `dsc_out`
  */
-bool EG_FontGetGlyphPropsFmtText(const EG_Font_t *font, EG_FontGlyphProps_t *dsc_out, uint32_t unicode_letter,
+bool EG_FontGetGlyphPropsFmtText(const EG_Font_t *pFont, EG_FontGlyphProps_t *dsc_out, uint32_t UnicodeChar,
 																	 uint32_t unicode_letter_next)
 {
 	/*It fixes a strange compiler optimization issue: https://github.com/lvgl/lvgl/issues/4370*/
-	bool is_tab = unicode_letter == '\t';
+	bool is_tab = UnicodeChar == '\t';
 	if(is_tab) {
-		unicode_letter = ' ';
+		UnicodeChar = ' ';
 	}
-	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)font->pProperties;
-	uint32_t gid = get_glyph_dsc_id(font, unicode_letter);
+	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)pFont->pProperties;
+	uint32_t gid = GetGlyphDiscriptorID(pFont, UnicodeChar);
 	if(!gid) return false;
 
 	int8_t kvalue = 0;
 	if(fdsc->pKernProps) {
-		uint32_t gid_next = get_glyph_dsc_id(font, unicode_letter_next);
+		uint32_t gid_next = GetGlyphDiscriptorID(pFont, unicode_letter_next);
 		if(gid_next) {
-			kvalue = get_kern_value(font, gid, gid_next);
+			kvalue = GetKerningValue(pFont, gid, gid_next);
 		}
 	}
 
@@ -189,11 +189,11 @@ void EG_FontCleanUpFmtText(void)
 #endif
 }
 
-static uint32_t get_glyph_dsc_id(const EG_Font_t *font, uint32_t letter)
+static uint32_t GetGlyphDiscriptorID(const EG_Font_t *pFont, uint32_t letter)
 {
 	if(letter == '\0') return 0;
 
-	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)font->pProperties;
+	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)pFont->pProperties;
 
 	/*Check the pCache first*/
 	if(fdsc->pCache && letter == fdsc->pCache->last_letter) return fdsc->pCache->last_glyph_id;
@@ -213,7 +213,7 @@ static uint32_t get_glyph_dsc_id(const EG_Font_t *font, uint32_t letter)
 		}
 		else if(fdsc->pCmaps[i].Type == EG_FONT_FMT_TXT_CMAP_SPARSE_TINY) {
 			uint16_t key = rcp;
-			uint16_t *p = (uint16_t*)_lv_utils_bsearch(&key, fdsc->pCmaps[i].UnicodeList, fdsc->pCmaps[i].ListLength, sizeof(fdsc->pCmaps[i].UnicodeList[0]), unicode_list_compare);
+			uint16_t *p = (uint16_t*)_lv_utils_bsearch(&key, fdsc->pCmaps[i].UnicodeList, fdsc->pCmaps[i].ListLength, sizeof(fdsc->pCmaps[i].UnicodeList[0]), UnicodeListCompare);
 
 			if(p) {
 				eg_uintptr_t ofs = p - fdsc->pCmaps[i].UnicodeList;
@@ -222,7 +222,7 @@ static uint32_t get_glyph_dsc_id(const EG_Font_t *font, uint32_t letter)
 		}
 		else if(fdsc->pCmaps[i].Type == EG_FONT_FMT_TXT_CMAP_SPARSE_FULL) {
 			uint16_t key = rcp;
-			uint16_t *p = (uint16_t*)_lv_utils_bsearch(&key, fdsc->pCmaps[i].UnicodeList, fdsc->pCmaps[i].ListLength, sizeof(fdsc->pCmaps[i].UnicodeList[0]), unicode_list_compare);
+			uint16_t *p = (uint16_t*)_lv_utils_bsearch(&key, fdsc->pCmaps[i].UnicodeList, fdsc->pCmaps[i].ListLength, sizeof(fdsc->pCmaps[i].UnicodeList[0]), UnicodeListCompare);
 
 			if(p) {
 				eg_uintptr_t ofs = p - fdsc->pCmaps[i].UnicodeList;
@@ -246,9 +246,9 @@ static uint32_t get_glyph_dsc_id(const EG_Font_t *font, uint32_t letter)
 	return 0;
 }
 
-static int8_t get_kern_value(const EG_Font_t *font, uint32_t gid_left, uint32_t gid_right)
+static int8_t GetKerningValue(const EG_Font_t *pFont, uint32_t gid_left, uint32_t gid_right)
 {
-	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)font->pProperties;
+	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)pFont->pProperties;
 
 	int8_t value = 0;
 
@@ -260,7 +260,7 @@ static int8_t get_kern_value(const EG_Font_t *font, uint32_t gid_left, uint32_t 
              *The pairs are ordered left_id first, then right_id secondly.*/
 			const uint16_t *g_ids = (uint16_t*)kdsc->glyph_ids;
 			uint16_t g_id_both = (gid_right << 8) + gid_left; /*Create one number from the ids*/
-			uint16_t *kid_p = (uint16_t*)_lv_utils_bsearch(&g_id_both, g_ids, kdsc->pair_cnt, 2, kern_pair_8_compare);
+			uint16_t *kid_p = (uint16_t*)_lv_utils_bsearch(&g_id_both, g_ids, kdsc->pair_cnt, 2, KernPair8Compare);
 
 			/*If the `g_id_both` were found get its index from the pointer*/
 			if(kid_p) {
@@ -273,7 +273,7 @@ static int8_t get_kern_value(const EG_Font_t *font, uint32_t gid_left, uint32_t 
              *The pairs are ordered left_id first, then right_id secondly.*/
 			const uint32_t *g_ids = (uint32_t*)kdsc->glyph_ids;
 			uint32_t g_id_both = (gid_right << 16) + gid_left; /*Create one number from the ids*/
-			uint32_t *kid_p = (uint32_t*)_lv_utils_bsearch(&g_id_both, g_ids, kdsc->pair_cnt, 4, kern_pair_16_compare);
+			uint32_t *kid_p = (uint32_t*)_lv_utils_bsearch(&g_id_both, g_ids, kdsc->pair_cnt, 4, KernPair16Compare);
 
 			/*If the `g_id_both` were found get its index from the pointer*/
 			if(kid_p) {
@@ -300,7 +300,7 @@ static int8_t get_kern_value(const EG_Font_t *font, uint32_t gid_left, uint32_t 
 	return value;
 }
 
-static int32_t kern_pair_8_compare(const void *ref, const void *element)
+static int32_t KernPair8Compare(const void *ref, const void *element)
 {
 	const uint8_t *ref8_p = (uint8_t*)ref;
 	const uint8_t *element8_p = (uint8_t*)element;
@@ -312,7 +312,7 @@ static int32_t kern_pair_8_compare(const void *ref, const void *element)
 		return (int32_t)ref8_p[1] - element8_p[1];
 }
 
-static int32_t kern_pair_16_compare(const void *ref, const void *element)
+static int32_t KernPair16Compare(const void *ref, const void *element)
 {
 const uint16_t *ref16_p = (uint16_t*)ref;
 const uint16_t *element16_p = (uint16_t*)element;
@@ -333,47 +333,47 @@ const uint16_t *element16_p = (uint16_t*)element;
  * @param BitsPerPixel bit per pixel (BitsPerPixel = 3 will be converted to BitsPerPixel = 4)
  * @param prefilter true: the lines are XORed
  */
-static void decompress(const uint8_t *in, uint8_t *out, EG_Coord_t w, EG_Coord_t h, uint8_t BitsPerPixel, bool prefilter)
+static void Decompress(const uint8_t *in, uint8_t *out, EG_Coord_t Width, EG_Coord_t Height, uint8_t BitsPerPixel, bool prefilter)
 {
 	uint32_t wrp = 0;
 	uint8_t wr_size = BitsPerPixel;
 	if(BitsPerPixel == 3) wr_size = 4;
 
-	rle_init(in, BitsPerPixel);
+	InitialiseRLE(in, BitsPerPixel);
 
-	uint8_t *line_buf1 = EG_GetBufferMem(w);
+	uint8_t *line_buf1 = (uint8_t*)EG_GetBufferMem(Width);
 
 	uint8_t *line_buf2 = NULL;
 
 	if(prefilter) {
-		line_buf2 = EG_GetBufferMem(w);
+		line_buf2 = (uint8_t*)EG_GetBufferMem(Width);
 	}
 
-	decompress_line(line_buf1, w);
+	DecompressLine(line_buf1, Width);
 
 	EG_Coord_t y;
 	EG_Coord_t x;
 
-	for(x = 0; x < w; x++) {
-		bits_write(out, wrp, line_buf1[x], BitsPerPixel);
+	for(x = 0; x < Width; x++) {
+		WriteBits(out, wrp, line_buf1[x], BitsPerPixel);
 		wrp += wr_size;
 	}
 
-	for(y = 1; y < h; y++) {
+	for(y = 1; y < Height; y++) {
 		if(prefilter) {
-			decompress_line(line_buf2, w);
+			DecompressLine(line_buf2, Width);
 
-			for(x = 0; x < w; x++) {
+			for(x = 0; x < Width; x++) {
 				line_buf1[x] = line_buf2[x] ^ line_buf1[x];
-				bits_write(out, wrp, line_buf1[x], BitsPerPixel);
+				WriteBits(out, wrp, line_buf1[x], BitsPerPixel);
 				wrp += wr_size;
 			}
 		}
 		else {
-			decompress_line(line_buf1, w);
+			DecompressLine(line_buf1, Width);
 
-			for(x = 0; x < w; x++) {
-				bits_write(out, wrp, line_buf1[x], BitsPerPixel);
+			for(x = 0; x < Width; x++) {
+				WriteBits(out, wrp, line_buf1[x], BitsPerPixel);
 				wrp += wr_size;
 			}
 		}
@@ -386,13 +386,13 @@ static void decompress(const uint8_t *in, uint8_t *out, EG_Coord_t w, EG_Coord_t
 /**
  * Decompress one line. Store one pixel per byte
  * @param out output buffer
- * @param w width of the line in pixel count
+ * @param Width width of the line in pixel count
  */
-static inline void decompress_line(uint8_t *out, EG_Coord_t w)
+static inline void DecompressLine(uint8_t *out, EG_Coord_t Width)
 {
 	EG_Coord_t i;
-	for(i = 0; i < w; i++) {
-		out[i] = rle_next();
+	for(i = 0; i < Width; i++) {
+		out[i] = NextRLE();
 	}
 }
 
@@ -403,7 +403,7 @@ static inline void decompress_line(uint8_t *out, EG_Coord_t w)
  * @param len number of bits to read (must be <= 8).
  * @return the read bits
  */
-static inline uint8_t get_bits(const uint8_t *in, uint32_t bit_pos, uint8_t len)
+static inline uint8_t GetBits(const uint8_t *in, uint32_t bit_pos, uint8_t len)
 {
 	uint8_t bit_mask;
 	switch(len) {
@@ -446,7 +446,7 @@ static inline uint8_t get_bits(const uint8_t *in, uint32_t bit_pos, uint8_t len)
  * @param len length of bits to write from `val`. (Counted from the LSB).
  * @note `len == 3` will be converted to `len = 4` and `val` will be upscaled too
  */
-static inline void bits_write(uint8_t *out, uint32_t bit_pos, uint8_t val, uint8_t len)
+static inline void WriteBits(uint8_t *out, uint32_t bit_pos, uint8_t val, uint8_t len)
 {
 	if(len == 3) {
 		len = 4;
@@ -487,7 +487,7 @@ static inline void bits_write(uint8_t *out, uint32_t bit_pos, uint8_t val, uint8
 	out[byte_pos] |= (val << bit_pos);
 }
 
-static inline void rle_init(const uint8_t *in, uint8_t BitsPerPixel)
+static inline void InitialiseRLE(const uint8_t *in, uint8_t BitsPerPixel)
 {
 	rle_in = in;
 	rle_bpp = BitsPerPixel;
@@ -497,13 +497,13 @@ static inline void rle_init(const uint8_t *in, uint8_t BitsPerPixel)
 	rle_cnt = 0;
 }
 
-static inline uint8_t rle_next(void)
+static inline uint8_t NextRLE(void)
 {
 	uint8_t v = 0;
 	uint8_t ret = 0;
 
 	if(rle_state == RLE_STATE_SINGLE) {
-		ret = get_bits(rle_in, rle_rdp, rle_bpp);
+		ret = GetBits(rle_in, rle_rdp, rle_bpp);
 		if(rle_rdp != 0 && rle_prev_v == ret) {
 			rle_cnt = 0;
 			rle_state = RLE_STATE_REPEATE;
@@ -513,19 +513,19 @@ static inline uint8_t rle_next(void)
 		rle_rdp += rle_bpp;
 	}
 	else if(rle_state == RLE_STATE_REPEATE) {
-		v = get_bits(rle_in, rle_rdp, 1);
+		v = GetBits(rle_in, rle_rdp, 1);
 		rle_cnt++;
 		rle_rdp += 1;
 		if(v == 1) {
 			ret = rle_prev_v;
 			if(rle_cnt == 11) {
-				rle_cnt = get_bits(rle_in, rle_rdp, 6);
+				rle_cnt = GetBits(rle_in, rle_rdp, 6);
 				rle_rdp += 6;
 				if(rle_cnt != 0) {
 					rle_state = RLE_STATE_COUNTER;
 				}
 				else {
-					ret = get_bits(rle_in, rle_rdp, rle_bpp);
+					ret = GetBits(rle_in, rle_rdp, rle_bpp);
 					rle_prev_v = ret;
 					rle_rdp += rle_bpp;
 					rle_state = RLE_STATE_SINGLE;
@@ -533,7 +533,7 @@ static inline uint8_t rle_next(void)
 			}
 		}
 		else {
-			ret = get_bits(rle_in, rle_rdp, rle_bpp);
+			ret = GetBits(rle_in, rle_rdp, rle_bpp);
 			rle_prev_v = ret;
 			rle_rdp += rle_bpp;
 			rle_state = RLE_STATE_SINGLE;
@@ -543,7 +543,7 @@ static inline uint8_t rle_next(void)
 		ret = rle_prev_v;
 		rle_cnt--;
 		if(rle_cnt == 0) {
-			ret = get_bits(rle_in, rle_rdp, rle_bpp);
+			ret = GetBits(rle_in, rle_rdp, rle_bpp);
 			rle_prev_v = ret;
 			rle_rdp += rle_bpp;
 			rle_state = RLE_STATE_SINGLE;
@@ -567,7 +567,7 @@ static inline uint8_t rle_next(void)
  *  @retval > 0   Reference is greater than element.
  *
  */
-static int32_t unicode_list_compare(const void *ref, const void *element)
+static int32_t UnicodeListCompare(const void *ref, const void *element)
 {
 	return ((int32_t)(*(uint16_t *)ref)) - ((int32_t)(*(uint16_t *)element));
 }

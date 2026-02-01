@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -87,7 +87,7 @@ public:
 	const void*     GetPrev(void *pElement) const;      
 	const void*     GetAt(POSITION Position) const;
 	void            SetAt(POSITION pos, void* pNewElement);
-	void            RemoveAt(POSITION &rPosition);
+	void*           RemoveAt(POSITION &rPosition);
 	POSITION        InsertBefore(POSITION Position, void *pNewElement);
 	POSITION        InsertAfter(POSITION Position, void *pNewElement);
 	POSITION        Find(const void* pSearchValue, POSITION StartAfter = 0) const;

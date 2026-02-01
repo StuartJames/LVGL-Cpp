@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -317,7 +317,7 @@ int EGDecoderMPEG::GetImageHeader(const char *pPath, EG_ImageHeader_t *pHeader)
 		pHeader->Width = pVideoDecoderContext->width;		// allocate image where the decoded image will be put 
 		pHeader->Height = pVideoDecoderContext->height;
 		pHeader->AlwaysZero = 0;
-		pHeader->ColorFormat = (HasAlpha ? EG_IMG_CF_TRUE_COLOR_ALPHA : EG_IMG_CF_TRUE_COLOR);
+		pHeader->ColorFormat = (HasAlpha ? EG_COLOR_FORMAT_NATIVE_ALPHA : EG_COLOR_FORMAT_NATIVE);
 		Result = 0;
 	}
 
@@ -595,7 +595,7 @@ EG_Result_t EGPlayerMPEG::SetSourcePath(const char *pPath)
 	m_ImageDescriptor.m_Header.Width = Width;
 	m_ImageDescriptor.m_Header.Height = Height;
 	m_ImageDescriptor.m_DataSize = DataSize;
-	m_ImageDescriptor.m_Header.ColorFormat = HasAlpha ? EG_IMG_CF_TRUE_COLOR_ALPHA : EG_IMG_CF_TRUE_COLOR;
+	m_ImageDescriptor.m_Header.ColorFormat = HasAlpha ? EG_COLOR_FORMAT_NATIVE_ALPHA : EG_COLOR_FORMAT_NATIVE;
 	m_ImageDescriptor.m_pData = DecoderMPEG.GetImageData(m_pMpegContext);
 	SetSource(&(m_ImageDescriptor));
 	int Period = GetFrameRefreshPeriod();

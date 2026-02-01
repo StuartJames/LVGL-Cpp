@@ -1,5 +1,5 @@
 /*
- *                LEGL 2025-2026 HydraSystems.
+ *                EGL 2025-2026 HydraSystems.
  *
  *  This program is free software; you can redistribute it and/or   
  *  modify it under the terms of the GNU General Public License as  
@@ -78,6 +78,7 @@ public:
 	                    EGRect(const EGRect &InRect);
 	                    EGRect(const EGRect *pInRect);
 	                    EGRect(EG_Coord_t x1, EG_Coord_t y1, EG_Coord_t x2, EG_Coord_t y2);
+  void                Zero(void);
 	void                Set(EG_Coord_t x1, EG_Coord_t y1, EG_Coord_t x2, EG_Coord_t y2);
 	void                SetWidth(EG_Coord_t w);
 	void                SetHeight(EG_Coord_t h);
@@ -89,11 +90,12 @@ public:
   EGPoint             TopRight(void) const;
   EGPoint             Center(void) const;
   void                Copy(EGRect *pDest) const;
-	void                Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY);
 	void                Inflate(EG_Coord_t Width, EG_Coord_t Height);
 	void                Inflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord_t Bottom);
 	void                Deflate(EG_Coord_t Width, EG_Coord_t Height);
 	void                Deflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord_t Bottom);
+	void                Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY);
+	void                Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY, EG_Coord_t OffsetX2, EG_Coord_t OffsetY2);
   void                Normalise(void);
 	bool                Intersect(const EGRect *pRect);
 	bool                Intersect(const EGRect *pRectA, const EGRect *pRectB);
