@@ -414,7 +414,7 @@ void EGMeter::DrawTicksLabels(EGDrawContext *pContext, const EGRect *pScaleArea)
 			EGPoint OuterPoint;
 			OuterPoint.m_X = CenterPoint.m_X + OutsideRadius + EG_MAX(EG_DPI_DEF, OutsideRadius);
 			OuterPoint.m_Y = CenterPoint.m_Y;
-			OuterPoint.PointTransform(UpscaleAngle, 256, 256, &CenterPoint);
+			OuterPoint.PointTransform(UpscaleAngle, 256, &CenterPoint);
 			DrawDiscriptor.m_pPoint1 = &CenterPoint;
 			DrawDiscriptor.m_pPoint2 = &OuterPoint;
 			DrawDiscriptor.m_Index = i;
@@ -425,7 +425,7 @@ void EGMeter::DrawTicksLabels(EGDrawContext *pContext, const EGRect *pScaleArea)
 				EGPoint Point;
 				Point.m_X = CenterPoint.m_X + r_text;
 				Point.m_Y = CenterPoint.m_Y;
-				Point.PointTransform(UpscaleAngle, 256, 256, &CenterPoint);
+				Point.PointTransform(UpscaleAngle, 256, &CenterPoint);
 				EGDrawLabel DrawLabel;
 				EG_CopyMem(&DrawLabel, &label_dsc, sizeof(DrawLabel));
 
@@ -580,7 +580,7 @@ void EGMeter::InvLine(EG_Indicator_t *pIndicator, int32_t Value)
 		ScaleCenter.m_X -= pIndicator->TypeData.NeedleImage.Pivot.m_X;
 		ScaleCenter.m_Y -= pIndicator->TypeData.NeedleImage.Pivot.m_Y;
 		EGRect Rect2;
-		EGImageBuffer::GetTransformedRect(&Rect2, info.Width, info.Height, Angle, EG_SCALE_NONE, EG_SCALE_NONE, &pIndicator->TypeData.NeedleImage.Pivot);
+		EGImageBuffer::GetTransformedRect(&Rect2, info.Width, info.Height, Angle, EG_SCALE_NONE, &pIndicator->TypeData.NeedleImage.Pivot);
 		Rect2.IncX1(ScaleCenter.m_X - 2);
 		Rect2.IncY1(ScaleCenter.m_Y - 2);
 		Rect2.IncX2(ScaleCenter.m_X + 2);

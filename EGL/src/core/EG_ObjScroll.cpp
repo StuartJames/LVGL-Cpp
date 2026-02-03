@@ -591,16 +591,16 @@ void EGObject::ReadjustScroll(EG_AnimateEnable_e AnimateEnable)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollAnimatedX(void *pObj, int32_t v)
+void EGObject::ScrollAnimatedX(EGAnimate *pAnimate, int32_t v)
 {
-	((EGObject*)pObj)->ScrollByRaw(v + ((EGObject*)pObj)->GetScrollX(), 0);
+	((EGObject*)pAnimate->m_pItem)->ScrollByRaw(v + ((EGObject*)pAnimate->m_pItem)->GetScrollX(), 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollAnimatedY(void *pObj, int32_t v)
+void EGObject::ScrollAnimatedY(EGAnimate *pAnimate, int32_t v)
 {
-	((EGObject*)pObj)->ScrollByRaw(0, v + ((EGObject*)pObj)->GetScrollY());
+	((EGObject*)pAnimate->m_pItem)->ScrollByRaw(0, v + ((EGObject*)pAnimate->m_pItem)->GetScrollY());
 }
 
 /////////////////////////////////////////////////////////////////////////////

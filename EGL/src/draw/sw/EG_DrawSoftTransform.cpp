@@ -42,30 +42,28 @@ typedef struct {
 	int32_t pivot_x_256;
 	int32_t pivot_y_256;
 	EGPoint pivot;
-} point_transform_dsc_t;
+} PointTransform_t;
 
+static void TransformPointUpscaled(PointTransform_t *t, int32_t xin, int32_t yin, int32_t *xout, int32_t *yout);
 
-// TRANSFORM //
-  static void transform_point_upscaled(point_transform_dsc_t *t, int32_t xin, int32_t yin, int32_t *xout, int32_t *yout);
+static void AlphaRGB_NoAntiAlias(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, 
+                      int32_t ys_ups, int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf);
 
-  static void argb_no_aa(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, 
-                        int32_t ys_ups, int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf);
-
-  static void rgb_no_aa(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, int32_t ys_ups,
-                         int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf, EG_ImageColorFormat_t ColorFormat);
+static void RGB_NoAntiAlias(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, int32_t ys_ups,
+                        int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf, EG_ImageColorFormat_t ColorFormat);
 #if EG_COLOR_DEPTH == 16
-  static void rgb565a8_no_aa(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, int32_t ys_ups,
-                            int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf);
+static void RGB565A8_NoAntiAlias(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, int32_t ys_ups,
+                          int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf);
 #endif
-  static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, int32_t ys_ups,
-                            int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf, EG_ImageColorFormat_t ColorFormat);
+static void AlphaRGB_AntiAlias(const uint8_t *src, EG_Coord_t src_w, EG_Coord_t src_h, EG_Coord_t src_stride, int32_t xs_ups, int32_t ys_ups,
+                          int32_t xs_step, int32_t ys_step, int32_t x_end, EG_Color_t *cbuf, uint8_t *abuf, EG_ImageColorFormat_t ColorFormat);
 
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EGSoftContext::DrawTransform(const EGRect *pRect, const void *pSourceBuffer, EG_Coord_t SourceWidth,
      EG_Coord_t SourceHeight, EG_Coord_t SourceStride, const EGDrawImage *pImage, EG_ImageColorFormat_t ColorFormat, EG_Color_t *pColorBuffer, EG_OPA_t *pBufferOPA)
 {
-	point_transform_dsc_t tr_dsc;
+	PointTransform_t tr_dsc;
 	tr_dsc.angle = -pImage->m_Angle;
 	tr_dsc.zoom = (256 * 256) / pImage->m_Zoom;
 	tr_dsc.pivot = pImage->m_Pivot;
@@ -92,8 +90,8 @@ void EGSoftContext::DrawTransform(const EGRect *pRect, const void *pSourceBuffer
 	EG_Coord_t y;
 	for(y = 0; y < DestHeight; y++) {
 		int32_t xs1_ups, ys1_ups, xs2_ups, ys2_ups;
-		transform_point_upscaled(&tr_dsc, pRect->GetX1(), pRect->GetY1() + y, &xs1_ups, &ys1_ups);
-		transform_point_upscaled(&tr_dsc, pRect->GetX2(), pRect->GetY1() + y, &xs2_ups, &ys2_ups);
+		TransformPointUpscaled(&tr_dsc, pRect->GetX1(), pRect->GetY1() + y, &xs1_ups, &ys1_ups);
+		TransformPointUpscaled(&tr_dsc, pRect->GetX2(), pRect->GetY1() + y, &xs2_ups, &ys2_ups);
 		int32_t xs_diff = xs2_ups - xs1_ups;
 		int32_t ys_diff = ys2_ups - ys1_ups;
 		int32_t xs_step_256 = 0;
@@ -108,26 +106,23 @@ void EGSoftContext::DrawTransform(const EGRect *pRect, const void *pSourceBuffer
 		if(pImage->m_Antialias == 0) {
 			switch(ColorFormat) {
 				case EG_COLOR_FORMAT_NATIVE_ALPHA:
-					argb_no_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA);
+					AlphaRGB_NoAntiAlias((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA);
 					break;
 				case EG_COLOR_FORMAT_NATIVE:
 				case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
-					rgb_no_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA, ColorFormat);
+					RGB_NoAntiAlias((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA, ColorFormat);
 					break;
-
 #if EG_COLOR_DEPTH == 16
 				case EG_COLOR_FORMAT_RGB565A8:
-					rgb565a8_no_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA);
+					RGB565A8_NoAntiAlias((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA);
 					break;
 #endif
-				default:
-					break;
+				default: break;
 			}
 		}
 		else {
-			argb_and_rgb_aa((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA, ColorFormat);
+			AlphaRGB_AntiAlias((uint8_t*)pSourceBuffer, SourceWidth, SourceHeight, SourceStride, xs_ups, ys_ups, xs_step_256, ys_step_256, DestWidth, pColorBuffer, pBufferOPA, ColorFormat);
 		}
-
 		pColorBuffer += DestWidth;
 		pBufferOPA += DestWidth;
 	}
@@ -135,7 +130,7 @@ void EGSoftContext::DrawTransform(const EGRect *pRect, const void *pSourceBuffer
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-static void rgb_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
+static void RGB_NoAntiAlias(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
 											int32_t xs_ups, int32_t ys_ups, int32_t xs_step, int32_t ys_step,
 											int32_t x_end, EG_Color_t *pColorBuffer, uint8_t *pBufferOPA, EG_ImageColorFormat_t ColorFormat)
 {
@@ -179,18 +174,15 @@ static void rgb_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t Sou
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-static void argb_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
+static void AlphaRGB_NoAntiAlias(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
 											 int32_t xs_ups, int32_t ys_ups, int32_t xs_step, int32_t ys_step,
 											 int32_t x_end, EG_Color_t *pColorBuffer, uint8_t *pBufferOPA)
 {
-	int32_t xs_ups_start = xs_ups;
-	int32_t ys_ups_start = ys_ups;
-
-	EG_Coord_t x;
-	for(x = 0; x < x_end; x++) {
+  int32_t xs_ups_start = xs_ups;
+  int32_t ys_ups_start = ys_ups;
+	for(EG_Coord_t x = 0; x < x_end; x++) {
 		xs_ups = xs_ups_start + ((xs_step * x) >> 8);
 		ys_ups = ys_ups_start + ((ys_step * x) >> 8);
-
 		int32_t xs_int = xs_ups >> 8;
 		int32_t ys_int = ys_ups >> 8;
 		if(xs_int < 0 || xs_int >= SourceWidth || ys_int < 0 || ys_int >= SourceHeight) {
@@ -199,7 +191,6 @@ static void argb_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t So
 		else {
 			const uint8_t *src_tmp = src;
 			src_tmp += (ys_int * SourceStride * EG_IMG_PX_SIZE_ALPHA_BYTE) + xs_int * EG_IMG_PX_SIZE_ALPHA_BYTE;
-
 #if EG_COLOR_DEPTH == 1 || EG_COLOR_DEPTH == 8
 			pColorBuffer[x].full = src_tmp[0];
 #elif EG_COLOR_DEPTH == 16
@@ -215,18 +206,15 @@ static void argb_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t So
 //////////////////////////////////////////////////////////////////////////////////////
 
 #if EG_COLOR_DEPTH == 16
-static void rgb565a8_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
+static void RGB565A8_NoAntiAlias(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
 													 int32_t xs_ups, int32_t ys_ups, int32_t xs_step, int32_t ys_step,
 													 int32_t x_end, EG_Color_t *pColorBuffer, uint8_t *pBufferOPA)
 {
 	int32_t xs_ups_start = xs_ups;
 	int32_t ys_ups_start = ys_ups;
-
-	EG_Coord_t x;
-	for(x = 0; x < x_end; x++) {
+	for(EG_Coord_t x = 0; x < x_end; x++) {
 		xs_ups = xs_ups_start + ((xs_step * x) >> 8);
 		ys_ups = ys_ups_start + ((ys_step * x) >> 8);
-
 		int32_t xs_int = xs_ups >> 8;
 		int32_t ys_int = ys_ups >> 8;
 		if(xs_int < 0 || xs_int >= SourceWidth || ys_int < 0 || ys_int >= SourceHeight) {
@@ -236,7 +224,6 @@ static void rgb565a8_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_
 			const EG_Color_t *src_tmp = (const EG_Color_t *)src;
 			src_tmp += ys_int * SourceStride + xs_int;
 			pColorBuffer[x] = *src_tmp;
-
 			const EG_OPA_t *a_tmp = src + SourceStride * SourceHeight * sizeof(EG_Color_t);
 			a_tmp += ys_int * SourceStride + xs_int;
 			pBufferOPA[x] = *a_tmp;
@@ -247,7 +234,7 @@ static void rgb565a8_no_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
+static void AlphaRGB_AntiAlias(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
 														int32_t xs_ups, int32_t ys_ups, int32_t xs_step, int32_t ys_step,
 														int32_t x_end, EG_Color_t *pColorBuffer, uint8_t *pBufferOPA, EG_ImageColorFormat_t ColorFormat)
 {
@@ -281,26 +268,19 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 		default:
 			return;
 	}
-
-	EG_Coord_t x;
-	for(x = 0; x < x_end; x++) {
+	for(EG_Coord_t x = 0; x < x_end; x++) {
 		xs_ups = xs_ups_start + ((xs_step * x) >> 8);
 		ys_ups = ys_ups_start + ((ys_step * x) >> 8);
-
 		int32_t xs_int = xs_ups >> 8;
 		int32_t ys_int = ys_ups >> 8;
-
-		/*Fully out of the image*/
+		// Fully out of the image
 		if(xs_int < 0 || xs_int >= SourceWidth || ys_int < 0 || ys_int >= SourceHeight) {
 			pBufferOPA[x] = 0x00;
 			continue;
 		}
-
-		/*Get the direction the hor and ver neighbor
-         *`fract` will be in range of 0x00..0xFF and `next` (+/-1) indicates the direction*/
+		// Get the direction the hor and ver neighbor `fract` range will be 0x00..0xFF and `next` (+/-1) indicates the direction
 		int32_t xs_fract = xs_ups & 0xFF;
 		int32_t ys_fract = ys_ups & 0xFF;
-
 		int32_t x_next;
 		int32_t y_next;
 		if(xs_fract < 0x80) {
@@ -319,10 +299,8 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 			y_next = 1;
 			ys_fract = (ys_fract - 0x80) * 2;
 		}
-
 		const uint8_t *src_tmp = src;
 		src_tmp += (ys_int * SourceStride * px_size) + xs_int * px_size;
-
 		if(xs_int + x_next >= 0 &&
 			 xs_int + x_next <= SourceWidth - 1 &&
 			 ys_int + y_next >= 0 &&
@@ -333,7 +311,6 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 			EG_Color_t c_base;
 			EG_Color_t c_ver;
 			EG_Color_t c_hor;
-
 			if(has_alpha) {
 				EG_OPA_t a_base;
 				EG_OPA_t a_ver;
@@ -418,19 +395,23 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 #endif
 			EG_OPA_t a;
 			switch(ColorFormat) {
-				case EG_COLOR_FORMAT_NATIVE_ALPHA:
+				case EG_COLOR_FORMAT_NATIVE_ALPHA:{
 					a = src_tmp[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 					break;
-				case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
+        }
+				case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:{
 					a = pColorBuffer[x].full == ck.full ? 0x00 : 0xff;
 					break;
+        }
 #if EG_COLOR_DEPTH == 16
-				case EG_COLOR_FORMAT_RGB565A8:
+				case EG_COLOR_FORMAT_RGB565A8:{
 					a = *(src + SourceStride * SourceHeight * sizeof(EG_Color_t) + (ys_int * SourceStride) + xs_int);
 					break;
+        }
 #endif
-				default:
+				default:{
 					a = 0xff;
+        }
 			}
 
 			if((xs_int == 0 && x_next < 0) || (xs_int == SourceWidth - 1 && x_next > 0)) {
@@ -448,7 +429,7 @@ static void argb_and_rgb_aa(const uint8_t *src, EG_Coord_t SourceWidth, EG_Coord
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-static void transform_point_upscaled(point_transform_dsc_t *t, int32_t xin, int32_t yin, int32_t *xout,
+static void TransformPointUpscaled(PointTransform_t *t, int32_t xin, int32_t yin, int32_t *xout,
 																		 int32_t *yout)
 {
 	if(t->angle == 0 && t->zoom == EG_SCALE_NONE) {

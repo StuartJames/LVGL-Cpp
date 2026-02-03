@@ -45,7 +45,7 @@ public:
 	void                operator-- (void);
   void                Offset(EG_Coord_t X, EG_Coord_t Y);
   void                Offset(const EGPoint *pPoint);
-  void                PointTransform(int32_t Angle, int32_t ScaleX, uint32_t ScaleY, const EGPoint *pPivot, bool ZoomFirst = false);
+  void                PointTransform(int32_t Angle, int32_t Zoom, const EGPoint *pPivot);
 
 	EG_Coord_t          m_X;
 	EG_Coord_t          m_Y;

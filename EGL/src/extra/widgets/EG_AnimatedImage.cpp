@@ -112,9 +112,9 @@ void EGAnimatedImage::SetRepeatCount(uint16_t Count)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGAnimatedImage::IndexChange(void *pObj, int32_t Index)
+void EGAnimatedImage::IndexChange(EGAnimate *pAnimation, int32_t Index)
 {
-	EGAnimatedImage *pAnimateImage = (EGAnimatedImage*)pObj;
+	EGAnimatedImage *pAnimateImage = (EGAnimatedImage*)pAnimation->m_pItem;
 	EG_Coord_t Idx = Index % pAnimateImage->m_PictureCount;
 	pAnimateImage->m_Image.SetSource(pAnimateImage->m_pDicriptors[Idx]);
 }

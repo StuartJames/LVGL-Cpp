@@ -616,9 +616,9 @@ void EGRoller::ScrollAnimateEndCB(EGAnimate *pAnimate)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGRoller::SetAnimateY(void *pObj, int32_t V)
+void EGRoller::SetAnimateY(EGAnimate *pAnimate, int32_t V)
 {
-	((EGObject*)pObj)->SetY(V);
+	((EGObject*)pAnimate->m_pItem)->SetY(V);
 }
 
 #endif

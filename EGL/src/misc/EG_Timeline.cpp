@@ -121,7 +121,7 @@ void EGAnimationTimeline::SetProgress(uint16_t Progress)
 			Value = pAnimation->m_PathCB(pAnimation);
 		}
 		else Value = pAnimation->m_EndValue;
-		pAnimation->m_AnimateCB(pAnimation->m_pItem, Value);
+		pAnimation->m_AnimateCB(pAnimation, Value);
 	}
 }
 
@@ -148,8 +148,8 @@ bool EGAnimationTimeline::GetReverse(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGAnimationTimeline::TimelineCB(void *pVar, int32_t Var)
+void EGAnimationTimeline::TimelineCB(EGAnimate *pAnimate, int32_t Var)
 {
-	EG_UNUSED(pVar);
+	EG_UNUSED(pAnimate);
 	EG_UNUSED(Var);
 }

@@ -441,9 +441,9 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGBar::Animate(void *pValue, int32_t Value)
+void EGBar::Animate(EGAnimate *pAnimation, int32_t Value)
 {
-	EG_BarAnimation_t *pAnimate = (EG_BarAnimation_t*)pValue;
+	EG_BarAnimation_t *pAnimate = (EG_BarAnimation_t*)pAnimation->m_pItem;
 	pAnimate->AnimationState = Value;
 	pAnimate->pBar->Invalidate();
 }

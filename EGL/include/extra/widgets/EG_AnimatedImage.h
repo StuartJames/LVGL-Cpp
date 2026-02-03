@@ -55,7 +55,7 @@ public:
   void                    SetDuration(uint32_t Duration);
   void                    SetRepeatCount(uint16_t Count);
 
-  static void             IndexChange(void *pObj,int32_t Indexx);
+  static void             IndexChange(EGAnimate *pAnimation, int32_t Indexx);
 
   EGImage                 m_Image;
   EGAnimate               m_Animate;

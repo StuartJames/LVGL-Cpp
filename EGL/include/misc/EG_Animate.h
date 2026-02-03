@@ -52,7 +52,7 @@ typedef int32_t (*EG_AnimatePathCB_t)(EGAnimate *);
 /** Generic prototype of "animator" functions.
  * First parameter is the variable to animate.
  * Second parameter is the value to set.*/
-typedef void (*EG_AnimateExecCB_t)(void *, int32_t);
+typedef void (*EG_AnimateExecCB_t)(EGAnimate *, int32_t);
 
 /** Same as `EG_AnimateExecCB_t` but receives `EGAnimate *` as the first parameter.
  * It's more consistent but less convenient. Might be used by binding generator functions.*/

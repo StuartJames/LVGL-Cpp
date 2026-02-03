@@ -48,7 +48,7 @@ public:
 
   static EGAnimationTimeline* Configure(void);
   static void                 Delete(EGAnimationTimeline *pTimeLine);
-  static void                 TimelineCB(void * var, int32_t v);
+  static void                 TimelineCB(EGAnimate *pAnimate, int32_t v);
 
 private:
   EG_TimelineDiscriptor_t     *m_pTimelines;    // Dynamically allocated anim dsc array

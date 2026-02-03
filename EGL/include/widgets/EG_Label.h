@@ -90,8 +90,8 @@ public:
   void                CutText(uint32_t Position, uint32_t Count);
 
   static void         EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
-  static void         SetAnimateOffsetX(void *pLabel, int32_t X);
-  static void         SetAnimateOffsetY(void *pLabel, int32_t Y);
+  static void         SetAnimateOffsetX(EGAnimate *pAnimate, int32_t X);
+  static void         SetAnimateOffsetY(EGAnimate *pAnimate, int32_t Y);
 
   char               *m_pText;
   union {

@@ -148,7 +148,7 @@ EGAnimate* EGAnimate::Create(EGAnimate *pAnimate)
 			pNewAnimate->m_StartValue += OffsetValue;
 			pNewAnimate->m_EndValue += OffsetValue;
 		}
-		if(pNewAnimate->m_AnimateCB && pNewAnimate->m_pItem) pNewAnimate->m_AnimateCB(pNewAnimate->m_pItem, pNewAnimate->m_StartValue);
+		if(pNewAnimate->m_AnimateCB && pNewAnimate->m_pItem) pNewAnimate->m_AnimateCB(pNewAnimate, pNewAnimate->m_StartValue);
 	}
 	MarkListChanged();	// It's important if it happens in a ready callback. (see `anim_timer`)
   return pNewAnimate;
@@ -399,7 +399,7 @@ POSITION Pos;
         int32_t Value = pAnimate->m_PathCB(pAnimate);
         if(Value != pAnimate->m_CurrentValue) {
           pAnimate->m_CurrentValue = Value;
-          if(pAnimate->m_AnimateCB) pAnimate->m_AnimateCB(pAnimate->m_pItem, Value);	// Apply the calculated value
+          if(pAnimate->m_AnimateCB) pAnimate->m_AnimateCB(pAnimate, Value);	// Apply the calculated value
         }
         if(pAnimate->m_ActiveTime >= pAnimate->m_Time) {// If the time has elapsed the animation has ended
 					EndHandler(pAnimate);

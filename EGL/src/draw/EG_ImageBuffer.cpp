@@ -296,7 +296,7 @@ uint32_t EGImageBuffer::CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height,
 	switch(ColorFormat) {
 		case EG_COLOR_FORMAT_NATIVE:
 			return EG_IMG_BUF_SIZE_TRUE_COLOR(Width, Height);
-		case EG_COLOR_FORMAT_NATIVE_ALPHA:
+    case EG_COLOR_FORMAT_RAW_ALPHA:
 		case EG_COLOR_FORMAT_RGB565A8:
 			return EG_IMG_BUF_SIZE_TRUE_COLOR_ALPHA(Width, Height);
 		case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
@@ -324,8 +324,8 @@ uint32_t EGImageBuffer::CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height,
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGImageBuffer::GetTransformedRect(EGRect *pRect, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, uint16_t ScaleX,
-                                        uint16_t ScaleY, const EGPoint *pPivot)
+void EGImageBuffer::GetTransformedRect(EGRect *pRect, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, uint16_t Zoom,
+                                        const EGPoint *pPivot)
 {
 #if EG_DRAW_COMPLEX
 EGPoint Point1(0,0);
@@ -333,17 +333,17 @@ EGPoint Point2(Width,0);
 EGPoint Point3(0,Height);
 EGPoint Point4(Width,Height);
 
-  if((Angle == 0) && (ScaleX == EG_SCALE_NONE) && (ScaleY == EG_SCALE_NONE)) {
+  if(Angle == 0 && Zoom == EG_SCALE_NONE) {
 		pRect->SetX1(0);
 		pRect->SetY1(0);
 		pRect->SetX2(Width - 1);
 		pRect->SetY2(Height - 1);
 		return;
 	}
-	Point1.PointTransform(Angle, ScaleX, ScaleY, pPivot, true);
-	Point2.PointTransform(Angle, ScaleX, ScaleY, pPivot, true);
-	Point3.PointTransform(Angle, ScaleX, ScaleY, pPivot, true);
-	Point4.PointTransform(Angle, ScaleX, ScaleY, pPivot, true);
+	Point1.PointTransform(Angle, Zoom, pPivot);
+	Point2.PointTransform(Angle, Zoom, pPivot);
+	Point3.PointTransform(Angle, Zoom, pPivot);
+	Point4.PointTransform(Angle, Zoom, pPivot);
 	pRect->SetX1(EG_MIN4(Point1.m_X, Point2.m_X, Point3.m_X, Point4.m_X) - 2);
 	pRect->SetX2(EG_MAX4(Point1.m_X, Point2.m_X, Point3.m_X, Point4.m_X) + 2);
 	pRect->SetY1(EG_MIN4(Point1.m_Y, Point2.m_Y, Point3.m_Y, Point4.m_Y) - 2);

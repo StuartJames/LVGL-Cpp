@@ -125,8 +125,8 @@ public:
   uint8_t             m_Antialias : 1;  // Apply anti-aliasing in transformations (rotate, zoom)
   uint8_t             m_SizeMode: 2;    // Image size mode when image size and object size is different.
   EG_ImageAlign_e     m_Align;
-  uint16_t            m_ScaleX;
-  uint16_t            m_ScaleY;
+  EG_Coord_t          m_ScaleX;
+  EG_Coord_t          m_ScaleY;
 
 private:
   void                ScaleUpdate(int32_t ScaleX, int32_t ScaleY);

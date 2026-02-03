@@ -68,7 +68,7 @@ public:
   static void         EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
   static void         LabelEventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
   static void         ScrollAnimateEndCB(EGAnimate *pAnimate);
-  static void         SetAnimateY(void *pObj, int32_t v);
+  static void         SetAnimateY(EGAnimate *pAnimate, int32_t v);
 
   uint16_t            m_ItemCount;          //  Number of options
   uint16_t            m_CurrentItemIndex;   //  Index of the current option

@@ -105,9 +105,9 @@ public:
 private:
   static void         LoadScreenPrivate(EGObject * scr);
   static void         LoadAnimationStart(EGAnimate *pAnimate);
-  static void         OpaScaleAnimation(void *obj, int32_t v);
-  static void         SetAnimationX(void *obj, int32_t v);
-  static void         SetAnimationY(void *obj, int32_t v);
+  static void         OpaScaleAnimation(EGAnimate *pAnimate, int32_t v);
+  static void         SetAnimationX(EGAnimate *pAnimate, int32_t v);
+  static void         SetAnimationY(EGAnimate *pAnimate, int32_t v);
   static void         AnimationEnd(EGAnimate *pAnimate);
   static bool         IsOutAnimation(EG_ScreenAnimateType_t a);
 

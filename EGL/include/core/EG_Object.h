@@ -307,10 +307,10 @@ public:
   static EG_StyleResult_t GetPropertyCore(const EGObject *pObj, EGPart_t Part, EGStyleProperty_e Property, EG_StyleValue_t *pValue);
   static EG_OPA_t         GetOPARecursive(EGObject *pObj, EGPart_t Part);
   static void             EnableStyleRefresh(bool Enable);
-  static void             TransitionAnimationCB(void *pTrans, int32_t Value);
+  static void             TransitionAnimationCB(EGAnimate *pAnimation, int32_t Value);
   static void             TransitionAnimationStartCB(EGAnimate *pAnimation);
   static void             TransitionAnimationEndCB(EGAnimate *pAnimation);
-  static void             FadeAnimationCB(void *pObj, int32_t Value);
+  static void             FadeAnimationCB(EGAnimate *pAnimation, int32_t Value);
   static void             FadeInAnimationEnd(EGAnimate *pAnimation);
 
   EG_ObjStyle_t          *m_pStyles;
@@ -639,8 +639,8 @@ public:
   void                    ScrollbarInvalidate(void); // Invalidate the area of the scrollbars
   void                    ReadjustScroll(EG_AnimateEnable_e AnimateEnable); // Checks if the content is scrolled "in" and adjusts it to a normal position.
 
-  static void             ScrollAnimatedX(void *pObj, int32_t v);
-  static void             ScrollAnimatedY(void *pObj, int32_t v);
+  static void             ScrollAnimatedX(EGAnimate *pAnimate, int32_t v);
+  static void             ScrollAnimatedY(EGAnimate *pAnimate, int32_t v);
   static void             ScrollAnimatedEndCB(EGAnimate *pAnimate);
 
 private:

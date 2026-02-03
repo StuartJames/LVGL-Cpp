@@ -58,25 +58,25 @@
 #define _EG_ZOOM_INV_UPSCALE 5
 
 #if EG_BIG_ENDIAN_SYSTEM
-typedef struct {
 
-    uint32_t Height : 11; // Height of the image map
-    uint32_t Width : 11; // Width of the image map
-    uint32_t Reserved : 2; // Reserved to be used later
-    uint32_t AlwaysZero : 3; // It's the upper bits of the first byte. Always zero to look like a non-printable character
-    uint32_t ColorFormat : 5;          // Color format: See `lv_img_color_format_t`
+typedef struct {
+    uint32_t Height : 11;     // Height of the image map
+    uint32_t Width : 11;      // Width of the image map
+    uint32_t Reserved : 2;    // Reserved to be used later
+    uint32_t AlwaysZero : 3;  // It's the upper bits of the first byte. Always zero to look like a non-printable character
+    uint32_t ColorFormat : 5; // Color format: See `lv_img_color_format_t`
 } EG_ImageHeader_t;
+
 #else
+
 typedef struct {
-
-    uint32_t ColorFormat : 5;          // Color format: See `lv_img_color_format_t`
-    uint32_t AlwaysZero : 3; // It the upper bits of the first byte. Always zero to look like a non-printable character
-
-    uint32_t Reserved : 2; // Reserved to be used later
-
-    uint32_t Width : 11; // Width of the image map
-    uint32_t Height : 11; // Height of the image map
+    uint32_t ColorFormat : 5; // Color format: See `lv_img_color_format_t`
+    uint32_t AlwaysZero : 3;  // It the upper bits of the first byte. Always zero to look like a non-printable character
+    uint32_t Reserved : 2;    // Reserved to be used later
+    uint32_t Width : 11;      // Width of the image map
+    uint32_t Height : 11;     // Height of the image map
 } EG_ImageHeader_t;
+
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -96,8 +96,8 @@ public:
   void            SetPalette(uint8_t ID, EG_Color_t Color);
   uint32_t        CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat);
 
-  static void     GetTransformedRect(EGRect * res, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, uint16_t ScaleX,
-                                        uint16_t ScaleY, const EGPoint *pPivot);
+  static void     GetTransformedRect(EGRect * res, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, uint16_t Zoom,
+                                        const EGPoint *pPivot);
 
   EG_ImageHeader_t  m_Header; // A header describing the basics of the image
   uint32_t          m_DataSize;     // Size of the image in bytes

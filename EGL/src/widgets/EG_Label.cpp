@@ -1029,18 +1029,18 @@ void EGLabel::FreeDotTemp(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGLabel::SetAnimateOffsetX(void *pLabel, int32_t X)
+void EGLabel::SetAnimateOffsetX(EGAnimate *pAnimate, int32_t X)
 {
-	((EGLabel*)pLabel)->m_Offset.m_X = X;
-	((EGLabel*)pLabel)->Invalidate();
+	((EGLabel*)pAnimate->m_pItem)->m_Offset.m_X = X;
+	((EGLabel*)pAnimate->m_pItem)->Invalidate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGLabel::SetAnimateOffsetY(void *pLabel, int32_t Y)
+void EGLabel::SetAnimateOffsetY(EGAnimate *pAnimate, int32_t Y)
 {
-	((EGLabel*)pLabel)->m_Offset.m_Y = Y;
-	((EGLabel*)pLabel)->Invalidate();
+	((EGLabel*)pAnimate->m_pItem)->m_Offset.m_Y = Y;
+	((EGLabel*)pAnimate->m_pItem)->Invalidate();
 }
 
 #endif

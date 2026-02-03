@@ -369,9 +369,9 @@ void EGObject::TransitionAnimationStartCB(EGAnimate *pAnimation)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGObject::TransitionAnimationCB(void *pTrans, int32_t Value)
+void EGObject::TransitionAnimationCB(EGAnimate *pAnimation, int32_t Value)
 {
-Transition_t *pTransition = (Transition_t*)pTrans;
+Transition_t *pTransition = (Transition_t*)pAnimation->m_pItem;
 EGObject *pObj = pTransition->pObj;
 EG_StyleValue_t FinalValue, OldValue;
 bool Refresh = true;
@@ -466,9 +466,9 @@ bool Running = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGObject::FadeAnimationCB(void *pObj, int32_t Value)
+void EGObject::FadeAnimationCB(EGAnimate *pAnimation, int32_t Value)
 {
-	((EGObject*)pObj)->SetStyleOPA(Value, 0);
+	((EGObject*)pAnimation->m_pItem)->SetStyleOPA(Value, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

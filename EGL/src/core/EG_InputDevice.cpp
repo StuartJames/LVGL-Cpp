@@ -898,8 +898,8 @@ void EGInputDevice::ReleaseProcess(EG_ProcessedInput_t *pProcess)
 			if(Angle != 0 || Zoom != EG_SCALE_NONE) {
 				Angle = -Angle;
 				Zoom = (256 * 256) / Zoom;
-				pProcess->Pointer.ScrollThrowVector.PointTransform(Angle, Zoom, Zoom, &Pivot);
-				pProcess->Pointer.LastScrollThrowVector.PointTransform(Angle, Zoom, Zoom, &Pivot);
+				pProcess->Pointer.ScrollThrowVector.PointTransform(Angle, Zoom, &Pivot);
+				pProcess->Pointer.LastScrollThrowVector.PointTransform(Angle, Zoom, &Pivot);
 			}
 		}
 	}

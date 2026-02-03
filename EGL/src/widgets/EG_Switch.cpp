@@ -166,11 +166,11 @@ void EGSwitch::DrawMain(EGEvent *pEvent)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGSwitch::AnimateExecCB(void *pObject, int32_t Value)
+void EGSwitch::AnimateExecCB(EGAnimate *pAnimate, int32_t Value)
 {
-	EGSwitch *pSwitch = (EGSwitch*)pObject;
+	EGSwitch *pSwitch = (EGSwitch*)pAnimate->m_pItem;
 	pSwitch->m_AnimateState = Value;
-	((EGSwitch*)pObject)->Invalidate();
+	pSwitch->Invalidate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

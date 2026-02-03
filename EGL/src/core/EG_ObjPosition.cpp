@@ -1020,7 +1020,7 @@ void EGObject::TransformCore(EGPoint *pPoint, bool Invert)
 		Angle = -Angle;
 		Zoom = (256 * 256) / Zoom;
 	}
-	pPoint->PointTransform(Angle, Zoom, Zoom, &Pivot);
+	pPoint->PointTransform(Angle, Zoom, &Pivot);
 }
 
 

@@ -49,7 +49,7 @@ public:
   void                  TriggerAnimate(void);
 
   static void           EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
-  static void           AnimateExecCB(void *pObject, int32_t Value);
+  static void           AnimateExecCB(EGAnimate *pAnimate, int32_t Value);
   static void           AnimateEndCB(EGAnimate *pAnimate);
 
   int32_t               m_AnimateState;

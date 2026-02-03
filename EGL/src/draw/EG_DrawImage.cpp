@@ -216,7 +216,7 @@ EG_Result_t EG_ATTRIBUTE_FAST_MEM EGDrawImage::PreDraw(const EGRect *pRect, cons
 		if(m_Angle || m_Zoom != EG_SCALE_NONE) {
 			int32_t Width = pRect->GetWidth();
 			int32_t Height = pRect->GetHeight();
-			EGImageBuffer::GetTransformedRect(&MapRectRotate, Width, Height, m_Angle, m_Zoom, m_Zoom, &m_Pivot);
+			EGImageBuffer::GetTransformedRect(&MapRectRotate, Width, Height, m_Angle, m_Zoom, &m_Pivot);
 			MapRectRotate.Move(pRect->GetX1(), pRect->GetY1());
 		}
 		EGRect CommonClip;          // Common area of mask and area

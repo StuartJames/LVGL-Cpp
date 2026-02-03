@@ -429,23 +429,23 @@ void EGDisplay::LoadAnimationStart(EGAnimate *pAnimate)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::OpaScaleAnimation(void *pObj, int32_t Value)
+void EGDisplay::OpaScaleAnimation(EGAnimate *pAnimate, int32_t Value)
 {
-	((EGObject*)pObj)->SetStyleOPA(Value, 0);
+	((EGObject*)pAnimate->m_pItem)->SetStyleOPA(Value, 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetAnimationX(void *pObj, int32_t Value)
+void EGDisplay::SetAnimationX(EGAnimate *pAnimate, int32_t Value)
 {
-	((EGObject*)pObj)->SetX(Value);
+	((EGObject*)pAnimate->m_pItem)->SetX(Value);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetAnimationY(void *pObj, int32_t Value)
+void EGDisplay::SetAnimationY(EGAnimate *pAnimate, int32_t Value)
 {
-	((EGObject*)pObj)->SetY(Value);
+	((EGObject*)pAnimate->m_pItem)->SetY(Value);
 }
 
 /////////////////////////////////////////////////////////////////////////////

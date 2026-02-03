@@ -224,7 +224,7 @@ void EGImage::SetRotation(int16_t Angle)
 	EG_Coord_t Width = GetWidth();
 	EG_Coord_t Height = GetHeight();
 	EGRect Rect;
-	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
 	InvalidateArea( &Rect);
 	m_Rotation = Angle;
@@ -233,7 +233,7 @@ void EGImage::SetRotation(int16_t Angle)
 	EGDisplay::EnableInvalidation(pDisplay, false);
 	RefreshExtDrawSize();
 	EGDisplay::EnableInvalidation(pDisplay, true);
-	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
 	InvalidateArea(&Rect);
 }
@@ -254,7 +254,7 @@ void EGImage::SetPivot(EGPoint Pivot)
 	EG_Coord_t Width = GetWidth();
 	EG_Coord_t Height = GetHeight();
 	EGRect Rect;
-	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
 	InvalidateArea(&Rect);
 	m_Pivot = Pivot;
@@ -263,7 +263,7 @@ void EGImage::SetPivot(EGPoint Pivot)
 	EGDisplay::EnableInvalidation(pDisplay, false);
 	RefreshExtDrawSize();
 	EGDisplay::EnableInvalidation(pDisplay, true);
-	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
 	InvalidateArea(&Rect);
 }
@@ -278,7 +278,7 @@ void EGImage::SetZoom(uint16_t Zoom)
 	EG_Coord_t Width = GetWidth();
 	EG_Coord_t Height = GetHeight();
 	EGRect Rect;
-	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom >> 8, m_Zoom >> 8, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom >> 8, &m_Pivot);
 	Rect.IncX1(m_Rect.GetX1() - 1);
 	Rect.IncY1(m_Rect.GetY1() - 1);
 	Rect.IncX2(m_Rect.GetX1() + 1);
@@ -289,7 +289,7 @@ void EGImage::SetZoom(uint16_t Zoom)
 	EGDisplay::EnableInvalidation(pDisplay, false);
 	RefreshExtDrawSize();
 	EGDisplay::EnableInvalidation(pDisplay, true);
-	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, m_Zoom, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 	Rect.IncX1(m_Rect.GetX1() - 1);
 	Rect.IncY1(m_Rect.GetY1() - 1);
 	Rect.IncX2(m_Rect.GetX1() + 1);
@@ -366,7 +366,7 @@ EGPoint EGImage::GetTransformedSize(void)
 {
 EGRect Rect;
 
-	EGImageBuffer::GetTransformedRect(&Rect, m_Width, m_Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+	EGImageBuffer::GetTransformedRect(&Rect, m_Width, m_Height, m_Rotation, m_Zoom, &m_Pivot);
 	return EGPoint(Rect.GetWidth(), Rect.GetHeight());
 }
 
@@ -400,7 +400,7 @@ void EGImage::Event(EGEvent *pEvent)
 			EGRect Rect;
 			EG_Coord_t Width = GetWidth();
 			EG_Coord_t Height = GetHeight();
-			EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+			EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 			*pSize = EG_MAX(*pSize, -Rect.GetX1());
 			*pSize = EG_MAX(*pSize, -Rect.GetY1());
 			*pSize = EG_MAX(*pSize, Rect.GetX2() - Width);
@@ -415,7 +415,7 @@ void EGImage::Event(EGEvent *pEvent)
 			EG_Coord_t Width = GetWidth();
 			EG_Coord_t Height = GetHeight();
 			EGRect Rect;
-			EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &m_Pivot);
+			EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Zoom, &m_Pivot);
 			Rect.IncX1(m_Rect.GetX1());
 			Rect.IncY1(m_Rect.GetY1());
 			Rect.IncX2(m_Rect.GetX1());
@@ -478,7 +478,7 @@ void EGImage::Draw(EGEvent *pEvent)
 		}
 		else {
 			EGRect Rect;
-			EGImageBuffer::GetTransformedRect(&Rect, GetWidth(), GetHeight(), 0, m_Zoom, m_Zoom, &m_Pivot);
+			EGImageBuffer::GetTransformedRect(&Rect, GetWidth(), GetHeight(), 0, m_Zoom, &m_Pivot);
 			Rect.IncX1(m_Rect.GetX1());
 			Rect.IncY1(m_Rect.GetY1());
 			Rect.IncX2(m_Rect.GetX1());
@@ -505,7 +505,7 @@ void EGImage::Draw(EGEvent *pEvent)
     	m_Rect.Copy(&BackgroundRect);	// Object size equals to transformed image size
 		}
 		else {
-			EGImageBuffer::GetTransformedRect(&BackgroundRect, Width, Height, m_Rotation, m_Zoom, m_Zoom, &BackgroundPivot);
+			EGImageBuffer::GetTransformedRect(&BackgroundRect, Width, Height, m_Rotation, m_Zoom, &BackgroundPivot);
 			BackgroundRect.Move(m_Rect.GetX1(), m_Rect.GetY1()); // Modify the coordinates to draw the background for the rotated and scaled coordinates
 		}
 		EGRect OriginalRect(m_Rect);
@@ -578,7 +578,7 @@ void EGImage::ScaleUpdate(int32_t ScaleX, int32_t ScaleY)
     int32_t Height = GetHeight();
     EGRect Rect;
     EGPoint PivotPoint = m_Pivot;
-    EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &PivotPoint);
+    EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, /*m_ScaleX,*/ m_ScaleY, &PivotPoint);
     Rect.Move(m_Rect.GetX1() - 1, m_Rect.GetY1() - 1, m_Rect.GetX1() + 1, m_Rect.GetY1() + 1);
     InvalidateArea(&Rect);
     m_ScaleX = ScaleX;
@@ -588,7 +588,7 @@ void EGImage::ScaleUpdate(int32_t ScaleX, int32_t ScaleY)
     EGDisplay::EnableInvalidation(pDisp, false);
     RefreshExtDrawSize();
     EGDisplay::EnableInvalidation(pDisp, true);
-    EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_ScaleX, m_ScaleY, &PivotPoint);
+    EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, /*m_ScaleX,*/ m_ScaleY, &PivotPoint);
     Rect.Move(m_Rect.GetX1() - 1, m_Rect.GetY1() - 1, m_Rect.GetX1() + 1, m_Rect.GetY1() + 1);
     InvalidateArea(&Rect);
 }
@@ -605,7 +605,8 @@ void EGImage::UpdateAlign(void)
         UpdateLayout();
         int32_t ScaleX = GetWidth() * EG_SCALE_NONE / m_Width;
         int32_t ScaleY = GetHeight() * EG_SCALE_NONE / m_Height;
-        ScaleUpdate(ScaleX, ScaleY);
+        int32_t Scale = EG_MIN(ScaleX, ScaleY);   // REMOVE THIS
+        ScaleUpdate(Scale, Scale);
       }
       break;
     }

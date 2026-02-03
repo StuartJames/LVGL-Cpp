@@ -55,7 +55,7 @@ void EGInputDevice::ScrollHandler(EG_ProcessedInput_t *pProcess)
 		Angle = -Angle;
 		Zoom = (256 * 256) / Zoom;
 		EGPoint Pivot = {0, 0};
-		pProcess->Pointer.Vector.PointTransform(Angle, Zoom, Zoom, &Pivot);
+		pProcess->Pointer.Vector.PointTransform(Angle, Zoom, &Pivot);
 	}
 	EG_Coord_t DifferenceX = 0;
 	EG_Coord_t DifferenceY = 0;
@@ -234,7 +234,7 @@ bool HorizontalEnable = false, VerticalEnable = false;
 		if(Angle != 0 || Zoom != EG_SCALE_NONE) {
 			Angle = -Angle;
 			Zoom = (256 * 256) / Zoom;
-			ScrollSum.PointTransform(Angle, Zoom, Zoom, &Pivot);
+			ScrollSum.PointTransform(Angle, Zoom, &Pivot);
 		}
 		if(EG_ABS(ScrollSum.m_X) > EG_ABS(ScrollSum.m_Y)) HorizontalEnable = true; // Decide if it's a horizontal or vertical scroll
 		else VerticalEnable = true;

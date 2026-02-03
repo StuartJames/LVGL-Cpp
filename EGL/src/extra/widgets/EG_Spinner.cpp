@@ -82,16 +82,16 @@ void EGSpinner::Configure(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGSpinner::StartAngle(void *pObj, int32_t Angle)
+void EGSpinner::StartAngle(EGAnimate *pAnimation, int32_t Angle)
 {
-	((EGArc*)pObj)->SetStartAngle((uint16_t)Angle);
+	((EGArc*)pAnimation->m_pItem)->SetStartAngle((uint16_t)Angle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGSpinner::EndAngle(void *pObj, int32_t Angle)
+void EGSpinner::EndAngle(EGAnimate *pAnimation, int32_t Angle)
 {
-	((EGArc*)pObj)->SetEndAngle((uint16_t)Angle);
+	((EGArc*)pAnimation->m_pItem)->SetEndAngle((uint16_t)Angle);
 }
 
 #endif 

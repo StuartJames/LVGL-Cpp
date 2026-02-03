@@ -44,6 +44,30 @@
 EG_EXPORT_CONST_INT(EG_COLOR_DEPTH);
 EG_EXPORT_CONST_INT(EG_COLOR_16_SWAP);
 
+/**
+ * Opacity percentages.
+ */
+enum {
+	EG_OPA_TRANSP = 0,
+	EG_OPA_0 = 0,
+	EG_OPA_MIN = 2,
+	EG_OPA_10 = 25,
+	EG_OPA_20 = 51,
+	EG_OPA_30 = 76,
+	EG_OPA_40 = 102,
+	EG_OPA_50 = 127,
+	EG_OPA_60 = 153,
+	EG_OPA_70 = 178,
+	EG_OPA_80 = 204,
+	EG_OPA_90 = 229,
+	EG_OPA_MAX = 253,
+	EG_OPA_100 = 255,
+	EG_OPA_COVER = 255,
+};
+
+#define EG_OPA_MIN 2   /*Opacities below this will be transparent*/
+#define EG_OPA_MAX 253 /*Opacities above this will fully cover*/
+
 #if EG_COLOR_DEPTH == 1
 #define EG_COLOR_SIZE 8
 #elif EG_COLOR_DEPTH == 8
@@ -245,26 +269,6 @@ typedef struct EG_ColorFilterProps_t {
 	void *pParam;
 } EG_ColorFilterProps_t;
 
-// Opacity percentages.
-enum {
-	EG_OPA_TRANSP = 0,
-	EG_OPA_0 = 0,
-	EG_OPA_MIN = 2,      // Opacities below this will be transparent
-	EG_OPA_10 = 25,
-	EG_OPA_20 = 51,
-	EG_OPA_30 = 76,
-	EG_OPA_40 = 102,
-	EG_OPA_50 = 127,
-	EG_OPA_60 = 153,
-	EG_OPA_70 = 178,
-	EG_OPA_80 = 204,
-	EG_OPA_90 = 229,
-	EG_OPA_MAX = 253,       // Opacities above this will fully cover
-	EG_OPA_100 = 255,
-	EG_OPA_COVER = 255,
-};
-
-
 typedef enum : uint8_t {
 	EG_PALETTE_RED,          // 00
 	EG_PALETTE_PINK,         // 01
@@ -314,28 +318,10 @@ typedef enum EG_ImageColorFormat_t : uint8_t{
     EG_COLOR_FORMAT_RGB888,
     EG_COLOR_FORMAT_RGBA8888,
     EG_COLOR_FORMAT_RGBX8888,
-    EG_COLOR_FORMAT_RGB565,
-    EG_COLOR_FORMAT_RGBA5658,
-    EG_COLOR_FORMAT_RGB565A8,
+    EG_COLOR_FORMAT_RGB565,                   // Format 2 bytes: Red: 5 bit, Green: 6 bit, Blue: 5 bit
+    EG_COLOR_FORMAT_RGBA8565,                 // Format 3 bytes: Alpha 8 bit, Red: 5 bit, Green: 6 bit, Blue: 5 bit
+    EG_COLOR_FORMAT_RGB565A8,                 // Format 3 bytes: Red: 5 bit, Green: 6 bit, Blue: 5 bit, Alpha 8 bit
 
-    EG_COLOR_FORMAT_RESERVED_15,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_16,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_17,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_18,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_19,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_20,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_21,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_22,              // Reserved for further use.
-    EG_COLOR_FORMAT_RESERVED_23,              // Reserved for further use.
-
-    EG_COLOR_FORMAT_USER_ENCODED_0,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_1,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_2,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_3,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_4,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_5,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_6,           // User holder encoding format.
-    EG_COLOR_FORMAT_USER_ENCODED_7,           // User holder encoding format.
 } EG_ImageColorFormat_t;
 
 /////////////////////////////////////////////////////////////////////////////

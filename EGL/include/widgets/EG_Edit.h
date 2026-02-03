@@ -94,8 +94,8 @@ public:
   void                Event(EGEvent *pEvent);
 
   static void         EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
-  static void         CursorBlinkAnimateCB(void *pObj, int32_t Show);
-  static void         PWDCharHiderAnimate(void *pObj, int32_t X);
+  static void         CursorBlinkAnimateCB(EGAnimate *pAnimate, int32_t Show);
+  static void         PWDCharHiderAnimate(EGAnimate *pAnimate, int32_t X);
   static void         PWDCharHiderAnimateEnd(EGAnimate *pAnimate);
 
   char               *m_pPromptText;      // Place holder label. only visible if text is an empty string

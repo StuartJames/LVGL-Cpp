@@ -47,8 +47,8 @@ public:
   virtual void      Configure(void);
 
 private:
-  static void       StartAngle(void *pObj, int32_t Angle);
-  static void       EndAngle(void *pObj, int32_t Angle);
+  static void       StartAngle(EGAnimate *pAnimation, int32_t Angle);
+  static void       EndAngle(EGAnimate *pAnimation, int32_t Angle);
 
   uint32_t          m_TimeParam;
   uint32_t          m_ArcLengthParam;

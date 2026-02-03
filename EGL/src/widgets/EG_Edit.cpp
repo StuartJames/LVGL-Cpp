@@ -796,9 +796,9 @@ void EGEdit::UpdateCursorPositionOnClick(EGEvent *pEvent)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGEdit::CursorBlinkAnimateCB(void *pObj, int32_t Show)
+void EGEdit::CursorBlinkAnimateCB(EGAnimate *pAnimate, int32_t Show)
 {
-	EGEdit *pEdit = (EGEdit *)pObj;
+	EGEdit *pEdit = (EGEdit *)pAnimate->m_pItem;
 	if(Show != pEdit->m_Cursor.Show) {
 		pEdit->m_Cursor.Show = Show ? 1U : 0U;
 		pEdit->InvalidateArea(&pEdit->m_BlinkRect);
@@ -807,9 +807,9 @@ void EGEdit::CursorBlinkAnimateCB(void *pObj, int32_t Show)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGEdit::PWDCharHiderAnimate(void *pObj, int32_t X)
+void EGEdit::PWDCharHiderAnimate(EGAnimate *pAnimate, int32_t X)
 {
-	EG_UNUSED(pObj);
+	EG_UNUSED(pAnimate);
 	EG_UNUSED(X);
 }
 

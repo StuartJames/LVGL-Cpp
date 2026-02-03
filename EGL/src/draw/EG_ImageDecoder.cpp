@@ -390,11 +390,9 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 #error "Invalid EG_COLOR_DEPTH. Check it in EG_Config.h"
 #endif
 	}
-
 	const EG_OPA_t *opa_table = nullptr;
 	uint8_t PixelSize = EGDrawImage::GetPixelSize((EG_ImageColorFormat_t)pDescriptor->Header.ColorFormat);
 	uint16_t mask = (1 << PixelSize) - 1; // E.g. PixelSize = 2; mask = 0x03
-
 	EG_Coord_t Width = 0;
 	uint32_t ofs = 0;
 	int8_t pos = 0;
@@ -432,7 +430,7 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 	}
 	else {
 		m_File.Seek(ofs + 4, EG_FS_SEEK_SET); // +4 to skip the Header
-		m_File.Read(fs_buf, Width, NULL);
+		m_File.Read(fs_buf, Width, nullptr);
 		data_tmp = fs_buf;
 	}
 
@@ -489,20 +487,18 @@ EG_Result_t EGDecoderBuiltIn::Indexed(ImageDecoderDescriptor_t *pDescriptor, EG_
 			break;
 	}
 	uint8_t *fs_buf = (uint8_t*)EG_GetBufferMem(Width);
-	if(fs_buf == NULL) return EG_RES_INVALID;
-	const uint8_t *data_tmp = NULL;
+	if(fs_buf == nullptr) return EG_RES_INVALID;
+	const uint8_t *data_tmp = nullptr;
 	if(pDescriptor->SourceType == EG_IMG_SRC_VARIABLE) {
 		const EGImageBuffer *pImageBuffer = (EGImageBuffer*)pDescriptor->pSource;
 		data_tmp = pImageBuffer->m_pData + ofs;
 	}
 	else {
 		m_File.Seek(ofs + 4, EG_FS_SEEK_SET); // +4 to skip the Header
-		m_File.Read(fs_buf, Width, NULL);
+		m_File.Read(fs_buf, Width, nullptr);
 		data_tmp = fs_buf;
 	}
-
-	EG_Coord_t i;
-	for(i = 0; i < Length; i++) {
+	for(EG_Coord_t i = 0; i < Length; i++) {
 		uint8_t val_act = (*data_tmp >> pos) & mask;
 
 		EG_Color_t Color = m_pPalette[val_act];

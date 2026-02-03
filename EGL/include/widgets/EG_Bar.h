@@ -75,7 +75,7 @@ public:
   EG_BarMode_e      GetMode(void) const;
 
   static void       Event(const EG_ClassType_t *pClass, EGEvent *pEvent);
-  static void       Animate(void *pValue, int32_t value);
+  static void       Animate(EGAnimate *pAnimate, int32_t value);
   static void       AnimateEnd(EGAnimate *pAnimation);
 
   int32_t           m_CurrentValue;          // Current value of the bar
