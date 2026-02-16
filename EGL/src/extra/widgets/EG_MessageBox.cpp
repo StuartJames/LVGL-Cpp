@@ -90,60 +90,65 @@ EGMessageBox::EGMessageBox(EGObject *pParent, const char *pTitle, const char *pT
   m_pText(nullptr),
   m_pButtons(nullptr)
 {
-	bool AutoParent = false;
+bool AutoParent = false;
+
 	if(pParent == nullptr) {
 		AutoParent = true;
 		pParent = new EGObject(EGTopLayer(), &c_MsgBoxBackdropClass);
 		pParent->ClearFlag(EG_OBJ_FLAG_IGNORE_LAYOUT);
 		pParent->SetSize(_EG_PCT(100), _EG_PCT(100));
 	}
-	EGObject *pObj = new EGObject(pParent, &c_MsgBoxClass);
-	if(pObj == NULL) return;
-	EGMessageBox *pMsgBox = (EGMessageBox*)pObj;
-	if(AutoParent) pMsgBox->AddFlag(LV_MSGBOX_FLAG_AUTO_PARENT);
-	EGFlexLayout::SetObjFlow(pMsgBox, EG_FLEX_FLOW_ROW_WRAP);
+	if(AutoParent) AddFlag(LV_MSGBOX_FLAG_AUTO_PARENT);
 	bool HasTitle = pTitle && strlen(pTitle) > 0;
 	// When a close button is required, we need the empty pLabel as spacer to push the button to the right
 	if(HasCloseButton || HasTitle) {
-		pMsgBox->m_pTitle = new EGLabel(pObj);
-		pMsgBox->m_pTitle->SetText(HasTitle ? pTitle : "");
-		pMsgBox->m_pTitle->SetLongMode(EG_LABEL_LONG_SCROLL_CIRCULAR);
-		if(HasCloseButton)	EGFlexLayout::SetObjGrow(pMsgBox->m_pTitle, 1);
-		else pMsgBox->m_pTitle->SetWidth(_EG_PCT(100));
+		m_pTitle = new EGLabel(this);
+		m_pTitle->SetText(HasTitle ? pTitle : "");
+		m_pTitle->SetLongMode(EG_LABEL_LONG_SCROLL_CIRCULAR);
+		if(HasCloseButton)	EGFlexLayout::SetObjGrow(m_pTitle, 1);
+		else m_pTitle->SetWidth(_EG_PCT(100));
 	}
 	if(HasCloseButton) {
-		pMsgBox->m_pCloseButton = new EGButton(pObj);
-		pMsgBox->m_pCloseButton->SetExtClickArea(EG_DPX(10));
-		EGEvent::AddEventCB(pMsgBox->m_pCloseButton, EGMessageBox::ClickEventCB, EG_EVENT_CLICKED, nullptr);
-		EGLabel *pLabel = new EGLabel(pMsgBox->m_pCloseButton);
+		m_pCloseButton = new EGButton(this);
+		m_pCloseButton->SetExtClickArea(EG_DPX(10));
+		EGEvent::AddEventCB(m_pCloseButton, EGMessageBox::ClickEventCB, EG_EVENT_CLICKED, nullptr);
+		EGLabel *pLabel = new EGLabel(m_pCloseButton);
 		pLabel->SetText(EG_SYMBOL_CLOSE);
-		const EG_Font_t *pFont = pMsgBox->m_pCloseButton->GetStyleTextFont(EG_PART_MAIN);
+		const EG_Font_t *pFont = m_pCloseButton->GetStyleTextFont(EG_PART_MAIN);
 		EG_Coord_t CloseSize = EG_FontGetLineHeight(pFont) + EG_DPX(10);
-		pMsgBox->m_pCloseButton->SetSize(CloseSize, CloseSize);
+		m_pCloseButton->SetSize(CloseSize, CloseSize);
 		pLabel->Align(EG_ALIGN_CENTER, 0, 0);
 	}
-	pMsgBox->m_pContent = new EGObject(pObj, &c_MsgBoxContentClass);
-	if(pMsgBox->m_pContent == NULL) return;
+	m_pContent = new EGObject(this, &c_MsgBoxContentClass);
+	if(m_pContent == NULL) return;
 	bool HasText = pText && strlen(pText) > 0;
 	if(HasText) {
-		pMsgBox->m_pText = new EGLabel(pMsgBox->m_pContent);
-		pMsgBox->m_pText->SetText(pText);
-		pMsgBox->m_pText->SetLongMode(EG_LABEL_LONG_WRAP);
-		pMsgBox->m_pText->SetWidth(EG_PCT(100));
+		m_pText = new EGLabel(m_pContent);
+		m_pText->SetText(pText);
+		m_pText->SetLongMode(EG_LABEL_LONG_WRAP);
+		m_pText->SetWidth(EG_PCT(100));
 	}
 	if(pButtonTexts) {
-		pMsgBox->m_pButtons = new EGButtonMatrix(pObj);
-		pMsgBox->m_pButtons->SetMap(pButtonTexts);
-		pMsgBox->m_pButtons->SetControlAll(EG_BTNMATRIX_CTRL_CLICK_TRIG | EG_BTNMATRIX_CTRL_NO_REPEAT);
+		m_pButtons = new EGButtonMatrix(this);
+		m_pButtons->SetMap(pButtonTexts);
+		m_pButtons->SetControlAll(EG_BTNMATRIX_CTRL_CLICK_TRIG | EG_BTNMATRIX_CTRL_NO_REPEAT);
 		uint32_t ButtonCount = 0;
 		while(pButtonTexts[ButtonCount] && pButtonTexts[ButtonCount][0] != '\0') ButtonCount++;
-		const EG_Font_t *font = pMsgBox->m_pButtons->GetStyleTextFont(EG_PART_ITEMS);
+		const EG_Font_t *font = m_pButtons->GetStyleTextFont(EG_PART_ITEMS);
 		EG_Coord_t btn_h = EG_FontGetLineHeight(font) + EG_DPI_DEF / 10;
-		pMsgBox->m_pButtons->SetSize(ButtonCount * (2 * EG_DPI_DEF / 3), btn_h);
-		pMsgBox->m_pButtons->SetStyleMaxWidth(EG_PCT(100), 0);
-		pMsgBox->m_pButtons->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE); // To see the event directly on the message box
+		m_pButtons->SetSize(ButtonCount * (2 * EG_DPI_DEF / 3), btn_h);
+		m_pButtons->SetStyleMaxWidth(EG_PCT(100), 0);
+		m_pButtons->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE); // To see the event directly on the message box
 	}
 	return;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void EGMessageBox::Configure(void)
+{
+  EGObject::Configure();
+	EGFlexLayout::SetObjFlow(this, EG_FLEX_FLOW_ROW_WRAP);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

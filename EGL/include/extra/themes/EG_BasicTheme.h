@@ -45,6 +45,7 @@ public:
   
 private:  
   void                  InitialiseStyles(void);
+  static EG_Color_t     GreyFilterCB(const EG_ColorFilterProps_t *pFilter, EG_Color_t Color, EG_OPA_t OPA);
   
   static EGBasicTheme*  m_pTheme;
   
@@ -55,6 +56,7 @@ private:
 	EGStyle               m_Dark;
 	EGStyle               m_Dim;
 	EGStyle               m_Scrollbar;
+	EGStyle               m_Disabled;
 #if EG_USE_ARC || EG_USE_COLORWHEEL
 	EGStyle               m_ArcLine;
 	EGStyle               m_ArcKnob;
@@ -62,6 +64,9 @@ private:
 #if EG_USE_TEXTAREA
 	EGStyle               m_TextCursor;
 #endif
+
+	static EG_ColorFilterProps_t     m_GreyFilter;
+
 };
 
 #endif

@@ -289,31 +289,34 @@ EG_ColorHSV_t EG_RGBToHSV(uint8_t r8, uint8_t g8, uint8_t b8)
 
 EG_ColorHSV_t EG_ColorToHSV(EG_Color_t Color)
 {
-	EG_Color32_t color32;
+EG_Color32_t color32;
+
 	color32.full = EG_ColorTo32(Color);
 	return EG_RGBToHSV(color32.ch.red, color32.ch.green, color32.ch.blue);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-uint32_t EG_ColorToInt(EG_Color_t c)
+uint32_t EG_ColorToInt(EG_Color_t Color)
 {
-    uint8_t *pTemp = (uint8_t *)&c;
-    return pTemp[0] + (pTemp[1] << 8) + (pTemp[2] << 16);
+uint32_t Color32 = (uint32_t)Color.full;
+uint8_t *pTemp = (uint8_t *)&Color32;
+
+  return pTemp[0] + (pTemp[1] << 8) + (pTemp[2] << 16);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 bool EG_ColorEqual(EG_Color_t c1, EG_Color_t c2)
 {
-    return EG_ColorToInt(c1) == EG_ColorToInt(c2);
+  return EG_ColorToInt(c1) == EG_ColorToInt(c2);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-bool EG_ColorEqual32(EG_Color_t c1, EG_Color_t c2)
+bool EG_ColorEqual32(EG_Color_t Color1, EG_Color_t Color2)
 {
-    return *((uint32_t *)&c1) == *((uint32_t *)&c2);
+  return Color1.full == Color2.full;
 }
 
 /////////////////////////////////////////////////////////////////////////////

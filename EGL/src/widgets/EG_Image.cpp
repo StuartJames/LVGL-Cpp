@@ -163,8 +163,8 @@ void EGImage::SetSource(const void *pSource)
 		if(m_pSource != pSource) {
 			const void *pOldSource = nullptr;
 			/*If memory was allocated because of the previous `SourceType` then save its pointer and free after allocation.
-             *It's important to allocate first to be sure the new data will be on a new address,
-             *otherwise `img_cache` wouldn't see the change in source.*/
+       *It's important to allocate first to be sure the new data will be on a new address,
+       *otherwise `img_cache` wouldn't see the change in source.*/
 			if(m_SourceType == EG_IMG_SRC_FILE || m_SourceType == EG_IMG_SRC_SYMBOL) {
 				pOldSource = m_pSource;
 			}

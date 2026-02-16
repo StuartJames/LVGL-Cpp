@@ -51,6 +51,7 @@ public:
                     EGMessageBox(void);
                     EGMessageBox(EGObject *pParent, const char *pTitle, const char *pText, const char *pButtonTexts[],
                        bool HasCloseButton, const EG_ClassType_t *pClassCnfg = &c_MsgBoxClass);
+  void              Configure(void);
   EGObject*         GetTitle(void){ return m_pTitle; };
   EGObject*         GetCloseButton(void){ return m_pCloseButton; };
   EGObject*         GetText(void){ return m_pText; };
