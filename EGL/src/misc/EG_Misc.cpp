@@ -21,29 +21,18 @@
  *
  */
 
-#pragma once
-
-#include <stdint.h>
+#include "misc/EG_Misc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-/** Searches base[0] to base[n - 1] for an item that matches *key.
- *
- * @note The function cmp must return negative if it's first
- *  argument (the search key) is less that it's second (a table entry),
- *  zero if equal, and positive if greater.
- *
- *  @note Items in the array must be in ascending order.
- *
- * @param key    Pointer to item being searched for
- * @param base   Pointer to first element to search
- * @param n      Number of elements
- * @param size   Size of each element
- * @param cmp    Pointer to comparison function (see #unicode_list_compare as a comparison function
- * example)
- *
- * @return a pointer to a matching item, or NULL if none exists.
- */
-void * _lv_utils_bsearch(const void * key, const void * base, uint32_t n, uint32_t size,
-                         int32_t (*cmp)(const void * pRef, const void * pElement));
+#if(!defined(EG_ENABLE_GC)) || EG_ENABLE_GC == 0
+    EG_ROOTS
+#endif
 
+/////////////////////////////////////////////////////////////////////////////
+
+void EG_GC_ClearRoots(void)
+{
+#define EG_CLEAR_ROOT(root_type, root_name) EG_ZeroMem(&EG_GC_ROOT(root_name), sizeof(EG_GC_ROOT(root_name)));
+    EG_ITERATE_ROOTS(EG_CLEAR_ROOT)
+}

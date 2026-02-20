@@ -24,7 +24,7 @@
 #include "core/EG_Object.h"
 #include "core/EG_ObjStyle.h"
 #include "core/EG_Display.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 //#include "core/EG_Object.h"
 
 #define OBJ_CLASS &c_ObjectClass

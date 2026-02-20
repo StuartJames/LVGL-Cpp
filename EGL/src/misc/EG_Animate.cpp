@@ -28,7 +28,7 @@
 #include "misc/EG_Timer.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Memory.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 #define EG_ANIM_RESOLUTION 1024
 #define EG_ANIM_RES_SHIFT 10

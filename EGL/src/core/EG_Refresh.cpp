@@ -29,7 +29,7 @@
 #include "misc/EG_Timer.h"
 #include "misc/EG_Memory.h"
 #include "misc/EG_Math.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "draw/EG_DrawContext.h"
 #include "font/EG_FontFmtText.h"
 #include "extra/others/EG_Snapshot.h"

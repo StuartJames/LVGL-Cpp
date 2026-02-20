@@ -25,7 +25,7 @@
 #include "misc/EG_Assert.h"
 #include "draw/EG_DrawImage.h"
 #include "misc/EG_List.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

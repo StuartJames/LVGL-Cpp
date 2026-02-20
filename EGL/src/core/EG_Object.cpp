@@ -33,7 +33,7 @@
 #include "misc/EG_Timer.h"
 #include "misc/EG_Async.h"
 #include "misc/EG_FileSystem.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Log.h"
 #include "hal/EG_HAL.h"

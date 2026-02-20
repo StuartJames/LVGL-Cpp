@@ -25,7 +25,7 @@
 #include "core/EG_Object.h"
 #include "core/EG_InputDevice.h"
 #include "misc/EG_Animate.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "misc/EG_Async.h"
 
 /////////////////////////////////////////////////////////////////////////////

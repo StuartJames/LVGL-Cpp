@@ -26,7 +26,7 @@
 #include "draw/EG_ImageDecoder.h"
 #include "draw/EG_DrawImage.h"
 #include "hal/EG_HALTick.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 //namespace EG_ImageCache
 //{

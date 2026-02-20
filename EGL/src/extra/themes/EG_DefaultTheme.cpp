@@ -26,7 +26,7 @@
 #if EG_USE_THEME_DEFAULT
 
 #include "extra/themes/EG_DefaultTheme.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 

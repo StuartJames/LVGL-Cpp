@@ -29,7 +29,7 @@
 #if EG_USE_THEME_MONO
 
 #include "extra/themes/EG_MonoTheme.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 

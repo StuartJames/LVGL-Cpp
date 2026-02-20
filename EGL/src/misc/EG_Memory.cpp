@@ -23,7 +23,7 @@
 
 #include "misc/EG_Memory.h"
 #include "misc/lv_tlsf.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "misc/EG_Assert.h"
 #include "misc/EG_Log.h"
 

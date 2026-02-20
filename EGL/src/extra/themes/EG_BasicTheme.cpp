@@ -4,7 +4,7 @@
 #if EG_USE_THEME_BASIC
 
 #include "extra/themes/EG_BasicTheme.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 

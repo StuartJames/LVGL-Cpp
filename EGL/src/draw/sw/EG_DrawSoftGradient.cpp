@@ -22,7 +22,7 @@
  */
 
 #include "draw/sw/EG_DrawSoftGradient.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "misc/EG_Types.h"
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@
 #include "hal/EG_HALInputDevice.h"
 #include "core/EG_InputDevice.h"
 #include "misc/EG_Memory.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "hal/EG_HALDisplay.h"
 
 #if EG_LOG_TRACE_INDEV

@@ -25,7 +25,7 @@
 #include "core/EG_ObjPosition.h"
 #include "core/EG_Display.h"
 #include "core/EG_Refresh.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

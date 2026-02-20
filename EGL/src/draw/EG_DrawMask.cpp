@@ -26,7 +26,7 @@
 #include "misc/EG_Math.h"
 #include "misc/EG_Log.h"
 #include "misc/EG_Assert.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 //namespace EG_DrawMask
 //{

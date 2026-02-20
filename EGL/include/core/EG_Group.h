@@ -29,7 +29,7 @@
 #include "../EG_IntrnlConfig.h"
 
 #include "../misc/EG_Types.h"
-#include "../misc/lv_gc.h"
+#include "../misc/EG_Misc.h"
 #include "EG_Object.h"
 
 /////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@
 
 #include "misc/EG_Assert.h"
 #include <string.h>
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 
 
 EGList EGFileSystem::m_DriverList;

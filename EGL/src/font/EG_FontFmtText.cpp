@@ -25,7 +25,7 @@
 #include "font/EG_FontFmtText.h"
 #include "misc/EG_Assert.h"
 #include "misc/EG_Types.h"
-#include "misc/lv_gc.h"
+#include "misc/EG_Misc.h"
 #include "misc/EG_Log.h"
 #include "misc/EG_Utilities.h"
 #include "misc/EG_Memory.h"
