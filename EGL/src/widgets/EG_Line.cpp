@@ -33,10 +33,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define LINE_CLASS &c_LineClass
-
-///////////////////////////////////////////////////////////////////////////////////////
-
 const EG_ClassType_t c_LineClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGLine::EventCB,
@@ -44,7 +40,7 @@ const EG_ClassType_t c_LineClass = {
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -117,7 +113,7 @@ bool EGLine::GetInvertY(void)
 void EGLine::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(LINE_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_LineClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGLine *pLine = (EGLine*)pEvent->GetTarget();
   pLine->Event(pEvent); // dereference once
 }

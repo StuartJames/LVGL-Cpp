@@ -73,7 +73,7 @@ typedef struct EG_Font_t {
 
     const void  *pProperties;           //  Store implementation specific or run_time data or caching here
     const struct EG_Font_t *pFallback;  //  Fallback font for missing glyph. Resolved recursively 
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
     void        *pExtData;              //  Custom user data for font.
 #endif
 } EG_Font_t;

@@ -109,7 +109,7 @@ const char *flags = "";
 static EG_FSResult_e FS_Close(EGFileDriver *pDriver, void *pFile)
 {
 	EG_UNUSED(pDriver);
-	fclose(pFile);
+	fclose((FILE*)pFile);
 	return EG_FS_RES_OK;
 }
 
@@ -128,7 +128,7 @@ static EG_FSResult_e FS_Close(EGFileDriver *pDriver, void *pFile)
 static EG_FSResult_e FS_Read(EGFileDriver *pDriver, void *pFile, void *pBuffer, uint32_t Count, uint32_t *pReadCount)
 {
 	EG_UNUSED(pDriver);
-	*pReadCount = fread(pBuffer, 1, Count, pFile);
+	*pReadCount = fread(pBuffer, 1, Count, (FILE*)pFile);
 	return (int32_t)(*pReadCount) < 0 ? EG_FS_RES_UNKNOWN : EG_FS_RES_OK;
 }
 
@@ -146,7 +146,7 @@ static EG_FSResult_e FS_Read(EGFileDriver *pDriver, void *pFile, void *pBuffer, 
 static EG_FSResult_e FS_Write(EGFileDriver *pDriver, void *pFile, const void *pBuffer, uint32_t Count, uint32_t *pWriteCount)
 {
 	EG_UNUSED(pDriver);
-	*pWriteCount = fwrite(pBuffer, 1, Count, pFile);
+	*pWriteCount = fwrite(pBuffer, 1, Count, (FILE*)pFile);
 	return (int32_t)(*pWriteCount) < 0 ? EG_FS_RES_UNKNOWN : EG_FS_RES_OK;
 }
 
@@ -163,7 +163,7 @@ static EG_FSResult_e FS_Write(EGFileDriver *pDriver, void *pFile, const void *pB
 static EG_FSResult_e FS_Seek(EGFileDriver *pDriver, void *pFile, uint32_t Pos, EG_FS_Seek_e Mode)
 {
 	EG_UNUSED(pDriver);
-	fseek(pFile, Pos, Mode);
+	fseek((FILE*)pFile, Pos, Mode);
 	return EG_FS_RES_OK;
 }
 
@@ -180,7 +180,7 @@ static EG_FSResult_e FS_Seek(EGFileDriver *pDriver, void *pFile, uint32_t Pos, E
 static EG_FSResult_e FS_Tell(EGFileDriver *pDriver, void *pFile, uint32_t *pPos)
 {
 	EG_UNUSED(pDriver);
-	*pPos = ftell(pFile);
+	*pPos = ftell((FILE*)pFile);
 	return EG_FS_RES_OK;
 }
 

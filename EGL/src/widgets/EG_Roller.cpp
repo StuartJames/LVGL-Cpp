@@ -9,11 +9,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define ROLLER_CLASS &c_RollerClass
-#define ROLLER_LABEL_CLASS &c_RollerLabelClass
-
-///////////////////////////////////////////////////////////////////////////////////////
-
 const EG_ClassType_t c_RollerClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGRoller::EventCB,
@@ -21,7 +16,7 @@ const EG_ClassType_t c_RollerClass = {
 	.HeightDef = EG_DPI_DEF,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -33,7 +28,7 @@ const EG_ClassType_t c_RollerLabelClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -211,7 +206,7 @@ uint16_t EGRoller::GetItemCount(void)
 void EGRoller::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(ROLLER_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_RollerClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGRoller *pRoller = (EGRoller*)pEvent->GetTarget();
   pRoller->Event(pEvent);   // dereference once
 }
@@ -545,7 +540,7 @@ EG_Coord_t EGRoller::GetSelectedLabelWidth(void)
 void EGRoller::LabelEventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(ROLLER_LABEL_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+  if(pEvent->Pump(&c_RollerLabelClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGLabel *pLabel = (EGLabel*)pEvent->GetTarget();
 	EGRoller *pRoller = (EGRoller*)pLabel->GetParent();
 	EG_EventCode_e Code = pEvent->GetCode();

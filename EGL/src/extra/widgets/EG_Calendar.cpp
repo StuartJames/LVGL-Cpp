@@ -45,7 +45,7 @@ const EG_ClassType_t c_CalendarClass = {
 	.HeightDef = (EG_DPI_DEF * 3) / 2,
   .IsEditable = 0,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };

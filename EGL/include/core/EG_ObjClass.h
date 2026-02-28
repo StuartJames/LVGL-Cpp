@@ -54,7 +54,7 @@ typedef struct EG_ClassType_t {
 	EG_Coord_t HeightDef;
 	uint8_t IsEditable : 2;      
 	uint8_t GroupDef : 2;        
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	void *pExtData;
 #endif
 } EG_ClassType_t;

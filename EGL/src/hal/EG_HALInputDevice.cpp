@@ -61,7 +61,7 @@ EGInputDevice* EGInputDevice::RegisterDriver(EGInputDriver *pDriver)
 	pDevice->m_pDriver = pDriver;      // Attach the driver
 	pDevice->m_Process.ResetQuery = 1;
   m_InDeviceList.AddHead(pDevice);  // save the device in the list then create periodic call back timer
-	pDevice->m_pDriver->m_pReadTimer = EGTimer::Create(ReadTimerCB, EG_INDEV_DEF_READ_PERIOD, (void*)pDevice, false);
+	pDevice->m_pDriver->m_pReadTimer = EGTimer::Create(ReadTimerCB, EG_INDEV_DEF_READ_PERIOD, (void*)pDevice, true);
 	return pDevice;
 }
 

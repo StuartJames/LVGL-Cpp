@@ -16,7 +16,7 @@ typedef struct _lv_monkey {
 	lv_indev_data_t indev_data;
 	lv_indev_t *indev;
 	EGTimer *timer;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	void *user_data;
 #endif
 } lv_monkey_t;
@@ -89,7 +89,7 @@ bool lv_monkey_get_enable(lv_monkey_t *monkey)
 	return !monkey->timer->paused;
 }
 
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 
 void lv_monkey_set_user_data(lv_monkey_t *monkey, void *user_data)
 {

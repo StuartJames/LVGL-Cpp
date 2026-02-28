@@ -24,11 +24,11 @@
 #pragma once
 
 /***************************
- * CURRENT VERSION OF LVGL
+ * CURRENT VERSION OF EGL
  ***************************/
 #define EG_VERSION_MAJOR 8
 #define EG_VERSION_MINOR 4
-#define EG_VERSION_PATCH 0
+#define EG_VERSION_PATCH 24
 #define EG_VERSION_INFO ""
 
 #include "misc/EG_Log.h"

@@ -51,8 +51,8 @@ EGGroup* EGGroup::Create(void)
 	pGroup->m_RefocusPolicy = EG_GROUP_REFOCUS_POLICY_PREV;
 	pGroup->m_Wrap = 1;
   pGroup->m_ObjectList.Initialise();
-#if EG_USE_USER_DATA
-	pGroup->m_pUserData = nullptr;
+#if EG_USE_EXT_DATA
+	pGroup->m_pExtData = nullptr;
 #endif
 	return pGroup;
 }

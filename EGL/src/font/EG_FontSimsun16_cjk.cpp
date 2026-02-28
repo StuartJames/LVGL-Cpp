@@ -23770,7 +23770,7 @@ EG_Font_t EG_FontSimSun16_cjk = {
 #endif
     .pProperties = &Props,           /*The custom font data. Will be accessed by `GetGlyphBitmapCB/dsc` */
     .pFallback = NULL,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
     .pExtData = NULL,
 #endif
 };

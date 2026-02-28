@@ -261,11 +261,11 @@ typedef uint8_t EG_OPA_t;
 
 struct EG_ColorFilterProps_t;
 
-typedef EG_Color_t (*EG_ColorFilterCB_t)(const struct EG_ColorFilterProps_t *, EG_Color_t, EG_OPA_t);
+typedef EG_Color_t (*EG_ColorFilterCB)(const struct EG_ColorFilterProps_t *, EG_Color_t, EG_OPA_t);
 
 typedef struct EG_ColorFilterProps_t {
 	EG_ColorFilterProps_t(void) : FilterCB(nullptr), pParam(nullptr){};
-	EG_ColorFilterCB_t FilterCB;
+	EG_ColorFilterCB FilterCB;
 	void *pParam;
 } EG_ColorFilterProps_t;
 
@@ -691,7 +691,7 @@ static inline EG_Color_t EG_ColorHex3(uint32_t Color)
 
 /////////////////////////////////////////////////////////////////////////////
 
-static inline void EG_ColorFilterInitialise(EG_ColorFilterProps_t *pFilter, EG_ColorFilterCB_t FilterCB)
+static inline void EG_ColorFilterInitialise(EG_ColorFilterProps_t *pFilter, EG_ColorFilterCB FilterCB)
 {
 	pFilter->FilterCB = FilterCB;
 }

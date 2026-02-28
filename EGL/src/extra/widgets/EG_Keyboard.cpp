@@ -41,7 +41,7 @@ const EG_ClassType_t c_KeyboardClass = {
 	.HeightDef = _EG_PCT(50),
 	.IsEditable = 1,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };

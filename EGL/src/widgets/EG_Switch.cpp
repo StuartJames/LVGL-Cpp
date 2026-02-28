@@ -34,8 +34,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define SWITCH_CLASS &c_SwitchClass
-
 // * Switch animation start value. (Not the real value of the switch just indicates process animation)
 #define EG_SWITCH_ANIM_STATE_START 0
 
@@ -54,7 +52,7 @@ const EG_ClassType_t c_SwitchClass = {
 	.HeightDef = (4 * EG_DPI_DEF) / 17,
   .IsEditable = 0,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -98,7 +96,7 @@ void EGSwitch::Configure(void)
 void EGSwitch::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(SWITCH_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_SwitchClass) != EG_RES_OK) return;  // Call the ancestor's event handler
   EG_EventCode_e Code = pEvent->GetCode();
 	EGSwitch *pSwitch = (EGSwitch*)pEvent->GetTarget();
 	if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {

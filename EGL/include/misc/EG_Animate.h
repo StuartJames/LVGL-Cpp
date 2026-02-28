@@ -103,9 +103,9 @@ public:
   void                    Copy(EGAnimate *pAnimate);
   void                    operator = (const EGAnimate &rval);
 
-#if EG_USE_USER_DATA
-  void                    SetUserData(void *pParam);
-  void*                   GetUserData(void);
+#if EG_USE_EXT_DATA
+  void                    SetExtData(void *pParam);
+  void*                   GetExtData(void);
 #endif
 
 
@@ -296,14 +296,14 @@ inline EGAnimate* EGAnimate::GetCustom(EGAnimate *pAnimate, EG_AnimateCustomExec
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGAnimate::SetUserData(void *pParam)
+inline void EGAnimate::SetExtData(void *pParam)
 {
   m_pParam = pParam;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void* EGAnimate::GetUserData(void)
+inline void* EGAnimate::GetExtData(void)
 {
   return m_pParam;
 }

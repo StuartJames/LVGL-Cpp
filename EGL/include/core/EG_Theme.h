@@ -58,7 +58,7 @@ public:
 protected:
   void                      StyleInitialiseReset(EGStyle *pStyle);
 
-  void                      *m_pUserData;
+  void                      *m_pExtData;
   bool                       m_Initialised;
 
 };

@@ -34,11 +34,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define BUTTONMATRIX_CLASS &c_ButtonMatrixClass
-
 #define BTN_EXTRA_CLICK_AREA_MAX (EG_DPI_DEF / 10)
 #define EG_BTNMATRIX_WIDTH_MASK 0x000F
-
 
 static const char *lv_btnmatrix_def_map[] = {"Btn1", "Btn2", "Btn3", "\n", "Btn4", "Btn5", ""};
 
@@ -49,7 +46,7 @@ const EG_ClassType_t c_ButtonMatrixClass = {
 	.HeightDef = EG_DPI_DEF,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	.pExtData = nullptr,
 #endif
 };
@@ -293,7 +290,7 @@ bool EGButtonMatrix::HasControl(uint16_t ButtonID, EG_ButMatrixCtrl_t Control)
 void EGButtonMatrix::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(BUTTONMATRIX_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+  if(pEvent->Pump(&c_ButtonMatrixClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EGButtonMatrix *pMatrix = (EGButtonMatrix*)pEvent->GetTarget();
   pMatrix->Event(pEvent);
 }

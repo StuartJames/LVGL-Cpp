@@ -27,8 +27,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define IMAGEBUTTON_CLASS &c_ImageButtonClass
-
 const EG_ClassType_t c_ImageButtonClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGImageButton::EventCB,
@@ -36,7 +34,7 @@ const EG_ClassType_t c_ImageButtonClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };
@@ -123,7 +121,7 @@ const void* EGImageButton::GetSourceRight(EG_ImageButtonState_e State)
 void EGImageButton::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(IMAGEBUTTON_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+	if(pEvent->Pump(&c_ImageButtonClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EGImageButton *pImageButton = (EGImageButton*)pEvent->GetTarget();
   pImageButton->Event(pEvent);  // Dereference once
 }

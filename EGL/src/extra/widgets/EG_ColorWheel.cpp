@@ -29,8 +29,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define COLORWHEEL_CLASS &c_ColorWheelClass
-
 #define LV_CPICKER_DEF_QF 3
 
 /**
@@ -50,7 +48,7 @@ const EG_ClassType_t c_ColorWheelClass = {
   .HeightDef = EG_DPI_DEF * 2, 
   .IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };
@@ -176,7 +174,7 @@ bool EGColorWheel::GetFixedMode(void)
 void EGColorWheel::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(COLORWHEEL_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+	if(pEvent->Pump(&c_ColorWheelClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EGColorWheel *pColorWheel = (EGColorWheel*)pEvent->GetTarget();
   pColorWheel->Event(pEvent);  // Dereference once
 }

@@ -56,8 +56,7 @@ EGTimer::EGTimer(void) :
   m_TimerCB(nullptr),
   m_pParam(nullptr),
   m_RepeatCount(0),
-  m_Paused(0),
-  m_Run(0)
+  m_Paused(0)
 {
 }
 
@@ -105,12 +104,10 @@ POSITION Pos;
 		Pos = m_TimerList.GetHeadPosition();
 		while(Pos != nullptr) {
 			pTimer = (EGTimer *)m_TimerList.GetNext(Pos); // The timer might be deleted if it runs only once ('repeat_count = 1') 	
-      if(pTimer->m_Run){
-        if(TimerExec(pTimer)){
-          if(m_Created || m_Deleted) {		// If a timer was created or deleted then this or the next item might be corrupted
-            TIMER_TRACE("Start from the first timer again because a timer was created or deleted");
-            break;
-          }
+      if(TimerExec(pTimer)){
+        if(m_Created || m_Deleted) {		// If a timer was created or deleted then this or the next item might be corrupted
+          TIMER_TRACE("Start from the first timer again because a timer was created or deleted");
+          break;
         }
       }
 		}
@@ -148,7 +145,7 @@ EGTimer* EGTimer::CreateBasic(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EGTimer* EGTimer::Create(EG_TimerCB_t TimerCB, uint32_t Period, void *pParam, bool AutoRun /*= true*/)
+EGTimer* EGTimer::Create(EG_TimerCB_t TimerCB, uint32_t Period, void *pParam, bool Paused /*= false*/)
 {
 	EGTimer *pTimer = new EGTimer;
 	if(pTimer == nullptr) return nullptr;
@@ -156,8 +153,7 @@ EGTimer* EGTimer::Create(EG_TimerCB_t TimerCB, uint32_t Period, void *pParam, bo
 	pTimer->m_pParam = pParam;
 	pTimer->m_TimerCB = TimerCB;
 	pTimer->m_RepeatCount = -1;
-	pTimer->m_Paused = false;
-  pTimer->m_Run = AutoRun;
+	pTimer->m_Paused = Paused;
 	pTimer->m_LastRun = EG_GetTick();
 	m_TimerList.AddHead(pTimer);
 	m_Created = true;
@@ -178,7 +174,6 @@ void EGTimer::Delete(EGTimer *pTimer)
 	POSITION Pos = m_TimerList.Find(pTimer);
 	TIMER_TRACE("Delete timer at %d", Pos);
   if(Pos == nullptr) return;
-  pTimer->m_Run = false;
   m_TimerList.RemoveAt(Pos);
 	m_Deleted = true;
 	delete pTimer;

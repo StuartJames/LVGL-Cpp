@@ -28,8 +28,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define METER_CLASS &c_MeterClass
-
 const EG_ClassType_t c_MeterClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGMeter::EventCB,
@@ -37,7 +35,7 @@ const EG_ClassType_t c_MeterClass = {
   .HeightDef = 0,
   .IsEditable = 0,  
   .GroupDef = 0, 
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };
@@ -249,7 +247,7 @@ void EGMeter::SetIndicatorEndValue(EG_Indicator_t *pIndicator, int32_t Value)
 void EGMeter::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(METER_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+	if(pEvent->Pump(&c_MeterClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	((EGMeter*)pEvent->GetTarget())->Event(pEvent);
 }
 
@@ -298,7 +296,7 @@ void EGMeter::DrawArcs(EGDrawContext *pContext, const EGRect *pScaleArea)
 	InitDrawDescriptor(&DrawDiscriptor, pContext);
 	DrawDiscriptor.m_pDrawArc = &DrawArc;
 	DrawDiscriptor.m_Part = EG_PART_INDICATOR;
-	DrawDiscriptor.m_pClass = METER_CLASS;
+	DrawDiscriptor.m_pClass = &c_MeterClass;
 	DrawDiscriptor.m_Type = EG_METER_DRAW_PART_ARC;
   POSITION Pos;
 	for(pIndicator = (EG_Indicator_t*)m_IndicatorList.GetTail(Pos); pIndicator != NULL; pIndicator = (EG_Indicator_t*)m_IndicatorList.GetPrev(Pos)){

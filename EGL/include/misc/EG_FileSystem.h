@@ -95,7 +95,7 @@ public:
 
   char                      m_DriverID;
   uint16_t                  m_CacheSize;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   void                      *m_Param; // Custom file user data
 #endif
 
@@ -125,10 +125,10 @@ public:
   static EGFileDriver*      GetDriver(char DriverID);
   static const char*        GetExt(const char *pFileName);
 
-    void                    *m_pFile;
-    EG_FS_FileCache_t       *m_pCache;
-    EGFileDriver            *m_pDriver;
-    void                    *m_pDir;
+  void                      *m_pFile;
+  EG_FS_FileCache_t         *m_pCache;
+  EGFileDriver              *m_pDriver;
+  void                      *m_pDir;
 
 private:
   EG_FSResult_e             ReadCached(char *pBuffer, uint32_t Count, uint32_t *pReadCount);

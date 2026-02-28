@@ -11,8 +11,6 @@
 #include "misc/lv_printf.h"
 #include "draw/EG_DrawContext.h"
 
-#define TABLE_CLASS &c_TableClass
-
 ///////////////////////////////////////////////////////////////////////////////////////
 
 const EG_ClassType_t c_TableClass = {
@@ -22,7 +20,7 @@ const EG_ClassType_t c_TableClass = {
 	.HeightDef = EG_SIZE_CONTENT,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -51,7 +49,7 @@ EGTable::~EGTable()
 {
 	for(uint16_t i = 0; i < m_ColumnCount * m_RowCount; i++) {
 		if(m_ppCellData[i]) {
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 			if(m_ppCellData[i]->pUserData) {
 				EG_FreeMem(m_ppCellData[i]->pUserData);
 				m_ppCellData[i]->pUserData = nullptr;
@@ -91,7 +89,7 @@ void EGTable::SetCellValue(uint16_t Row, uint16_t Column, const char *pText)
 	uint32_t Cell = Row * m_ColumnCount + Column;
 	EG_TableCellCtrl_t Control = EG_TABLE_CELL_CTRL_NONE;
 	if(m_ppCellData[Cell]) Control = m_ppCellData[Cell]->Control;	// Save the control byte
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	void *pUserData = nullptr;
 	if(m_ppCellData[Cell]) pUserData = m_ppCellData[Cell]->pUserData;	// Save the user data
 #endif
@@ -102,7 +100,7 @@ void EGTable::SetCellValue(uint16_t Row, uint16_t Column, const char *pText)
 	if(m_ppCellData[Cell] == nullptr) return;
 	CopyCellText(m_ppCellData[Cell], pText);
 	m_ppCellData[Cell]->Control = Control;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	m_ppCellData[Cell]->pUserData = pUserData;
 #endif
 	RefreshCellSize(Row, Column);
@@ -118,7 +116,7 @@ void EGTable::SetCellValue(uint16_t Row, uint16_t Column, const char *pFormat, .
 	uint32_t Cell = Row * m_ColumnCount + Column;
 	EG_TableCellCtrl_t Control = EG_TABLE_CELL_CTRL_NONE;
 	if(m_ppCellData[Cell]) Control = m_ppCellData[Cell]->Control;	// Save the control byte
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	void *pUserData = nullptr;
 	if(m_ppCellData[Cell]) pUserData = m_ppCellData[Cell]->pUserData;	// Save the pUserData
 #endif
@@ -157,7 +155,7 @@ void EGTable::SetCellValue(uint16_t Row, uint16_t Column, const char *pFormat, .
 #endif
 	va_end(ap2);
 	m_ppCellData[Cell]->Control = Control;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	m_ppCellData[Cell]->pUserData = pUserData;
 #endif
 	RefreshCellSize(Row, Column);
@@ -178,7 +176,7 @@ void EGTable::SetRowCount(uint16_t RowCount)
 		uint32_t new_cell_cnt = m_ColumnCount * m_RowCount;
 		uint32_t i;
 		for(i = new_cell_cnt; i < old_cell_cnt; i++) {
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 			if(m_ppCellData[i]->pUserData) {
 				EG_FreeMem(m_ppCellData[i]->pUserData);
 				m_ppCellData[i]->pUserData = nullptr;
@@ -222,7 +220,7 @@ void EGTable::SetColumnCount(uint16_t ColumnCount)
 		int32_t i;
 		for(i = 0; i < (int32_t)old_col_cnt - ColumnCount; i++) {
 			uint32_t idx = old_col_start + min_col_cnt + i;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 			if(m_ppCellData[idx]->pUserData) {
 				EG_FreeMem(m_ppCellData[idx]->pUserData);
 				m_ppCellData[idx]->pUserData = nullptr;
@@ -265,7 +263,7 @@ void EGTable::AddCellControl(uint16_t Row, uint16_t Column, EG_TableCellCtrl_t C
 		EG_ASSERT_MALLOC(m_ppCellData[Cell]);
 		if(m_ppCellData[Cell] == nullptr) return;
 		m_ppCellData[Cell]->Control = EG_TABLE_CELL_CTRL_NONE;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 		m_ppCellData[Cell]->pUserData = nullptr;
 #endif
 		m_ppCellData[Cell]->Text[0] = '\0';
@@ -285,7 +283,7 @@ void EGTable::ClearCellControl(uint16_t Row, uint16_t Column, EG_TableCellCtrl_t
 		EG_ASSERT_MALLOC(m_ppCellData[Cell]);
 		if(m_ppCellData[Cell] == nullptr) return;
 		m_ppCellData[Cell]->Control = 0;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 		m_ppCellData[Cell]->pUserData = nullptr;
 #endif
 		m_ppCellData[Cell]->Text[0] = '\0';
@@ -293,7 +291,7 @@ void EGTable::ClearCellControl(uint16_t Row, uint16_t Column, EG_TableCellCtrl_t
 	m_ppCellData[Cell]->Control &= (~Control);
 }
 
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -357,7 +355,7 @@ void EGTable::GetSelectedCell(uint16_t *pRow, uint16_t *pColumn)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 
 void EGTable::SetCellUserData(uint16_t Row, uint16_t Column, void *pUserData)
 {
@@ -398,7 +396,7 @@ void* EGTable::GetCellUserData(uint16_t Row, uint16_t Column)
 void EGTable::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(TABLE_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_TableClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGTable *pTable = (EGTable*)pEvent->GetTarget();
   pTable->Event(pEvent); // dereference once
 }

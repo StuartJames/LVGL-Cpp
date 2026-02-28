@@ -88,7 +88,7 @@ const EG_ClassType_t c_FFMpegPlayerClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -558,7 +558,7 @@ EGPlayerMPEG::~EGPlayerMPEG(void)
 void EGPlayerMPEG::Configure(void)
 {
   EGImage::Configure();
- 	m_pTimer = EGTimer::Create(FrameUpdateCB, FRAME_DEF_REFR_PERIOD, this, false);
+ 	m_pTimer = EGTimer::Create(FrameUpdateCB, FRAME_DEF_REFR_PERIOD, this, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

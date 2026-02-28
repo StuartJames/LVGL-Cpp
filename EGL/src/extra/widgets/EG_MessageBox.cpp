@@ -40,7 +40,7 @@ const EG_ClassType_t c_MsgBoxClass = {
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -52,7 +52,7 @@ const EG_ClassType_t c_MsgBoxContentClass = {
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -64,7 +64,7 @@ const EG_ClassType_t c_MsgBoxBackdropClass = {
 	.HeightDef = _EG_PCT(100),
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };

@@ -40,7 +40,7 @@ const EG_ClassType_t c_ListClass = {
 	.HeightDef = EG_DPI_DEF * 2,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -52,7 +52,7 @@ const EG_ClassType_t c_ListButtonClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -64,7 +64,7 @@ const EG_ClassType_t c_ListTextClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };

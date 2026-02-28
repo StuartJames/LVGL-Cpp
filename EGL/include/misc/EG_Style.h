@@ -101,8 +101,10 @@ enum {
   EG_DITHER_ERR_DIFF, // Error diffusion mode. Slower to compute and use more memory but give highest dither quality
 };
 
+typedef uint8_t EG_DitherMode_t;
 
-typedef enum : uint16_t {
+
+typedef enum EGStyleProperty_e : uint16_t {
   EG_STYLE_PROP_INV               = 0,
 
   // Group 0
@@ -218,9 +220,9 @@ enum {
   EG_STYLE_RES_INHERIT
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////
+typedef uint8_t EG_StyleResult_t;
 
-typedef uint8_t EG_DitherMode_t;
+/////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
     EG_Color_t color;   // The stop color 
@@ -229,12 +231,12 @@ typedef struct {
 
 
 typedef struct {
-    EG_GradientStop_t   stops[EG_GRADIENT_MAX_STOPS]; // A gradient stop array 
-    uint8_t              stops_count;                  // The number of used stops in the array 
-    EG_GradDirection_e   dir : 3;                      // The gradient direction.
-                                                       // Any of EG_GRAD_DIR_HOR, EG_GRAD_DIR_VER, EG_GRAD_DIR_NONE 
-    EG_DitherMode_t     dither : 3;                   // Whether to dither the gradient or not.
-                                                       // Any of EG_DITHER_NONE, EG_DITHER_ORDERED, EG_DITHER_ERR_DIFF 
+    EG_GradientStop_t   stops[EG_GRADIENT_MAX_STOPS];   // A gradient stop array 
+    uint8_t              stops_count;                   // The number of used stops in the array 
+    EG_GradDirection_e   dir : 3;                       // The gradient direction.
+                                                        // Any of EG_GRAD_DIR_HOR, EG_GRAD_DIR_VER, EG_GRAD_DIR_NONE 
+    EG_DitherMode_t     dither : 3;                     // Whether to dither the gradient or not.
+                                                        // Any of EG_DITHER_NONE, EG_DITHER_ORDERED, EG_DITHER_ERR_DIFF 
 } EG_GradDescriptor_t;
 
 
@@ -244,15 +246,13 @@ typedef union {
     EG_Color_t  Color;    // Colors
 } EG_StyleValue_t;
 
-typedef uint8_t EG_StyleResult_t;
-
 
 typedef struct {
     const EGStyleProperty_e *pProperties; // An array with the properties to animate.
-    void                  *m_pParam;   // A custom user data that will be passed to the animation's user_data 
-    EG_AnimatePathCB_t    PathCB;       // A path for the animation.
-    uint32_t              Time;         // Duration of the transition in [ms]
-    uint32_t              Delay;        // Delay before the transition in [ms]
+    void                  *m_pParam;      // A custom user data that will be passed to the animation's user_data 
+    EG_AnimatePathCB_t    PathCB;         // A path for the animation.
+    uint32_t              Time;           // Duration of the transition in [ms]
+    uint32_t              Delay;          // Delay before the transition in [ms]
 } EG_StyleTransitionDiscriptor_t;
 
 

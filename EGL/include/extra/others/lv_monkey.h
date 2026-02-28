@@ -62,7 +62,7 @@ void lv_monkey_set_enable(lv_monkey_t * monkey, bool en);
  */
 bool lv_monkey_get_enable(lv_monkey_t * monkey);
 
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 
 /**
  * Set the user_data field of the monkey
@@ -78,7 +78,7 @@ void lv_monkey_set_user_data(lv_monkey_t * monkey, void * user_data);
  */
 void * lv_monkey_get_user_data(lv_monkey_t * monkey);
 
-#endif/*EG_USE_USER_DATA*/
+#endif/*EG_USE_EXT_DATA*/
 
 /**
  * Delete monkey

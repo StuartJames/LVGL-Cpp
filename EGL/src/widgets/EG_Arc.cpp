@@ -33,8 +33,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define ARC_CLASS &c_ArcClass
-
 #define VALUE_UNSET INT16_MIN
 #define CLICK_OUTSIDE_BG_ANGLES ((uint32_t)0x00U)
 #define CLICK_INSIDE_BG_ANGLES ((uint32_t)0x01U)
@@ -51,7 +49,7 @@ const EG_ClassType_t c_ArcClass = {
 	.HeightDef = 0,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -376,7 +374,7 @@ EG_Coord_t Radius;
 void EGArc::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
  	EG_UNUSED(pClass);
-  if(pEvent->Pump(ARC_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+  if(pEvent->Pump(&c_ArcClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGArc *pArc = (EGArc*)pEvent->GetTarget();
   pArc->Event(pEvent); // dereference once
 }
@@ -555,7 +553,7 @@ void EGArc::Draw(EGEvent *pEvent)
   	EGDrawArc DrawArc;	// Draw the background pArc
 		InititialseDrawArc(EG_PART_MAIN, &DrawArc);
 		PartDrawDiscriptor.m_Part = EG_PART_MAIN;
-		PartDrawDiscriptor.m_pClass = ARC_CLASS;
+		PartDrawDiscriptor.m_pClass = &c_ArcClass;
 		PartDrawDiscriptor.m_Type = EG_ARC_DRAW_PART_BACKGROUND;
 		PartDrawDiscriptor.m_pPoint1 = &Center;
 		PartDrawDiscriptor.m_Radius = Radius;
@@ -574,7 +572,7 @@ void EGArc::Draw(EGEvent *pEvent)
   	EGDrawArc DrawArc;	// Draw the indicator pArc
 		InititialseDrawArc(EG_PART_INDICATOR, &DrawArc);
 		PartDrawDiscriptor.m_Part = EG_PART_INDICATOR;
-		PartDrawDiscriptor.m_pClass = ARC_CLASS;
+		PartDrawDiscriptor.m_pClass = &c_ArcClass;
 		PartDrawDiscriptor.m_Type = EG_ARC_DRAW_PART_FOREGROUND;
 		PartDrawDiscriptor.m_pPoint1 = &Center;
 		PartDrawDiscriptor.m_Radius = IndicRadius;
@@ -589,7 +587,7 @@ void EGArc::Draw(EGEvent *pEvent)
 	EGDrawRect DrawRect;
 	InititialseDrawRect(EG_PART_KNOB, &DrawRect);
 	PartDrawDiscriptor.m_Part = EG_PART_KNOB;
-	PartDrawDiscriptor.m_pClass = ARC_CLASS;
+	PartDrawDiscriptor.m_pClass = &c_ArcClass;
 	PartDrawDiscriptor.m_Type = EG_ARC_DRAW_PART_KNOB;
 	PartDrawDiscriptor.m_pRect = &KnobRect;
 	PartDrawDiscriptor.m_pDrawRect = &DrawRect;

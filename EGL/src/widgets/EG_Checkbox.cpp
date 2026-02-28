@@ -31,10 +31,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define CHECKBOX_CLASS &c_CheckboxClass
-
-///////////////////////////////////////////////////////////////////////////////////////
-
 const EG_ClassType_t c_CheckboxClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGCheckbox::EventCB,
@@ -42,7 +38,7 @@ const EG_ClassType_t c_CheckboxClass = {
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -133,7 +129,7 @@ const char* EGCheckbox::GetText(void)
 void EGCheckbox::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(CHECKBOX_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+  if(pEvent->Pump(&c_CheckboxClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGCheckbox *pCheckbox = (EGCheckbox*)pEvent->GetTarget();
   pCheckbox->Event(pEvent); // dereference once
 }

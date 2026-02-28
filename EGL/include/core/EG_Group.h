@@ -98,8 +98,8 @@ public:
 
   EGList                  m_ObjectList;         // Linked list to store the objects in the group
   EGObject               *m_pFocusedObject;       // The object in focus
-#if EG_USE_USER_DATA
-  void                   *m_pUserData;
+#if EG_USE_EXT_DATA
+  void                   *m_pExtData;
 #endif
   uint8_t                 m_Frozen : 1;         // 1: can't focus to new object
   uint8_t                 m_Editing : 1;        // 1: Edit mode, 0: Navigate mode

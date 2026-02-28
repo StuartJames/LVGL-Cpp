@@ -29,8 +29,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define SPAN_CLASS &lv_spangroup_class
-
 ///////////////////////////////////////////////////////////////////////////////////////
 
 struct _snippet_stack {
@@ -42,14 +40,14 @@ struct _snippet_stack {
 
 static struct _snippet_stack snippet_stack;
 
-const EG_ClassType_t lv_spangroup_class = {
+const EG_ClassType_t c_SpanGroupClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGSpanGroup::EventCB,
 	.WidthDef = EG_SIZE_CONTENT,
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,   
   .GroupDef = 0,  
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };
@@ -419,7 +417,7 @@ POSITION Pos;
 void EGSpanGroup::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(SPAN_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+	if(pEvent->Pump(&c_SpanGroupClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EGSpanGroup *pSpanGroup = (EGSpanGroup*)pEvent->GetTarget();
   pSpanGroup->Event(pEvent);  // Dereference once
 

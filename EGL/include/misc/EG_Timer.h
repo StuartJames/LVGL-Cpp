@@ -48,7 +48,6 @@ class EGTimer
 {
 public:
                   EGTimer(void);
-	void            Start(void);
 	void            Pause(void);
 	void            Resume(void);
 	void            SetExcCB(EG_TimerCB_t TimerCB);
@@ -59,7 +58,7 @@ public:
 
 	static void     InitialiseCore(void);
 	static EGTimer* CreateBasic(void);
-	static EGTimer* Create(EG_TimerCB_t TimerCB, uint32_t Period, void *pParam, bool AutoRun = true);
+	static EGTimer* Create(EG_TimerCB_t TimerCB, uint32_t Period, void *pParam, bool Paused = false);
 	static void     Delete(EGTimer *pTimer);
   static EGTimer* GetNext(EGTimer *pTimer);
 	static void     EnableAll(bool Flag);
@@ -76,7 +75,6 @@ public:
 	void           *m_pParam;       // Call back function parameter
 	int32_t         m_RepeatCount;  // 1: One time;  -1 : infinity;  n>0: residual times
 	bool            m_Paused;
-  bool            m_Run;
 
 private:
 	uint32_t        TimeRemaining(void);
@@ -103,13 +101,6 @@ inline uint32_t EG_ATTRIBUTE_TIMER_HANDLER EGTimer::RunInPeriod(uint32_t ms)
 		return TimerHandler();
 	}
 	return 1;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-inline void EGTimer::Start(void)
-{
-	m_Run = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

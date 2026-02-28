@@ -34,8 +34,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define SLIDER_CLASS &c_SliderClass
-
 #define EG_SLIDER_KNOB_COORD(IsRTL, area) (IsRTL ? area.GetX1() : area.GetX2())
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +45,7 @@ const EG_ClassType_t c_SliderClass = {
 	.HeightDef = 0,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -87,7 +85,7 @@ bool EGSlider::IsDragged(void)
 void EGSlider::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(SLIDER_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_SliderClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGSlider *pSlider = (EGSlider*)pEvent->GetTarget();
   pSlider->Event(pEvent);   // dereference once
 }

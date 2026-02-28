@@ -554,9 +554,9 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_OPA_LAYERED, StyleValue);
 }
 
-void EGStyle::SetColorFilterDiscriptor(const EG_ColorFilterProps_t * Value)
+void EGStyle::SetColorFilterDiscriptor(const EG_ColorFilterProps_t *pValue)
 {
-EG_StyleValue_t StyleValue = {.pPtr = Value};
+EG_StyleValue_t StyleValue = {.pPtr = pValue};
 
   SetProperty(EG_STYLE_COLOR_FILTER_DSC, StyleValue);
 }

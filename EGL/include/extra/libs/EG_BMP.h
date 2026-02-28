@@ -40,7 +40,7 @@ public:
   void                      Close(ImageDecoderDescriptor_t *pDescriptor);
 
 private:
-	EGFileSystem                    m_File;
+	EGFileSystem              m_File;
 	unsigned int              m_PixelOffset;
 	int                       m_PixelWidth;
 	int                       m_PixelHeight;

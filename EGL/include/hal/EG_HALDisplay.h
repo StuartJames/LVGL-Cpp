@@ -105,8 +105,8 @@ public:
   EGDrawContext      *m_pContext;
   size_t              m_ContextSize;
  
-#if EG_USE_USER_DATA
-  void               *m_pUserData;              // Custom display driver user data
+#if EG_USE_EXT_DATA
+  void               *m_pExtData;              // Custom display driver user data
 #endif
 
 };

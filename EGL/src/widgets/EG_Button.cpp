@@ -19,7 +19,7 @@ const EG_ClassType_t c_ButtonClass = {
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };

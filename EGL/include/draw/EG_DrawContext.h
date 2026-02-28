@@ -46,7 +46,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-    void  *pUserData;
+  void  *pExtData;
 } EG_DrawMask_t;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -62,8 +62,8 @@ public:
   static const EGRect     *m_pClipRect;       // The current clip area with absolute coordinates, always the same or smaller than `buf_area`
   static size_t            m_LayerInstanceSize;
 
-#if EG_USE_USER_DATA
-  void                    *m_pUserData;
+#if EG_USE_EXT_DATA
+  void                    *m_pExtData;
 #endif
 
   static void             (*InitBuffer)(EGDrawContext *pContext);

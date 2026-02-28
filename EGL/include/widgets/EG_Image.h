@@ -43,7 +43,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-extern const EG_ClassType_t c_Imageclass;
+extern const EG_ClassType_t c_ImageClass;
 
 typedef enum {
   /** Zoom doesn't affect the coordinates of the object,
@@ -84,7 +84,7 @@ class EGImage : public EGObject
 {
 public:
                       EGImage(void);
-                      EGImage(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_Imageclass);
+                      EGImage(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_ImageClass);
                       ~EGImage(void);
   virtual void        Configure(void);
   void                SetSource(const void *pSource);

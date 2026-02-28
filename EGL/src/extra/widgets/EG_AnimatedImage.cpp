@@ -51,7 +51,7 @@ const EG_ClassType_t c_AnimateImageClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };

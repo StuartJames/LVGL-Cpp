@@ -42,7 +42,7 @@ const EG_ClassType_t c_MenuClass = {
 	.HeightDef = EG_DPI_DEF * 2,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -54,7 +54,7 @@ const EG_ClassType_t c_MenuPageClass = {
 	.HeightDef = EG_SIZE_CONTENT,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -66,7 +66,7 @@ const EG_ClassType_t c_MenuContainerClass = {
 	.HeightDef = EG_SIZE_CONTENT,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -78,7 +78,7 @@ const EG_ClassType_t c_MenuSectionClass = {
 	.HeightDef = EG_SIZE_CONTENT,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -90,7 +90,7 @@ const EG_ClassType_t c_MenuSeparatorClass = {
 	.HeightDef = EG_SIZE_CONTENT,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -102,7 +102,7 @@ const EG_ClassType_t c_MenuSidebarContainerClass = {
 	.HeightDef = 0,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -114,7 +114,7 @@ const EG_ClassType_t c_MenuMainContainerClass = {
 	.HeightDef = 0,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -126,7 +126,7 @@ const EG_ClassType_t c_MenuMainHeaderContainerClass = {
 	.HeightDef = 0,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -138,7 +138,7 @@ const EG_ClassType_t c_MenuSidebarHeaderContainerClass = {
 	.HeightDef = 0,
 	.IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };

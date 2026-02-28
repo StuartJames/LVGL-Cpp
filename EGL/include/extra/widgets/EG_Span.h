@@ -67,7 +67,7 @@ typedef struct {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-extern const EG_ClassType_t c_SpangroupClass;
+extern const EG_ClassType_t c_SpanGroupClass;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,7 +75,7 @@ class EGSpanGroup : public EGObject
 {
 public:
                       EGSpanGroup(void);
-                      EGSpanGroup(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_SpangroupClass);
+                      EGSpanGroup(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_SpanGroupClass);
                       ~EGSpanGroup(void);
   virtual void        Configure(void);
   EG_Span_t*          NewSpan(void);

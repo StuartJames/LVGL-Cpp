@@ -37,14 +37,14 @@ void EG_FSInitialise_LittleFS(void);
 #endif
 
 #if EG_USE_FS_STDIO != '\0'
-void lv_fs_stdio_init(void);
+void EG_FSInitialise_Stdio(void);
 #endif
 
 #if EG_USE_FS_POSIX != '\0'
-void lv_fs_posix_init(void);
+void EG_Initialise_Posix(void);
 #endif
 
 #if EG_USE_FS_WIN32 != '\0'
-void lv_fs_win32_init(void);
+void EG_FSInitialise_Win32(void);
 #endif
 

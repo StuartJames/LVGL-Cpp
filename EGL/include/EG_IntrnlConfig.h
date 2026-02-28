@@ -835,20 +835,20 @@
     #endif
 #endif  /*EG_SPRINTF_CUSTOM*/
 
-#ifndef EG_USE_USER_DATA
+#ifndef EG_USE_EXT_DATA
     #ifdef _EG_KCONFIG_PRESENT
-        #ifdef CONFIG_EG_USE_USER_DATA
-            #define EG_USE_USER_DATA CONFIG_EG_USE_USER_DATA
+        #ifdef CONFIG_EG_USE_EXT_DATA
+            #define EG_USE_EXT_DATA CONFIG_EG_USE_EXT_DATA
         #else
-            #define EG_USE_USER_DATA 0
+            #define EG_USE_EXT_DATA 0
         #endif
     #else
-        #define EG_USE_USER_DATA 1
+        #define EG_USE_EXT_DATA 1
     #endif
 #endif
 
 /*Garbage Collector settings
- *Used if lvgl is bound to higher level language and the memory is managed by that language*/
+ *Used if the library is bound to higher level language and the memory is managed by that language*/
 #ifndef EG_ENABLE_GC
     #ifdef CONFIG_EG_ENABLE_GC
         #define EG_ENABLE_GC CONFIG_EG_ENABLE_GC

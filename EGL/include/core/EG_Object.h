@@ -271,8 +271,8 @@ private:
 
   EGObject 				         *m_pParent;
 
-#if EG_USE_USER_DATA
-  void 								     *m_pUserData;
+#if EG_USE_EXT_DATA
+  void 								     *m_pExtData;
 #endif
 
 // Class Section //
@@ -515,9 +515,9 @@ public:
   uint32_t                GetChildCount(void);
   uint32_t                GetIndex(void) const;
 
-#if EG_USE_USER_DATA
-  void                    SetUserData(void *pUserData);
-  void*                   GetUserData(void);
+#if EG_USE_EXT_DATA
+  void                    SetExtData(void *pUserData);
+  void*                   GetExtData(void);
 #endif
 
   static void             TreeWalk(EGObject *pObj, ObjTreeWalkCB_t WalkCB, void *pUserData);
@@ -651,114 +651,7 @@ private:
 extern EGObject *g_pTabObj;
 extern EGObject *g_pItemObj;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::RemoveAllStyles(void)
-{
-  RemoveStyle(NULL, (EG_StyleFlags_t)EG_PART_ANY | (EG_StyleFlags_t)EG_STATE_ANY);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if EG_USE_USER_DATA
-inline void EGObject::SetUserData(void *pUserData)
-{
-  m_pUserData = pUserData;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
-inline void* EGObject::GetUserData(void)
-{
-  return m_pUserData;
-}
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-
-/* Scale the given number of pixels (a distance or size) relative to a 160 DPI display
- * considering the DPI of the `obj`'s display.
- * It ensures that e.g. `eg_dpx(100)` will have the same physical size regardless to the
- * DPI of the display. */
-
-inline EG_Coord_t EGObject::DPX(EGObject *pObj, EG_Coord_t DPI)
-{
-  return _EG_DPX_CALC(EGDisplay::GetDPI(pObj->GetDisplay()), DPI);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#include "EG_ObjStyleGen.h"
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::SetPaddingAll(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
-{
-  SetStylePadLeft(Value, SelectFlags);
-  SetStylePadRight(Value, SelectFlags);
-  SetStylePadTop(Value, SelectFlags);
-  SetStylePadBottom(Value, SelectFlags);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::SetHorizontalPadding(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
-{
-  SetStylePadLeft(Value, SelectFlags);
-  SetStylePadRight(Value, SelectFlags);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::SetVerticalPadding(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
-{
-  SetStylePadTop(Value, SelectFlags);
-  SetStylePadBottom(Value, SelectFlags);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::SetPaddingGap(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
-{
-  SetStylePadRow(Value, SelectFlags);
-  SetStylePadColumn(Value, SelectFlags);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::SetStyleSize(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
-{
-  SetStyleWidth(Value, SelectFlags);
-  SetStyleHeight(Value, SelectFlags);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline EG_Coord_t EGObject::GetTransformZoomSafe(const uint32_t Part)
-{
-  int16_t Zoom = GetStyleTransformZoom(Part);
-  return Zoom != 0 ? Zoom : 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline EGState_t GetSelectorState(EG_StyleFlags_t SelectFlags)
-{
-	return (EGState_t)(SelectFlags & 0x00FFFF);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline EGPart_t GetSelectorPart(EG_StyleFlags_t SelectFlags)
-{
-	return (EGPart_t)(SelectFlags & 0xFF0000);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-inline void EGObject::Center(void)
-{
-  Align(EG_ALIGN_CENTER, 0, 0);
-}
-
+#include "EG_ObjStyle.inl"
 

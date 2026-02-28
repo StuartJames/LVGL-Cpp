@@ -136,6 +136,7 @@ uint32_t i;
 EG_StyleValue_t EGObject::ApplyColorFilter(uint32_t Part, EG_StyleValue_t Value)
 {
 	const EG_ColorFilterProps_t *pFilter = GetStyleColorFilterDiscriptor(Part);
+  if(pFilter) ESP_LOGI("[ObjStl]", "ApplyFilterCB %d - %p.", Part, pFilter);
 	if((pFilter != nullptr) && (pFilter->FilterCB != nullptr)){
 		EG_OPA_t FilterOPA = GetStyleColorFilterOPA(Part);
 		if(FilterOPA != 0) Value.Color = pFilter->FilterCB(pFilter, Value.Color, FilterOPA);

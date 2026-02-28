@@ -55,7 +55,7 @@ typedef uint8_t EG_TableCellCtrl_t;
 
 typedef struct {
     EG_TableCellCtrl_t Control;
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
     void      *pUserData; //  Custom user data
 #endif
     char      Text[];
@@ -91,7 +91,7 @@ public:
   bool                CellHasControl(uint16_t Row, uint16_t Column, EG_TableCellCtrl_t Control);
   void                GetSelectedCell(uint16_t *pRow, uint16_t *pColumn);
   void                Event(EGEvent *pEvent);
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   void                SetCellUserData(uint16_t Row, uint16_t Column, void *pUserData);
   void*               GetCellUserData(uint16_t Row, uint16_t Column);
 #endif

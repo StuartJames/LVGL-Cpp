@@ -28,8 +28,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define LED_CLASS &c_LedClass
-
 const EG_ClassType_t c_LedClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGLed::EventCB,
@@ -37,7 +35,7 @@ const EG_ClassType_t c_LedClass = {
 	.HeightDef = EG_DPI_DEF / 5,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	.pExtData = NULL,
 #endif
 };
@@ -112,7 +110,7 @@ void EGLed::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 	EG_UNUSED(pClass);
   EG_EventCode_e Code = pEvent->GetCode();
 	if((Code != EG_EVENT_DRAW_MAIN) && (Code != EG_EVENT_DRAW_MAIN_END)) {
-	  if(pEvent->Pump(LED_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+	  if(pEvent->Pump(&c_LedClass) != EG_RES_OK) return;// Call the ancestor's event handler
   }
 	EGLed *pLed = (EGLed*)pEvent->GetTarget();
   pLed->Event(pEvent);

@@ -142,8 +142,8 @@ public:
   uint16_t             m_LongPressTime;      // Long press time in milliseconds
   uint16_t             m_LongPressRepeatTime;// Repeated trigger period in long press [ms]
 
-#if EG_USE_USER_DATA
-  void                *m_pUserData;
+#if EG_USE_EXT_DATA
+  void                *m_pExtData;
 #endif
 } ;
 

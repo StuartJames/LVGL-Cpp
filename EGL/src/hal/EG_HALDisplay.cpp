@@ -120,8 +120,8 @@ EGDisplay* EGDisplay::RegisterDriver(EGDisplayDriver *pDriver)
 	pDisplay->m_SyncAreas.Initialise();
 	EGDisplay *pDispTemp = m_pDefaultDisplay;
 	m_pDefaultDisplay = pDisplay; // Temporarily change the default display to create the default screens on the new display
-	pDisplay->m_pRefreshTimer = EGTimer::Create(RefreshTimerCB, EG_DISP_DEF_REFR_PERIOD, pDisplay, false); // Create a refresh timer
-//	pDisplay->m_pRefreshTimer = EGTimer::Create(RefreshTimerCB, 1000, pDisplay, false); // Create a refresh timer
+	pDisplay->m_pRefreshTimer = EGTimer::Create(RefreshTimerCB, EG_DISP_DEF_REFR_PERIOD, pDisplay, true); // Create a refresh timer
+//	pDisplay->m_pRefreshTimer = EGTimer::Create(RefreshTimerCB, 1000, pDisplay, true); // Create a refresh timer
 	if(pDisplay->m_pRefreshTimer == nullptr) {
 		delete pDisplay;
 		return nullptr;
@@ -153,7 +153,7 @@ EGDisplay* EGDisplay::RegisterDriver(EGDisplayDriver *pDriver)
   EG_LOG_WARN("Setting the default display");
 	m_pDefaultDisplay = pDispTemp;                                // Revert the default display
 	if(m_pDefaultDisplay == nullptr) m_pDefaultDisplay = pDisplay; // Initialize the default display
-	pDisplay->m_pRefreshTimer->Start(); // It's now safe to start the timer
+	pDisplay->m_pRefreshTimer->Resume(); // It's now safe to start the timer
 	pDisplay->m_pRefreshTimer->MakeReady(); // Be sure the screen will be refreshed immediately on start up
 	return pDisplay;
 }

@@ -34,16 +34,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define IMAGE_CLASS &c_Imageclass
-
-const EG_ClassType_t c_Imageclass = {
+const EG_ClassType_t c_ImageClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGImage::EventCB,
 	.WidthDef = EG_SIZE_CONTENT,
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -377,7 +375,7 @@ void EGImage::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 	EG_UNUSED(pClass);
 	EG_EventCode_e Code = pEvent->GetCode();
 	if(Code != EG_EVENT_DRAW_MAIN && Code != EG_EVENT_DRAW_POST) {
-  	if(pEvent->Pump(IMAGE_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+  	if(pEvent->Pump(&c_ImageClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	}
 	EGImage *pImage = (EGImage*)pEvent->GetTarget();
   pImage->Event(pEvent);
@@ -510,7 +508,7 @@ void EGImage::Draw(EGEvent *pEvent)
 		}
 		EGRect OriginalRect(m_Rect);
 		BackgroundRect.Copy(&m_Rect);
-		EG_Result_t Result = pEvent->Pump(m_pClass);	// Call the ancestor'pSize event handler
+		EG_Result_t Result = pEvent->Pump(&c_ImageClass);	// Call the ancestor'pSize event handler
 		if(Result != EG_RES_OK) return;
 		OriginalRect.Copy(&m_Rect);
 		if(Code == EG_EVENT_DRAW_MAIN) {

@@ -41,30 +41,29 @@ EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 		const char *pFileName = (char*)pSource;
 		if(strcmp(EGFileSystem::GetExt((const char *)pFileName), "png") == 0) { // Check the extension
 			// Read the width and height from the file. They have a constant location: [16..23]: width [24..27]: height
-			uint32_t size[2];
+			uint32_t Size[2];
 			if(m_File.Open(pFileName, EG_FS_MODE_RD) != EG_FS_RES_OK) return EG_RES_INVALID;
 			m_File.Seek(16, EG_FS_SEEK_SET);
 			uint32_t ReadCount;
-			m_File.Read(&size, 8, &ReadCount);
+			m_File.Read(&Size, 8, &ReadCount);
 			m_File.Close();
-			if(rn != 8) return EG_RES_INVALID;
+			if(ReadCount != 8) return EG_RES_INVALID;
 			// Save the m_pData in the pHeader
 			pHeader->AlwaysZero = 0;
 			pHeader->ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;
 			// The width and height are stored in Big endian format so convert them to little endian
-			pHeader->Width = (EG_Coord_t)((size[0] & 0xff000000) >> 24) + ((size[0] & 0x00ff0000) >> 8);
-			pHeader->Height = (EG_Coord_t)((size[1] & 0xff000000) >> 24) + ((size[1] & 0x00ff0000) >> 8);
+			pHeader->Width = (EG_Coord_t)((Size[0] & 0xff000000) >> 24) + ((Size[0] & 0x00ff0000) >> 8);
+			pHeader->Height = (EG_Coord_t)((Size[1] & 0xff000000) >> 24) + ((Size[1] & 0x00ff0000) >> 8);
 			return EG_RES_OK;
 		}
 	}
-	// If it's a PNG file in a  C array...
-	else if(SourceType == EG_IMG_SRC_VARIABLE) {
+	else if(SourceType == EG_IMG_SRC_VARIABLE) {	// If it's a PNG file in an array...
 		const EGImageBuffer *pImageBuffer = (EGImageBuffer*)pSource;
 		const uint32_t m_DataSize = pImageBuffer->m_DataSize;
-		const uint32_t *size = ((uint32_t *)pImageBuffer->m_pData) + 4;
-		const uint8_t magic[] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
-		if(m_DataSize < sizeof(magic)) return EG_RES_INVALID;
-		if(memcmp(magic, pImageBuffer->m_pData, sizeof(magic))) return EG_RES_INVALID;
+		const uint32_t *pSize = ((uint32_t *)pImageBuffer->m_pData) + 4;
+		const uint8_t Magic[] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
+		if(m_DataSize < sizeof(Magic)) return EG_RES_INVALID;
+		if(memcmp(Magic, pImageBuffer->m_pData, sizeof(Magic))) return EG_RES_INVALID;
 		pHeader->AlwaysZero = 0;
 		if(pImageBuffer->m_Header.ColorFormat) {
 			pHeader->ColorFormat = pImageBuffer->m_Header.ColorFormat; // Save the color format
@@ -76,13 +75,13 @@ EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 			pHeader->Width = pImageBuffer->m_Header.Width; // Save the image width
 		}
 		else {
-			pHeader->Width = (EG_Coord_t)((size[0] & 0xff000000) >> 24) + ((size[0] & 0x00ff0000) >> 8);
+			pHeader->Width = (EG_Coord_t)((pSize[0] & 0xff000000) >> 24) + ((pSize[0] & 0x00ff0000) >> 8);
 		}
 		if(pImageBuffer->m_Header.Height) {
 			pHeader->Height = pImageBuffer->m_Header.Height; // Save the color height
 		}
 		else {
-			pHeader->Height = (EG_Coord_t)((size[1] & 0xff000000) >> 24) + ((size[1] & 0x00ff0000) >> 8);
+			pHeader->Height = (EG_Coord_t)((pSize[1] & 0xff000000) >> 24) + ((pSize[1] & 0x00ff0000) >> 8);
 		}
 		return EG_RES_OK;
 	}

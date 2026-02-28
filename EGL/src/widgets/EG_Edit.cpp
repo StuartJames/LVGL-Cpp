@@ -48,8 +48,6 @@
 #define EG_TEXTAREA_PWD_BULLET_UNICODE 0x2022
 #define IGNORE_KERNING '\0'
 
-#define EDIT_CLASS &c_EditClass
-
 ///////////////////////////////////////////////////////////////////////////////////////
 
 const EG_ClassType_t c_EditClass = {
@@ -59,7 +57,7 @@ const EG_ClassType_t c_EditClass = {
 	.HeightDef = EG_DPI_DEF,
 	.IsEditable = 0,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
 	.pExtData = nullptr,
 #endif
 };
@@ -617,7 +615,7 @@ void EGEdit::CursorUp(void)
 void EGEdit::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(EDIT_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_EditClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	((EGEdit*)pEvent->GetTarget())->Event(pEvent);  // dereference once
 }
 

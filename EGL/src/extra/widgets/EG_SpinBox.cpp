@@ -29,9 +29,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define SPINBOX_CLASS &c_SpinboxClass
-
-
 const EG_ClassType_t c_SpinboxClass = {
   .pBaseClassType = &c_EditClass,
 	.pEventCB = EGSpinBox::EventCB,
@@ -39,7 +36,7 @@ const EG_ClassType_t c_SpinboxClass = {
 	.HeightDef = 0,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };
@@ -220,7 +217,7 @@ void EGSpinBox::Decrement(void)
 void EGSpinBox::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(SPINBOX_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+  if(pEvent->Pump(&c_SpinboxClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EGSpinBox *pSpinbox = (EGSpinBox*)pEvent->GetTarget();
 	pSpinbox->Event(pEvent);
 }

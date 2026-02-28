@@ -39,8 +39,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define DROP_CLASS &c_DropDownClass
-#define DROPLIST_CLASS &c_DropDownListClass
 #define EG_DROPDOWN_PR_NONE 0xFFFF
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +50,7 @@ const EG_ClassType_t c_DropDownClass = {
 	.HeightDef = EG_SIZE_CONTENT,
 	.IsEditable = EG_OBJ_CLASS_EDITABLE_TRUE,
 	.GroupDef = EG_OBJ_CLASS_GROUP_DEF_TRUE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -485,7 +483,7 @@ bool EGDropDown::IsOpen(void)
 void EGDropDown::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(DROP_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_DropDownClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	EGDropDown *pDropDown = (EGDropDown*)pEvent->GetTarget();
   pDropDown->Event(pEvent); // dereference once
 }
@@ -825,7 +823,7 @@ const EG_ClassType_t c_DropDownListClass = {
 	.HeightDef = 0,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -872,7 +870,7 @@ void EGDropDownList::Configure(void)
 void EGDropDownList::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(DROPLIST_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_DropDownListClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	((EGDropDownList*)pEvent->GetTarget())->Event(pEvent);;
 }
 
@@ -899,7 +897,7 @@ void EGDropDownList::Event(EGEvent *pEvent)
     }
     case EG_EVENT_DRAW_POST: {
       Draw(pEvent);
-      pEvent->Pump(DROPLIST_CLASS);	// Call the ancestor'pSize event handler
+      pEvent->Pump(&c_DropDownListClass);	// Call the ancestor'pSize event handler
       break;
     }
     default: break;

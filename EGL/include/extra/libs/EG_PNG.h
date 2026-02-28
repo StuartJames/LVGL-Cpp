@@ -41,7 +41,7 @@ public:
 private:
   void                      ConvertColorDepth(uint8_t *pImage, uint32_t PixelCount);
 
-	EGFileSystem                    m_File;
+	EGFileSystem              m_File;
 	EG_Color_t               *m_pPalette;
 	EG_OPA_t                 *m_pOPA;
 

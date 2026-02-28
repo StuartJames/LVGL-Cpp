@@ -33,8 +33,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define BAR_CLASS &c_BarClass
-
 #define EG_BAR_SIZE_MIN 4
 #define EG_BAR_IS_ANIMATING(anim_struct) (((anim_struct).AnimationState) != EG_BAR_ANIM_STATE_INV)
 #define EG_BAR_GET_ANIM_VALUE(orig_value, anim_struct) (EG_BAR_IS_ANIMATING(anim_struct) ? ((anim_struct).AnimationEnd) : (orig_value))
@@ -52,7 +50,7 @@ const EG_ClassType_t c_BarClass = {
 	.HeightDef = EG_DPI_DEF / 10,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -203,7 +201,7 @@ EG_BarMode_e EGBar::GetMode(void) const
 void EGBar::Event(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(BAR_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+  if(pEvent->Pump(&c_BarClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EG_EventCode_e Code = pEvent->GetCode();
 	EGObject *pObj = pEvent->GetTarget();
 	EGBar *pBar = (EGBar*)pEvent->GetTarget();

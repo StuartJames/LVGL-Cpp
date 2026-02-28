@@ -18,21 +18,11 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 EGBasicTheme *EGBasicTheme::m_pTheme = nullptr;
-EG_ColorFilterProps_t     EGBasicTheme::m_GreyFilter;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
 EGBasicTheme::EGBasicTheme(void) : EGTheme()
 { 
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
-
-EG_Color_t EGBasicTheme::GreyFilterCB(const EG_ColorFilterProps_t *pFilter, EG_Color_t Color, EG_OPA_t OPA)
-{
-EG_UNUSED(pFilter);
-
-	return EG_ColorMix(EG_LightPalette(EG_PALETTE_GREY, 2), Color, OPA);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +61,7 @@ void EGBasicTheme::Initialise(EGDisplay *pDisplay)
 	m_pFontNormal = EG_FONT_DEFAULT;
 	m_pFontLarge = EG_FONT_DEFAULT;
 	InitialiseStyles();
-	if(pDisplay == NULL || EGDisplay::GetTheme(pDisplay) == this) EGObject::ReportStyleChange(NULL);
+	if(pDisplay == nullptr || EGDisplay::GetTheme(pDisplay) == this) EGObject::ReportStyleChange(nullptr);
 	m_Initialised = true;
 }
 
@@ -123,12 +113,6 @@ void EGBasicTheme::InitialiseStyles(void)
 	m_Dim.SetLineColor(COLOR_DIM);
 	m_Dim.SetArcWidth(2);
 	m_Dim.SetArcColor(COLOR_DIM);
-
-	EG_ColorFilterInitialise(&m_GreyFilter, GreyFilterCB);
-
-	StyleInitialiseReset(&m_Disabled);
-	m_Disabled.SetColorFilterDiscriptor(&m_GreyFilter);
-	m_Disabled.SetColorFilterOPA(EG_OPA_50);
 
 #if EG_USE_ARC || EG_USE_COLORWHEEL
 	StyleInitialiseReset(&m_ArcLine);
@@ -191,7 +175,6 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 #if EG_USE_BTN
 	else if(EGObject::IsKindOf(pObj, &c_ButtonClass)) {
 		pObj->AddStyle(&m_Dark, 0);
-		pObj->AddStyle(&m_Disabled, EG_STATE_DISABLED);
 	}
 #endif
 
@@ -200,7 +183,6 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 #if EG_USE_MSGBOX
     if(EGObject::IsKindOf(pParent, &c_MsgBoxClass)){
 			pObj->AddStyle(&m_Light, 0);
-			pObj->AddStyle(&m_Disabled, EG_PART_ITEMS | EG_STATE_DISABLED);
 			return;
 		}
 #endif
@@ -241,7 +223,6 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 	else if(EGObject::IsKindOf(pObj, &c_CheckboxClass)) {
 		pObj->AddStyle(&m_Light, EG_PART_INDICATOR);
 		pObj->AddStyle(&m_Dark, EG_PART_INDICATOR | EG_STATE_CHECKED);
-		pObj->AddStyle(&m_Disabled, EG_PART_INDICATOR | EG_STATE_DISABLED);
 	}
 #endif
 
@@ -249,9 +230,6 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 	else if(EGObject::IsKindOf(pObj, &c_SwitchClass)) {
 		pObj->AddStyle(&m_Light, 0);
 		pObj->AddStyle(&m_Dim, EG_PART_KNOB);
-		pObj->AddStyle(&m_Disabled, EG_STATE_DISABLED);
-		pObj->AddStyle(&m_Disabled, EG_PART_INDICATOR | EG_STATE_DISABLED);
-		pObj->AddStyle(&m_Disabled, EG_PART_KNOB | EG_STATE_DISABLED);
 	}
 #endif
 
@@ -327,7 +305,6 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 		pObj->AddStyle(&m_White, 0);
 		pObj->AddStyle(&m_Scrollbar, EG_PART_SCROLLBAR);
 		pObj->AddStyle(&m_TextCursor, EG_PART_CURSOR | EG_STATE_FOCUSED);
-		pObj->AddStyle(&m_Disabled, EG_STATE_DISABLED);
 	}
 #endif
 
@@ -342,7 +319,6 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 		pObj->AddStyle(&m_Screen, 9);
 		pObj->AddStyle(&m_White, EG_PART_ITEMS);
 		pObj->AddStyle(&m_Light, EG_PART_ITEMS | EG_STATE_CHECKED);
-		pObj->AddStyle(&m_Disabled, EG_PART_ITEMS | EG_STATE_DISABLED);
 	}
 #endif
 #if EG_USE_LIST

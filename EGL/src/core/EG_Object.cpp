@@ -61,7 +61,7 @@ const EG_ClassType_t c_ObjectClass = {
   .HeightDef = EG_DPI_DEF,
   .IsEditable = EG_OBJ_CLASS_EDITABLE_FALSE,
   .GroupDef = EG_OBJ_CLASS_GROUP_DEF_FALSE,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -77,7 +77,7 @@ EGObject::EGObject(void)
   m_pClass = nullptr;
   m_pStyles = nullptr;
   m_pAttributes = nullptr;
-  m_pUserData = nullptr;
+  m_pExtData = nullptr;
   m_Flags = EG_OBJ_FLAG_HIDDEN;
   m_State = EG_STATE_DEFAULT;
   m_StyleCount = 0;
@@ -98,7 +98,7 @@ EGObject::EGObject(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_Ob
   m_pClass = nullptr;
   m_pStyles = nullptr;
   m_pAttributes = nullptr;
-  m_pUserData = nullptr;
+  m_pExtData = nullptr;
   m_Flags = EG_OBJ_FLAG_HIDDEN;
   m_State = EG_STATE_DEFAULT;
   m_StyleCount = 0;
@@ -625,7 +625,7 @@ void EGObject::Draw(EGEvent *pEvent)
       DrawDiscriptor.m_Part = EG_PART_MAIN;
       EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
 #if EG_DRAW_COMPLEX
-      // With clip corner enabled draw the bg img separately to make it clipped
+      // With clip corner enabled draw the background image separately to make it clipped
       bool ClipCorner = (GetStyleClipCorner(EG_PART_MAIN) && DrawRect.m_Radius != 0) ? true : false;
       const void *pBackImageSource = DrawRect.m_pBackImageSource;
       if(ClipCorner) {

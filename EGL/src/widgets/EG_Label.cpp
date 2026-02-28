@@ -35,8 +35,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define LABEL_CLASS &c_LabelClass
-
 #define EG_LABEL_DEF_SCROLL_SPEED (EGDisplay::GetDPI(GetDisplay()) / 3)
 #define EG_LABEL_SCROLL_DELAY 300
 #define EG_LABEL_DOT_END_INV 0xFFFFFFFF
@@ -51,7 +49,7 @@ const EG_ClassType_t c_LabelClass = {
 	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr
 #endif
 };
@@ -598,7 +596,7 @@ void EGLabel::CutText(uint32_t Position, uint32_t Count)
 void EGLabel::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(LABEL_CLASS) != EG_RES_OK) return;  // Call the ancestor's event handler
+	if(pEvent->Pump(&c_LabelClass) != EG_RES_OK) return;  // Call the ancestor's event handler
 	((EGLabel*)pEvent->GetTarget())->Event(pEvent);
 }
 

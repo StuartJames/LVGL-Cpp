@@ -27,11 +27,11 @@
 
 #if EG_USE_GIF
 
-#include "gifdec.h"
+#include "EG_GIFDecoder.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-extern const EG_ClassType_t EG_GifClass;
+extern const EG_ClassType_t c_GifClass;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,15 +39,15 @@ class EGImageGIF : public EGImage
 {
 public:
                     EGImageGIF(void){};
-                    EGImageGIF(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &EG_GifClass);
+                    EGImageGIF(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_GifClass);
                     ~EGImageGIF(void);
   virtual void      Configure(void);
   void              SetSource(const void *pSource);
   void              Restart(void);
 
-  static void       NextFrameTaskCB(EGTimer *pTimer);
+  static void       NextFrameCB(EGTimer *pTimer);
 
-  gd_GIF            *m_pGif;
+  EGDecoderGIF      *m_pDecoder;
   EGTimer           *m_pTimer;
   EGImageBuffer      m_ImageBuffer;
   uint32_t           m_LastCall;

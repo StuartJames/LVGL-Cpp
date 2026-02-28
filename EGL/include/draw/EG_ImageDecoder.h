@@ -76,8 +76,8 @@ public:
   static void             Delete(void *pDecoder);
   static EG_Result_t      GetInfo(const void *pSource, EG_ImageHeader_t *pHeader);
 
-#if EG_USE_USER_DATA
-  void                   *m_pUserData;
+#if EG_USE_EXT_DATA
+  void                   *m_pExtData;
 #endif
 
 private:
@@ -105,7 +105,7 @@ private:
   EG_Result_t               Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Length, uint8_t *pBuffer);
   EG_Result_t               Indexed(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y,EG_Coord_t Length, uint8_t *pBuffer);
 
-	EGFileSystem                    m_File;
+	EGFileSystem              m_File;
 	EG_Color_t               *m_pPalette;
 	EG_OPA_t                 *m_pOPA;
 

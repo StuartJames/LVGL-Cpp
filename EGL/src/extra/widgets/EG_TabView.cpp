@@ -34,9 +34,6 @@ EG_Coord_t    EGTabView::m_TabSizeCreate;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#define TABVIEW_CLASS &c_TabViewClass
-
-
 const EG_ClassType_t c_TabViewClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGTabView::EventCB,
@@ -44,7 +41,7 @@ const EG_ClassType_t c_TabViewClass = {
 	.HeightDef = _EG_PCT(100),
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = NULL,
 #endif
 };
@@ -252,7 +249,7 @@ void EGTabView::SetActive(uint32_t Index, EG_AnimateEnable_e Enable)
 void EGTabView::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(TABVIEW_CLASS) != EG_RES_OK) return;   // Call the ancestor's event handler
+  if(pEvent->Pump(&c_TabViewClass) != EG_RES_OK) return;   // Call the ancestor's event handler
 	EGTabView *pTabView = (EGTabView*)pEvent->GetTarget();
 	if(pEvent->GetCode() == EG_EVENT_SIZE_CHANGED) {
 		pTabView->SetActive(pTabView->GetActive(), EG_ANIM_OFF);

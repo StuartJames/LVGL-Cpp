@@ -33,7 +33,7 @@ EGTheme::EGTheme(void) :
   m_pFontNormal(nullptr),
   m_pFontLarge(nullptr),
   m_Flags(0),
-  m_pUserData(nullptr),
+  m_pExtData(nullptr),
   m_Initialised(false) 
 {
 }

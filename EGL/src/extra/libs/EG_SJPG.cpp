@@ -125,27 +125,27 @@ EG_Result_t ret = EG_RES_OK;
 
 	if(SourceType == EG_IMG_SRC_VARIABLE) {
 		const EGImageBuffer *pImageBuffer = (EGImageBuffer*)pSource;
-		uint8_t *raw_sjpeg_data = (uint8_t *)pImageBuffer->m_pData;
-		const uint32_t raw_sjpeg_data_size = pImageBuffer->m_DataSize;
-		if(!strncmp((char *)raw_sjpeg_data, "_SJPG__", strlen("_SJPG__"))) {
-			raw_sjpeg_data += 14;  //seek to res info ... refer pSJPEG format
+		uint8_t *pRawData = (uint8_t *)pImageBuffer->m_pData;
+		const uint32_t RawDataSize = pImageBuffer->m_DataSize;
+		if(!strncmp((char *)pRawData, "_SJPG__", strlen("_SJPG__"))) {
+			pRawData += 14;  //seek to res info ... refer pSJPEG format
 			pHeader->AlwaysZero = 0;
 			pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
-			pHeader->Width = *raw_sjpeg_data++;
-			pHeader->Width |= *raw_sjpeg_data++ << 8;
-			pHeader->Height = *raw_sjpeg_data++;
-			pHeader->Height |= *raw_sjpeg_data++ << 8;
+			pHeader->Width = *pRawData++;
+			pHeader->Width |= *pRawData++ << 8;
+			pHeader->Height = *pRawData++;
+			pHeader->Height |= *pRawData++ << 8;
 			return ret;
 		}
-		else if(IsJPG(raw_sjpeg_data, raw_sjpeg_data_size) == true) {
+		else if(IsJPG(pRawData, RawDataSize) == true) {
 			pHeader->AlwaysZero = 0;
 			pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
 			uint8_t *pWorkBuffer = (uint8_t*)EG_AllocMem(TJPGD_WORKBUFF_SIZE);
 			if(!pWorkBuffer) return EG_RES_INVALID;
 			IO_Source_t io_source_temp;
 			io_source_temp.Type = SJPEG_IO_SOURCE_C_ARRAY;
-			io_source_temp.pRawData = raw_sjpeg_data;
-			io_source_temp.RawDataSize = raw_sjpeg_data_size;
+			io_source_temp.pRawData = pRawData;
+			io_source_temp.RawDataSize = RawDataSize;
 			io_source_temp.RawDataPosition = 0;
 			JDEC TempJDEC;
 			JRESULT rc = jd_prepare(&TempJDEC, InputFunc, pWorkBuffer, (size_t)TJPGD_WORKBUFF_SIZE, &io_source_temp);
@@ -186,11 +186,11 @@ end:
 				}
 				pHeader->AlwaysZero = 0;
 				pHeader->ColorFormat = EG_COLOR_FORMAT_RAW;
-				uint8_t *raw_sjpeg_data = Buffer;
-				pHeader->Width = *raw_sjpeg_data++;
-				pHeader->Width |= *raw_sjpeg_data++ << 8;
-				pHeader->Height = *raw_sjpeg_data++;
-				pHeader->Height |= *raw_sjpeg_data++ << 8;
+				uint8_t *pRawData = Buffer;
+				pHeader->Width = *pRawData++;
+				pHeader->Width |= *pRawData++ << 8;
+				pHeader->Height = *pRawData++;
+				pHeader->Height |= *pRawData++ << 8;
 				File.Close();
 				return EG_RES_OK;
 			}
@@ -234,7 +234,7 @@ EG_Result_t Result = EG_RES_OK;
 	if(pDescriptor->SourceType == EG_IMG_SRC_VARIABLE) {
 		uint8_t *m_pData;
 		SJPEG_t *pSJPEG = (SJPEG_t *)pDescriptor->pExtParam;
-		const uint32_t raw_sjpeg_data_size = ((EGImageBuffer *)pDescriptor->pSource)->m_DataSize;
+		const uint32_t RawDataSize = ((EGImageBuffer *)pDescriptor->pSource)->m_DataSize;
 		if(pSJPEG == NULL) {
 			pSJPEG = (SJPEG_t*)EG_AllocMem(sizeof(SJPEG_t));
 			if(!pSJPEG) return EG_RES_INVALID;
@@ -295,7 +295,7 @@ EG_Result_t Result = EG_RES_OK;
 			pDescriptor->pImageData = nullptr;
 			return Result;
 		}
-		else if(IsJPG(pSJPEG->pData, raw_sjpeg_data_size) == true) {
+		else if(IsJPG(pSJPEG->pData, RawDataSize) == true) {
 			uint8_t *pWorkBuffer = (uint8_t*)EG_AllocMem(TJPGD_WORKBUFF_SIZE);
 			if(!pWorkBuffer) {
 				Cleanup(pSJPEG);

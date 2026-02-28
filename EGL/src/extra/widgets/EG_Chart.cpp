@@ -26,8 +26,6 @@
 
 #include "misc/EG_Assert.h"
 
-#define CHART_CLASS &c_ChartClass
-
 #define EG_CHART_HDIV_DEF 3
 #define EG_CHART_VDIV_DEF 5
 #define EG_CHART_POINT_CNT_DEF 10
@@ -43,7 +41,7 @@ const EG_ClassType_t c_ChartClass = {
 	.HeightDef = EG_DPI_DEF * 2,
   .IsEditable = 0,
 	.GroupDef = 0,
-#if EG_USE_USER_DATA
+#if EG_USE_EXT_DATA
   .pExtData = nullptr,
 #endif
 };
@@ -592,7 +590,7 @@ uint32_t EGChart::GetSelectPoint(void)
 void EGChart::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-	if(pEvent->Pump(CHART_CLASS) != EG_RES_OK) return;// Call the ancestor's event handler
+	if(pEvent->Pump(&c_ChartClass) != EG_RES_OK) return;// Call the ancestor's event handler
 	EGChart *pChart = (EGChart*)pEvent->GetTarget();
   pChart->Event(pEvent);  // Dereference once
 }
@@ -676,7 +674,7 @@ int16_t i, TickStart, TickEnd;
 	EGDrawDiscriptor DrawDiscriptor;
 	InitDrawDescriptor(&DrawDiscriptor, pContext);
 	DrawDiscriptor.m_Part = EG_PART_MAIN;
-	DrawDiscriptor.m_pClass = CHART_CLASS;
+	DrawDiscriptor.m_pClass = &c_ChartClass;
 	DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_DIV_LINE_INIT;
 	DrawDiscriptor.m_pDrawLine = &DrawLine;
 	DrawDiscriptor.m_Index = 0xFFFFFFFF;
@@ -700,7 +698,7 @@ int16_t i, TickStart, TickEnd;
 			Point1.m_Y = (int32_t)((int32_t)ChartHeight * i) / (m_HorizontalDivCount - 1);
 			Point1.m_Y += OffsetY;
 			Point2.m_Y = Point1.m_Y;
-			DrawDiscriptor.m_pClass = CHART_CLASS;
+			DrawDiscriptor.m_pClass = &c_ChartClass;
 			DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_DIV_LINE_HOR;
 			DrawDiscriptor.m_pPoint1 = &Point1;
 			DrawDiscriptor.m_pPoint2 = &Point2;
@@ -724,7 +722,7 @@ int16_t i, TickStart, TickEnd;
 			Point1.m_X = (int32_t)((int32_t)ChartWidth * i) / (m_VerticalDivCount - 1);
 			Point1.m_X += OffsetX;
 			Point2.m_X = Point1.m_X;
-			DrawDiscriptor.m_pClass = CHART_CLASS;
+			DrawDiscriptor.m_pClass = &c_ChartClass;
 			DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_DIV_LINE_VER;
 			DrawDiscriptor.m_pPoint1 = &Point1;
 			DrawDiscriptor.m_pPoint2 = &Point2;
@@ -801,7 +799,7 @@ EGRect SeriesClip;
 		Point2.m_Y = ChartHeight - CalcY + OffsetY;
 		EGDrawDiscriptor DrawDiscriptor;
 		InitDrawDescriptor(&DrawDiscriptor, pContext);
-		DrawDiscriptor.m_pClass = CHART_CLASS;
+		DrawDiscriptor.m_pClass = &c_ChartClass;
 		DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_LINE_AND_POINT;
 		DrawDiscriptor.m_Part = EG_PART_ITEMS;
 		DrawDiscriptor.m_pDrawLine = &DrawLine;
@@ -935,7 +933,7 @@ void EGChart::DrawScatterSeries(EGDrawContext *pContext)
 		EGDrawDiscriptor DrawDiscriptor;
 		InitDrawDescriptor(&DrawDiscriptor, pContext);
 		DrawDiscriptor.m_Part = EG_PART_ITEMS;
-		DrawDiscriptor.m_pClass = CHART_CLASS;
+		DrawDiscriptor.m_pClass = &c_ChartClass;
 		DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_LINE_AND_POINT;
 		DrawDiscriptor.m_pDrawLine = &DrawLine;
 		DrawDiscriptor.m_pDrawRect = &DrawRect;
@@ -1025,7 +1023,7 @@ EG_CharSeries_t *pSeries;
 	EGDrawDiscriptor DrawDiscriptor;
 	InitDrawDescriptor(&DrawDiscriptor, pContext);
 	DrawDiscriptor.m_Part = EG_PART_ITEMS;
-	DrawDiscriptor.m_pClass = CHART_CLASS;
+	DrawDiscriptor.m_pClass = &c_ChartClass;
 	DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_BAR;
 	for(uint16_t i = 0; i < m_PointCount; i++) {	// Go through all points
 		EG_Coord_t RefX = (int32_t)((int32_t)(ChartWidth - BlockWidth) * i) / (m_PointCount - 1) + m_Rect.GetX1() + OffsetX;
@@ -1084,7 +1082,7 @@ void EGChart::DrawCursors(EGDrawContext *pContext)
 	DrawDiscriptor.m_pDrawLine = &DrawLineTemp;
 	DrawDiscriptor.m_pDrawRect = &DrawCursorTemp;
 	DrawDiscriptor.m_Part = EG_PART_CURSOR;
-	DrawDiscriptor.m_pClass = CHART_CLASS;
+	DrawDiscriptor.m_pClass = &c_ChartClass;
 	DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_CURSOR;
 	// Go through all cursor lines
   POSITION Pos;
@@ -1187,7 +1185,7 @@ void EGChart::DrawAxisY(EGDrawContext *pContext, EG_ChartAxis_e Axis)
 	InititialseDrawLabel(EG_PART_TICKS, &DrawLabel);
 	EGDrawDiscriptor DrawDiscriptor;
 	InitDrawDescriptor(&DrawDiscriptor, pContext);
-	DrawDiscriptor.m_pClass = CHART_CLASS;
+	DrawDiscriptor.m_pClass = &c_ChartClass;
 	DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_TICK_LABEL;
 	DrawDiscriptor.m_Index = Axis;
 	DrawDiscriptor.m_Part = EG_PART_TICKS;
@@ -1281,7 +1279,7 @@ void EGChart::DrawAxisX(EGDrawContext *pContext, EG_ChartAxis_e Axis)
 	DrawLine.m_DashWidth = 0;
 	EGDrawDiscriptor DrawDiscriptor;
 	InitDrawDescriptor(&DrawDiscriptor, pContext);
-	DrawDiscriptor.m_pClass = CHART_CLASS;
+	DrawDiscriptor.m_pClass = &c_ChartClass;
 	DrawDiscriptor.m_Type = EG_CHART_DRAW_PART_TICK_LABEL;
 	DrawDiscriptor.m_Index = EG_CHART_AXIS_PRIMARY_X;
 	DrawDiscriptor.m_Part = EG_PART_TICKS;
