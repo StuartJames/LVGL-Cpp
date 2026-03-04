@@ -497,8 +497,9 @@ void EGDropDown::Event(EGEvent *pEvent)
     case EG_EVENT_FOCUSED:{
       EGGroup *pGroup = (EGGroup*)GetGroup();
       bool IsEditing = (pGroup != nullptr) ? pGroup->GetEditing() : false;
-      EG_InDeviceType_e InputType = EGInputDevice::GetActive()->GetType();
-      if(InputType == EG_INDEV_TYPE_ENCODER) {		// Encoders need special handling
+      EGInputDevice *pInDev  = EGInputDevice::GetActive();
+      if(pInDev == nullptr) break;
+      if(pInDev->GetType() == EG_INDEV_TYPE_ENCODER) {		// Encoders need special handling
         if(IsEditing) Open();			// Open the list if IsEditing
         else{			                // Close the list if navigating
           m_SelectedIndex = m_FocusIndex;
