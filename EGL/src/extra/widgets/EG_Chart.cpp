@@ -854,7 +854,6 @@ EGRect SeriesClip;
 					}
 					if(PointWidth && PointHeight && pSeries->pPointsY[PreviousPoint] != EG_CHART_POINT_NONE) {
 //    ESP_LOGI("[Chart ]", "RY1:%d, RY2:%d, CY1:%d, CY2:%d", PointRect.GetY1(), PointRect.GetY2(), pOriginalClipRect->GetY1(), pOriginalClipRect->GetY2());
-        g_pItemObj = this;
 						DrawRect.Draw(pContext, &PointRect);
 					}
 					EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);

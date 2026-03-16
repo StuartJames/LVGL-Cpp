@@ -92,7 +92,7 @@ void EGCheckbox::SetText(const char *pText)
 #else
 	size_t Length = strlen(pText);
 #endif
-	char *pTextMem = (char *)m_pText;
+	char *pTextMem = (char*)m_pText;
 	if(!m_StaticText) pTextMem = (char*)EG_ReallocMem(pTextMem, Length + 1);
 	else pTextMem = (char*)EG_AllocMem(Length + 1);
 #if EG_USE_ARABIC_PERSIAN_CHARS

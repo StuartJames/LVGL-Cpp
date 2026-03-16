@@ -196,7 +196,7 @@ EGObject* EGTabView::AddTab(const char *pName)
 	EG_FreeMem(OldMap);
 	pButtons->SetControlAll(EG_BTNMATRIX_CTRL_CHECKABLE | EG_BTNMATRIX_CTRL_CLICK_TRIG | EG_BTNMATRIX_CTRL_NO_REPEAT);
 	m_TabCount++;
-	if(m_TabCount == 1) SetActive(0, EG_ANIM_OFF);
+	if(m_TabCount == 1) SetActiveTab(0, EG_ANIM_OFF);
 	pButtons->SetControl(m_CurrentTab, EG_BTNMATRIX_CTRL_CHECKED);
 	return pPage;
 }
@@ -215,7 +215,7 @@ void EGTabView::RenameTab(uint32_t Index, const char *pName)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGTabView::SetActive(uint32_t Index, EG_AnimateEnable_e Enable)
+void EGTabView::SetActiveTab(uint32_t Index, EG_AnimateEnable_e Enable)
 {
 	if(m_IsBeingDeleted) return;
 	if(Index >= m_TabCount) Index = m_TabCount - 1;
@@ -252,7 +252,7 @@ void EGTabView::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
   if(pEvent->Pump(&c_TabViewClass) != EG_RES_OK) return;   // Call the ancestor's event handler
 	EGTabView *pTabView = (EGTabView*)pEvent->GetTarget();
 	if(pEvent->GetCode() == EG_EVENT_SIZE_CHANGED) {
-		pTabView->SetActive(pTabView->GetActive(), EG_ANIM_OFF);
+		pTabView->SetActiveTab(pTabView->GetActiveTab(), EG_ANIM_OFF);
 	}
 }
 
@@ -263,7 +263,7 @@ void EGTabView::ButtonEventCB(EGEvent *pEvent)
 	EGButtonMatrix *pButtons = (EGButtonMatrix*)pEvent->GetTarget();
 	EGTabView *pTabView = (EGTabView*)pButtons->GetParent();
 	uint32_t Index = pButtons->GetSelected();
-	pTabView->SetActive(Index, EG_ANIM_OFF);
+	pTabView->SetActiveTab(Index, EG_ANIM_OFF);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -274,7 +274,7 @@ void EGTabView::ContentEventCB(EGEvent *pEvent)
   EG_EventCode_e Code = pEvent->GetCode();
 	EGTabView *pTabView = (EGTabView*)pContent->GetParent();
 	if(Code == EG_EVENT_LAYOUT_CHANGED) {
-		pTabView->SetActive(pTabView->GetActive(), EG_ANIM_OFF);
+		pTabView->SetActiveTab(pTabView->GetActiveTab(), EG_ANIM_OFF);
     return;
 	}
 	if(Code == EG_EVENT_SCROLL_END) {
@@ -296,8 +296,8 @@ void EGTabView::ContentEventCB(EGEvent *pEvent)
 		}
 		if(Tab < 0) Tab = 0;
 		bool NewTab = false;
-		if(Tab != pTabView->GetActive()) NewTab = true;
-		pTabView->SetActive(Tab, EG_ANIM_ON);
+		if(Tab != pTabView->GetActiveTab()) NewTab = true;
+		pTabView->SetActiveTab(Tab, EG_ANIM_ON);
 		if(NewTab) EGEvent::EventSend(pTabView, EG_EVENT_VALUE_CHANGED, NULL);
 	}
 }

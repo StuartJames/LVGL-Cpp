@@ -145,7 +145,7 @@ const EG_ClassType_t c_MenuSidebarHeaderContainerClass = {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGMenuPage::EGMenuPage(EGObject *pParent, char *pTitle) : EGObject()
+EGMenuPage::EGMenuPage(EGObject *pParent, const char *pTitle) : EGObject()
 {
   Attach(this, pParent, &c_MenuPageClass);
 	Initialise();

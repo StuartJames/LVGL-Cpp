@@ -33,7 +33,7 @@
 #define EG_OBJ_FLAG_FLEX_IN_NEW_TRACK   EG_OBJ_FLAG_LAYOUT_1
 EG_EXPORT_CONST_INT(EG_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
-#define _EG_FLEX_COLUMN        (1 << 0)
+#define _EG_FLEX_COLUMN     (1 << 0)
 #define _EG_FLEX_WRAP       (1 << 2)
 #define _EG_FLEX_REVERSE    (1 << 3)
 
@@ -107,6 +107,7 @@ public:
   static EG_FlexAlign_e   GetObjStyleCrossPlace(const EGObject *pObject, uint32_t part);
   static EG_FlexAlign_e   GetObjStyleTrackPlace(const EGObject *pObject, uint32_t part);
   static uint8_t          GetObjStyleGrow(const EGObject *pObject, uint32_t part);
+  static uint32_t         GetReference(){ return m_Reference; };
         
   static void             UpdateCB(EGObject *pObject, void *pUserData);
 

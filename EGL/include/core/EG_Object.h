@@ -648,9 +648,6 @@ private:
 
 };
 
-extern EGObject *g_pTabObj;
-extern EGObject *g_pItemObj;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "EG_ObjStyle.inl"

@@ -43,7 +43,6 @@ EGFlexLayout::EGFlexLayout(void) :
 	m_Row(0),
 	m_Wrap(0),
 	m_Reverse(0)
-
 {
 }
 

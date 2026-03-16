@@ -46,8 +46,8 @@ public:
   void              RenameTab(uint32_t Index, const char *pName);
   EGObject*         GetContent(void){ return GetChild(1); };
   EGButtonMatrix*   GetTabButtons(void){ return (EGButtonMatrix*)GetChild(0); };
-  void              SetActive(uint32_t Index, EG_AnimateEnable_e Enable);
-  uint16_t          GetActive(void){ return m_CurrentTab; };
+  void              SetActiveTab(uint32_t Index, EG_AnimateEnable_e Enable);
+  uint16_t          GetActiveTab(void){ return m_CurrentTab; };
 
   static void       EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
   static void       ButtonEventCB(EGEvent *pEvent);

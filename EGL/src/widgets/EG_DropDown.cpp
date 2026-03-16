@@ -370,7 +370,6 @@ EG_DirType_e EGDropDown::GetDirection(void)
 
 void EGDropDown::Open(void)
 {
-  g_pItemObj = m_pDropList;
 	AddState(EG_STATE_CHECKED);
 	m_pDropList->SetParent(GetScreen());
 	m_pDropList->MoveToIndex(-1);
@@ -745,7 +744,6 @@ void EGDropDown::DrawBoxLabel(EGDrawContext *pContext, uint16_t Index, EGState_t
 EG_Result_t EGDropDown::ButtonReleaseHandler(void)
 {
 	EGInputDevice *pInput = EGInputDevice::GetActive();
-//  if(g_pItemObj == obj) ESP_LOGI("[Object]", "Layout Invalid:%d, DoScroll:%d", obj->layout_inv, was_on_layout);
 	if(pInput->GetScrollObj() == nullptr) {
 		if(IsOpen()) {
 			Close();

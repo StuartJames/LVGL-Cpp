@@ -65,7 +65,7 @@ class EGMenuPage : public EGObject
 {
 public:
                       EGMenuPage(void) : EGObject(), m_pTitle(nullptr){};
-                      EGMenuPage(EGObject *pParent, char *pTitle);
+                      EGMenuPage(EGObject *pParent, const char *pTitle);
   virtual             ~EGMenuPage(void);
   virtual void        Configure(void);
 

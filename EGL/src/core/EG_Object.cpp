@@ -41,9 +41,6 @@
 #include <stdint.h>
 #include <string.h>
 
-EGObject *g_pTabObj;
-EGObject *g_pItemObj;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #define OBJ_CLASS &c_ObjectClass
