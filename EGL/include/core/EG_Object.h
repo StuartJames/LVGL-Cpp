@@ -550,7 +550,7 @@ public:
   void                    UpdateLayout(void);
   void                    SetAlign(EG_AlignType_e Align);
   void                    Align(EG_AlignType_e Align, EG_Coord_t OfsetX, EG_Coord_t OfsetY);
-  void                    AlignTo(EGObject *pBase, EG_AlignType_e Align, EG_Coord_t OfsetX, EG_Coord_t OfsetY);
+  void                    AlignTo(EGObject *pAnchor, EG_AlignType_e Align, EG_Coord_t OfsetX, EG_Coord_t OfsetY);
   void                    Center(void);
   EG_Coord_t              GetX(void);
   EG_Coord_t              GetX2(void);

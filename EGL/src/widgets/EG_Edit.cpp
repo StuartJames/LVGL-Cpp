@@ -444,9 +444,9 @@ void EGEdit::SetOneLineMode(bool Enable)
 	if(m_OneLineMode == Enable) return;
 	m_OneLineMode = Enable ? 1U : 0U;
 	EG_Coord_t Width = Enable ? EG_SIZE_CONTENT : EG_PCT(100);
-	EG_Coord_t MinimumWidth = Enable ? EG_PCT(100) : 0;
 	SetWidth(Width);
-	SetStyleMinWidth(MinimumWidth, 0);
+//	EG_Coord_t MinimumWidth = Enable ? EG_PCT(100) : 0;
+//	SetStyleMinWidth(MinimumWidth, 0);    // not shure why you'd want to do this
 	if(Enable) SetHeight(EG_SIZE_CONTENT);
 	else RemoveStyleProperty(EG_STYLE_HEIGHT, EG_PART_MAIN);
 	ScrollTo(0, 0, EG_ANIM_OFF);
@@ -933,19 +933,14 @@ EG_Result_t EGEdit::InsertHandler(const char *pText)
 {
 	m_pInsertReplace = nullptr;
 	EGEvent::EventSend(this, EG_EVENT_INSERT, (char *)pText);
-
 	//  Drop pText if insert replace is set to '\0'
-	if(m_pInsertReplace && m_pInsertReplace[0] == '\0')
-		return EG_RES_INVALID;
-
+	if(m_pInsertReplace && m_pInsertReplace[0] == '\0')	return EG_RES_INVALID;
 	if(m_pInsertReplace) {
-		// Add the replaced text directly it's different from the original
-		if(strcmp(m_pInsertReplace, pText)) {
+		if(strcmp(m_pInsertReplace, pText)) {	// Add the replaced text directly it's different from the original
 			AddText(m_pInsertReplace);
 			return EG_RES_INVALID;
 		}
 	}
-
 	return EG_RES_OK;
 }
 

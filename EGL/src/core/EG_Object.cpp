@@ -68,44 +68,44 @@ EGList    EGObject::m_LayoutList;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-EGObject::EGObject(void) 
+EGObject::EGObject(void) :
+  m_Flags(EG_OBJ_FLAG_HIDDEN),
+  m_State(EG_STATE_DEFAULT),
+  m_pAttributes(nullptr),
+  m_StyleCount(0),
+  m_LayoutInvalid(0),
+  m_ReadScrollAfterLayout(0),
+  m_ScreenLayoutInvalid(0),
+  m_SkipTransition(0),
+  m_HeightLayout(0),
+  m_WidthLayout(0),
+  m_IsBeingDeleted(0),
+  m_pParent(nullptr),
+  m_pExtData(nullptr),
+  m_pClass(nullptr),
+  m_pStyles(nullptr)
 {
-  m_pParent = nullptr;
-  m_pClass = nullptr;
-  m_pStyles = nullptr;
-  m_pAttributes = nullptr;
-  m_pExtData = nullptr;
-  m_Flags = EG_OBJ_FLAG_HIDDEN;
-  m_State = EG_STATE_DEFAULT;
-  m_StyleCount = 0;
-  m_LayoutInvalid = 0;
-  m_ReadScrollAfterLayout = 0;
-  m_ScreenLayoutInvalid = 0;
-  m_SkipTransition = 0;
-  m_HeightLayout = 0;
-  m_WidthLayout = 0;
-  m_IsBeingDeleted = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-EGObject::EGObject(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_ObjectClass*/) 
+EGObject::EGObject(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_ObjectClass*/) :
+  m_Flags(EG_OBJ_FLAG_HIDDEN),
+  m_State(EG_STATE_DEFAULT),
+  m_pAttributes(nullptr),
+  m_StyleCount(0),
+  m_LayoutInvalid(0),
+  m_ReadScrollAfterLayout(0),
+  m_ScreenLayoutInvalid(0),
+  m_SkipTransition(0),
+  m_HeightLayout(0),
+  m_WidthLayout(0),
+  m_IsBeingDeleted(0),
+  m_pParent(nullptr),
+  m_pExtData(nullptr),
+  m_pClass(nullptr),
+  m_pStyles(nullptr)
 {
-  m_pParent = nullptr;
-  m_pClass = nullptr;
-  m_pStyles = nullptr;
-  m_pAttributes = nullptr;
-  m_pExtData = nullptr;
-  m_Flags = EG_OBJ_FLAG_HIDDEN;
-  m_State = EG_STATE_DEFAULT;
-  m_StyleCount = 0;
-  m_LayoutInvalid = 0;
-  m_ReadScrollAfterLayout = 0;
-  m_ScreenLayoutInvalid = 0;
-  m_SkipTransition = 0;
-  m_HeightLayout = 0;
-  m_WidthLayout = 0;
-  m_IsBeingDeleted = 0;
  	EG_LOG_INFO("[Object]", "New : Parent %p", (void*)pParent);
   Attach(this, pParent, pClassCnfg);  //  attach class and set parent
 	Initialise();

@@ -71,7 +71,7 @@ const EG_ClassType_t c_ListTextClass = {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGListCtrl::EGListCtrl(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= LISTCTRL_CLASS*/) : EGObject()
+EGListCtrl::EGListCtrl(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= c_ListClass*/) : EGObject()
 {
   Attach(this, pParent, pClassCnfg);
 	Initialise();
@@ -103,7 +103,7 @@ EGButton* EGListCtrl::AddButton(const void *pIcon, const char *pText)
 	}
 #endif
 	if(pText) {
-    EGLabel *pLabel = new EGLabel(this);        
+    EGLabel *pLabel = new EGLabel(pButton);        
 		pLabel->SetText(pText);
 	  pLabel->SetLongMode(EG_LABEL_LONG_SCROLL_CIRCULAR);
     EGFlexLayout::SetObjGrow(pLabel, 1);

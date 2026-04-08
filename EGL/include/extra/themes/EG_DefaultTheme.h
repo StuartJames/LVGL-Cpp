@@ -129,8 +129,8 @@ private:
   EGStyle             m_MeterIndicator;
 #endif
 #if EG_USE_TEXTAREA
-	EGStyle             m_TextAreaCursor;
-  EGStyle             m_TextAreaPlaceholder;
+	EGStyle             m_EditCursor;
+  EGStyle             m_EditPlaceholder;
 #endif
 #if EG_USE_CALENDAR
 	EGStyle             m_CalendarButtonBackground;
@@ -165,6 +165,9 @@ private:
   EGStyle             m_ListButton;
   EGStyle             m_ListItemGrow;
   EGStyle             m_ListLabel;
+#endif
+#if EG_USE_SPINBOX
+	EGStyle             m_SpinBoxCursor;
 #endif
 #if EG_USE_TABVIEW
 	EGStyle             m_TabBackgroundFocus;

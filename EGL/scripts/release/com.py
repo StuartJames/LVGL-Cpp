@@ -41,8 +41,8 @@ def ver_format(ver):
     if(ver[3] != ""): s = s + "-" + ver[3]
     return s
 
-def get_lvgl_version():
-    print("Get lvgl's version ")
+def get_egl_version():
+    print("Get EGL's version ")
 
     ver = [0, 0, 0, ""]
 

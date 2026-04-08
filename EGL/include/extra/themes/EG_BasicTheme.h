@@ -62,6 +62,9 @@ private:
 #if EG_USE_TEXTAREA
 	EGStyle               m_TextCursor;
 #endif
+#if EG_USE_SPINBOX
+	EGStyle               m_SpinBoxCursor;
+#endif
 
 	static EG_ColorFilterProps_t     m_GreyFilter;
 

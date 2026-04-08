@@ -93,9 +93,7 @@ void EGSpinBox::Configure(void)
 
 void EGSpinBox::SetValue(int32_t Value)
 {
-	if(Value > m_MaxRange) Value = m_MaxRange;
-	if(Value < m_MinRange) Value = m_MinRange;
-	m_Value = Value;
+	m_Value = (Value > m_MaxRange) ? m_MaxRange : (Value < m_MinRange) ? m_MinRange : Value;
 	UpdateValue();
 }
 
@@ -145,7 +143,9 @@ void EGSpinBox::SetRange(int32_t MinRange, int32_t MaxRange)
 
 void EGSpinBox::SetCursorPos(uint8_t Pos)
 {
-	int32_t step_limit;
+int32_t step_limit;
+
+
 	step_limit = EG_MAX(m_MaxRange, (m_MinRange < 0 ? (-m_MinRange) : m_MinRange));
 	int32_t new_step = m_Step * EG_Pow(10, Pos);
 	if(Pos <= 0) m_Step = 1;
@@ -217,7 +217,7 @@ void EGSpinBox::Decrement(void)
 void EGSpinBox::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 {
 	EG_UNUSED(pClass);
-  if(pEvent->Pump(&c_SpinboxClass) != EG_RES_OK) return;// Call the ancestor's event handler
+  if(pEvent->Pump(&c_SpinboxClass) != EG_RES_OK) return; // Call the ancestor's event handler
 	EGSpinBox *pSpinbox = (EGSpinBox*)pEvent->GetTarget();
 	pSpinbox->Event(pEvent);
 }
@@ -258,28 +258,27 @@ void EGSpinBox::Event(EGEvent *pEvent)
           }
         }
       }
-      // The cursor has been positioned to a digit. Set `step` accordingly
-      else {
-        const char *txt = GetText();
-        size_t txt_len = strlen(txt);
+      else {      // The cursor has been positioned to a digit. Set `step` accordingly
+        const char *pText = GetText();
+        size_t Length = strlen(pText);
 
-        if(txt[m_Cursor.Position] == '.') {
+        if(pText[m_Cursor.Position] == '.'){
           CursorLeft();
         }
-        else if(m_Cursor.Position == (uint32_t)txt_len) {
-          SetCursorPos(txt_len - 1);
+        else if(m_Cursor.Position == (uint32_t)Length) {
+          SetCursorPos(Length - 1);
         }
         else if(m_Cursor.Position == 0 && m_MinRange < 0) {
           SetCursorPos(1);
         }
-        size_t len = m_DigitCount - 1;
-        uint16_t cp = m_Cursor.Position;
-        if(m_Cursor.Position > m_DecimalPointPos && m_DecimalPointPos != 0) cp--;
-        uint32_t pos = len - cp;
-        if(m_MinRange < 0) pos++;
+        size_t Digits = m_DigitCount - 1;
+        uint16_t CursorPos = m_Cursor.Position;
+        if(m_Cursor.Position > m_DecimalPointPos && m_DecimalPointPos != 0) CursorPos--;
+        uint32_t DigitPos = Digits - CursorPos;
+        if(m_MinRange < 0) DigitPos++;
         m_Step = 1;
         uint16_t i;
-        for(i = 0; i < pos; i++) m_Step *= 10;
+        for(i = 0; i < DigitPos; i++) m_Step *= 10;
       }
       break;
     }
@@ -318,53 +317,54 @@ void EGSpinBox::Event(EGEvent *pEvent)
 
 void EGSpinBox::UpdateValue(void)
 {
-	char buf[EG_SPINBOX_MAX_DIGIT_COUNT + 8];
-	EG_ZeroMem(buf, sizeof(buf));
-	char *buf_p = buf;
-	uint8_t cur_shift_left = 0;
+char Buffer[EG_SPINBOX_MAX_DIGIT_COUNT + 8];
+
+	EG_ZeroMem(Buffer, sizeof(Buffer));
+	char *pBuffer = Buffer;
+	uint8_t CursorShift = 0;
 	if(m_MinRange < 0) {  // hide sign if there are only positive values
-		(*buf_p) = m_Value >= 0 ? '+' : '-';		// Add the sign
-		buf_p++;
+		(*pBuffer) = m_Value >= 0 ? '+' : '-';		// Add the sign
+		pBuffer++;
 	}
-	else cur_shift_left++;	// Cursor need shift to left
+	else CursorShift++;	// Cursor need shift to left
 	int32_t i;
-	char digits[EG_SPINBOX_MAX_DIGIT_COUNT + 4];
+	char Digits[EG_SPINBOX_MAX_DIGIT_COUNT + 4];
 	// Convert the numbers to string (the sign is already handled so always covert positive number)
-	eg_snprintf(digits, sizeof(digits), "%" EG_PRId32, EG_ABS(m_Value));
-	int lz_cnt = m_DigitCount - (int)strlen(digits);	// Add leading zeros
+	eg_snprintf(Digits, sizeof(Digits), "%" EG_PRId32, EG_ABS(m_Value));
+	int lz_cnt = m_DigitCount - (int)strlen(Digits);	// Add leading zeros
 	if(lz_cnt > 0) {
-		for(i = (uint16_t)strlen(digits); i >= 0; i--) {
-			digits[i + lz_cnt] = digits[i];
+		for(i = (uint16_t)strlen(Digits); i >= 0; i--) {
+			Digits[i + lz_cnt] = Digits[i];
 		}
 		for(i = 0; i < lz_cnt; i++) {
-			digits[i] = '0';
+			Digits[i] = '0';
 		}
 	}
 	int32_t intDigits;
 	intDigits = (m_DecimalPointPos == 0) ? m_DigitCount : m_DecimalPointPos;
-	for(i = 0; i < intDigits && digits[i] != '\0'; i++) {	// Add the decimal part
-		(*buf_p) = digits[i];
-		buf_p++;
+	for(i = 0; i < intDigits && Digits[i] != '\0'; i++) {	// Add the decimal part
+		(*pBuffer) = Digits[i];
+		pBuffer++;
 	}
 	if(m_DecimalPointPos != 0) {
 		// Insert the decimal point
-		(*buf_p) = '.';
-		buf_p++;
-		for(/*Leave i*/; i < m_DigitCount && digits[i] != '\0'; i++) {
-			(*buf_p) = digits[i];
-			buf_p++;
+		(*pBuffer) = '.';
+		pBuffer++;
+		for(/*Leave i*/; i < m_DigitCount && Digits[i] != '\0'; i++) {
+			(*pBuffer) = Digits[i];
+			pBuffer++;
 		}
 	}
-	SetText((char *)buf);	// Refresh the text
-	int32_t step = m_Step;	// Set the cursor position
-	uint8_t cur_pos = (uint8_t)m_DigitCount;
-	while(step >= 10) {
-		step /= 10;
-		cur_pos--;
+	SetText((char *)Buffer);	// Refresh the text
+	int32_t Step = m_Step;	// Set the cursor position
+	uint8_t CursorPos = (uint8_t)m_DigitCount;
+	while(Step >= 10) {
+		Step /= 10;
+		CursorPos--;
 	}
-	if(cur_pos > intDigits) cur_pos++; // Skip the decimal point
-	cur_pos -= cur_shift_left;
-	SetCursorPos(cur_pos);
+	if(CursorPos > intDigits) CursorPos++; // Skip the decimal point
+	CursorPos -= CursorShift;
+	SetCursorPosition(CursorPos);
 }
 
 #endif

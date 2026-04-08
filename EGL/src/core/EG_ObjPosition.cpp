@@ -284,69 +284,69 @@ void EGObject::Align(EG_AlignType_e Align, EG_Coord_t OffsetX, EG_Coord_t OfsetY
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::AlignTo(EGObject *pBase, EG_AlignType_e Align, EG_Coord_t OffsetX, EG_Coord_t OffsetY)
+void EGObject::AlignTo(EGObject *pAnchor, EG_AlignType_e Align, EG_Coord_t OffsetX, EG_Coord_t OffsetY)
 {
 EG_Coord_t X = 0;
 EG_Coord_t Y = 0;
 
 	UpdateLayout();
-	if(pBase == nullptr) pBase = GetParent();
+	if(pAnchor == nullptr) pAnchor = GetParent();
 	EGObject *pParent = GetParent();
 	EG_Coord_t ParentBorder = pParent->GetStyleBorderWidth(EG_PART_MAIN);
 	EG_Coord_t ParentLeft = pParent->GetStylePadLeft(EG_PART_MAIN) + ParentBorder;
 	EG_Coord_t ParentTop = pParent->GetStylePadTop(EG_PART_MAIN) + ParentBorder;
-	EG_Coord_t BaseBorder = pBase->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t BaseLeft = pBase->GetStylePadLeft(EG_PART_MAIN) + BaseBorder;
-	EG_Coord_t BaseTop = pBase->GetStylePadTop(EG_PART_MAIN) + BaseBorder;
+	EG_Coord_t AnchorBorder = pAnchor->GetStyleBorderWidth(EG_PART_MAIN);
+	EG_Coord_t AnchorLeft = pAnchor->GetStylePadLeft(EG_PART_MAIN) + AnchorBorder;
+	EG_Coord_t AnchorTop = pAnchor->GetStylePadTop(EG_PART_MAIN) + AnchorBorder;
 	if(Align == EG_ALIGN_DEFAULT) {
-		if(pBase->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL)	Align = EG_ALIGN_TOP_RIGHT;
+		if(pAnchor->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL)	Align = EG_ALIGN_TOP_RIGHT;
 		else Align = EG_ALIGN_TOP_LEFT;
 	}
 	switch(Align) {
     case EG_ALIGN_DEFAULT:
 		case EG_ALIGN_CENTER:{
-			X = pBase->GetContentWidth() / 2 - GetWidth() / 2 + BaseLeft;
-			Y = pBase->GetContentWidth() / 2 - GetContentHeight() / 2 + BaseTop;
+			X = pAnchor->GetContentWidth() / 2 - GetWidth() / 2 + AnchorLeft;
+			Y = pAnchor->GetContentWidth() / 2 - GetContentHeight() / 2 + AnchorTop;
 			break;
     }
 		case EG_ALIGN_TOP_LEFT:{
-			X = BaseLeft;
-			Y = BaseTop;
+			X = AnchorLeft;
+			Y = AnchorTop;
 			break;
     }
 		case EG_ALIGN_TOP_MID:{
-			X = pBase->GetContentWidth() / 2 - GetWidth() / 2 + BaseLeft;
-			Y = BaseTop;
+			X = pAnchor->GetContentWidth() / 2 - GetWidth() / 2 + AnchorLeft;
+			Y = AnchorTop;
 			break;
     }
 		case EG_ALIGN_TOP_RIGHT:{
-			X = pBase->GetContentWidth() - GetWidth() + BaseLeft;
-			Y = BaseTop;
+			X = pAnchor->GetContentWidth() - GetWidth() + AnchorLeft;
+			Y = AnchorTop;
 			break;
     }
 		case EG_ALIGN_BOTTOM_LEFT:{
-			X = BaseLeft;
-			Y = pBase->GetContentHeight() - GetHeight() + BaseTop;
+			X = AnchorLeft;
+			Y = pAnchor->GetContentHeight() - GetHeight() + AnchorTop;
 			break;
     }
 		case EG_ALIGN_BOTTOM_MID:{
-			X = pBase->GetContentWidth() / 2 - GetWidth() / 2 + BaseLeft;
-			Y = pBase->GetContentHeight() - GetHeight() + BaseTop;
+			X = pAnchor->GetContentWidth() / 2 - GetWidth() / 2 + AnchorLeft;
+			Y = pAnchor->GetContentHeight() - GetHeight() + AnchorTop;
 			break;
     }
 		case EG_ALIGN_BOTTOM_RIGHT:{
-			X = pBase->GetContentWidth() - GetWidth() + BaseLeft;
-			Y = pBase->GetContentHeight() - GetHeight() + BaseTop;
+			X = pAnchor->GetContentWidth() - GetWidth() + AnchorLeft;
+			Y = pAnchor->GetContentHeight() - GetHeight() + AnchorTop;
 			break;
     }
 		case EG_ALIGN_LEFT_MID:{
-			X = BaseLeft;
-			Y = pBase->GetContentHeight() / 2 - GetHeight() / 2 + BaseTop;
+			X = AnchorLeft;
+			Y = pAnchor->GetContentHeight() / 2 - GetHeight() / 2 + AnchorTop;
 			break;
     }
 		case EG_ALIGN_RIGHT_MID:{
-			X = pBase->GetContentWidth() - GetWidth() + BaseLeft;
-			Y = pBase->GetContentHeight() / 2 - GetHeight() / 2 + BaseTop;
+			X = pAnchor->GetContentWidth() - GetWidth() + AnchorLeft;
+			Y = pAnchor->GetContentHeight() / 2 - GetHeight() / 2 + AnchorTop;
 			break;
     }
 		case EG_ALIGN_OUT_TOP_LEFT:{
@@ -355,27 +355,27 @@ EG_Coord_t Y = 0;
 			break;
     }
 		case EG_ALIGN_OUT_TOP_MID:{
-			X = ((EGObject*)pBase)->GetWidth() / 2 - GetWidth() / 2;
+			X = pAnchor->GetWidth() / 2 - GetWidth() / 2;
 			Y = -GetHeight();
 			break;
     }
 		case EG_ALIGN_OUT_TOP_RIGHT:{
-			X = ((EGObject*)pBase)->GetWidth() - GetWidth();
+			X = pAnchor->GetWidth() - GetWidth();
 			Y = -GetHeight();
 			break;
     }
 		case EG_ALIGN_OUT_BOTTOM_LEFT:{
 			X = 0;
-			Y = ((EGObject*)pBase)->GetHeight();
+			Y = pAnchor->GetHeight();
 			break;
     }
 		case EG_ALIGN_OUT_BOTTOM_MID:{
-			X = ((EGObject*)pBase)->GetWidth() / 2 - GetWidth() / 2;
-			Y = ((EGObject*)pBase)->GetHeight();
+			X = pAnchor->GetWidth() / 2 - GetWidth() / 2;
+			Y = pAnchor->GetHeight();
 			break;
     }
 		case EG_ALIGN_OUT_BOTTOM_RIGHT:{
-			X = ((EGObject*)pBase)->GetWidth() - GetWidth();
+			X = pAnchor->GetWidth() - GetWidth();
 			Y = GetHeight();
 			break;
     }
@@ -386,35 +386,35 @@ EG_Coord_t Y = 0;
     }
 		case EG_ALIGN_OUT_LEFT_MID:{
 			X = -GetWidth();
-			Y = ((EGObject*)pBase)->GetHeight() / 2 - GetHeight() / 2;
+			Y = pAnchor->GetHeight() / 2 - GetHeight() / 2;
 			break;
     }
 		case EG_ALIGN_OUT_LEFT_BOTTOM:{
 			X = -GetWidth();
-			Y = ((EGObject*)pBase)->GetHeight() - GetHeight();
+			Y = pAnchor->GetHeight() - GetHeight();
 			break;
     }
 		case EG_ALIGN_OUT_RIGHT_TOP:{
-			X = ((EGObject*)pBase)->GetWidth();
+			X = pAnchor->GetWidth();
 			Y = 0;
 			break;
     }
 		case EG_ALIGN_OUT_RIGHT_MID:{
-			X = ((EGObject*)pBase)->GetWidth();
-			Y = ((EGObject*)pBase)->GetHeight() / 2 - GetHeight() / 2;
+			X = pAnchor->GetWidth();
+			Y = pAnchor->GetHeight() / 2 - GetHeight() / 2;
 			break;
     }
 		case EG_ALIGN_OUT_RIGHT_BOTTOM:{
-			X = ((EGObject*)pBase)->GetWidth();
-			Y = ((EGObject*)pBase)->GetHeight() - GetHeight();
+			X = pAnchor->GetWidth();
+			Y = pAnchor->GetHeight() - GetHeight();
 			break;
     }
 	}
 	if(pParent->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) {
-	  X += OffsetX + pBase->m_Rect.GetX1() - pParent->m_Rect.GetX1() + pParent->GetScrollRight() - ParentLeft;
+	  X += OffsetX + pAnchor->m_Rect.GetX1() - pParent->m_Rect.GetX1() + pParent->GetScrollRight() - ParentLeft;
 	}
-	else X += OffsetX + pBase->m_Rect.GetX1() - pParent->m_Rect.GetX1() + pParent->GetScrollLeft() - ParentLeft;
-	Y += OffsetY + pBase->m_Rect.GetY1() - pParent->m_Rect.GetY1() + pParent->GetScrollTop() - ParentTop;
+	else X += OffsetX + pAnchor->m_Rect.GetX1() - pParent->m_Rect.GetX1() + pParent->GetScrollLeft() - ParentLeft;
+	Y += OffsetY + pAnchor->m_Rect.GetY1() - pParent->m_Rect.GetY1() + pParent->GetScrollTop() - ParentTop;
 	SetStyleAlign(EG_ALIGN_TOP_LEFT, 0);
 	SetPosition(X, Y);
 }

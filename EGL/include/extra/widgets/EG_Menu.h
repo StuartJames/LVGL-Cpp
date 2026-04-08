@@ -34,9 +34,9 @@ class EGButton;
 class EGLabel;
 
 typedef enum {
-    EG_MENU_HEADER_TOP_FIXED, //  Header is positioned at the top 
-    EG_MENU_HEADER_TOP_UNFIXED, //  Header is positioned at the top and can be scrolled out of view
-    EG_MENU_HEADER_BOTTOM_FIXED //  Header is positioned at the bottom 
+    EG_MENU_HEADER_TOP_FIXED,     //  Header is positioned at the top
+    EG_MENU_HEADER_TOP_UNFIXED,   //  Header is positioned at the top and can be scrolled out of view
+    EG_MENU_HEADER_BOTTOM_FIXED   //  Header is positioned at the bottom
 } EG_MenuHeaderMode_e;
 
 typedef enum {
@@ -56,8 +56,8 @@ extern const EG_ClassType_t c_MenuSectionClass;
 extern const EG_ClassType_t c_MenuSeparatorClass;
 extern const EG_ClassType_t c_MenuSidebarContainerClass;
 extern const EG_ClassType_t c_MenuMainContainerClass;
-extern const EG_ClassType_t c_MenuSidebarHeaderContainerClass;
-extern const EG_ClassType_t c_MenuMainHeaderContainerClass;
+extern const EG_ClassType_t c_MenuMainHeaderClass;
+extern const EG_ClassType_t c_MenuSidebarHeaderClass;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,11 +65,37 @@ class EGMenuPage : public EGObject
 {
 public:
                       EGMenuPage(void) : EGObject(), m_pTitle(nullptr){};
-                      EGMenuPage(EGObject *pParent, const char *pTitle);
+                      EGMenuPage(EGObject *pParent, const char *pTitle, const EG_ClassType_t *pClassCnfg = &c_MenuPageClass);
   virtual             ~EGMenuPage(void);
   virtual void        Configure(void);
 
   char                *m_pTitle;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+class EGMenuContainer : public EGObject
+{
+public:
+                      EGMenuContainer(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_MenuContainerClass);
+  virtual void        Configure(void);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+class EGMenuSection : public EGObject
+{
+public:
+                      EGMenuSection(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_MenuSectionClass);
+  virtual void        Configure(void);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+class EGMenuSeparator : public EGObject
+{
+public:
+                      EGMenuSeparator(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_MenuSeparatorClass);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +106,7 @@ public:
                       EGMenu(void);
                       EGMenu(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_MenuClass);
   virtual             ~EGMenu(void);
-  void                Configure(void);
+  virtual void        Configure(void);
   EGObject*           CreateContainer(EGObject *pParent);
   EGObject*           CreateSection(EGObject *pParent);
   EGObject*           CreateSeparator(EGObject *pParent);

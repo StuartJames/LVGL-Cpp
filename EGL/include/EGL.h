@@ -24,7 +24,7 @@
 #pragma once
 
 /***************************
- * CURRENT VERSION OF LVGL
+ * CURRENT VERSION OF EGL DERIVED FROM LVGL
  ***************************/
 #define EG_VERSION_MAJOR 8
 #define EG_VERSION_MINOR 4

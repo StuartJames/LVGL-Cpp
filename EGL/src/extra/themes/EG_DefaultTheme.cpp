@@ -455,6 +455,9 @@ static const EGStyleProperty_e TransitionProperties[] = {
 	m_MenuHeaderButton.SetShadowOPA(EG_OPA_TRANSP);
 	m_MenuHeaderButton.SetBackOPA(EG_OPA_TRANSP);
 	m_MenuHeaderButton.SetTextColor(m_TextColor);
+	m_MenuHeaderButton.SetBorderOPA(EG_OPA_20);
+	m_MenuHeaderButton.SetBorderWidth(BORDER_WIDTH);
+	m_MenuHeaderButton.SetBorderColor(m_TextColor);
 
 	StyleInitialiseReset(&m_MenuPage);
 	m_MenuPage.SetHorizontalPadding(0);
@@ -491,15 +494,15 @@ static const EGStyleProperty_e TransitionProperties[] = {
 #endif
 
 #if EG_USE_TEXTAREA
-	StyleInitialiseReset(&m_TextAreaCursor);
-	m_TextAreaCursor.SetBorderColor(m_TextColor);
-	m_TextAreaCursor.SetBorderWidth(EG_DisplayDPX(pDisplay, 2));
-	m_TextAreaCursor.SetPaddingLeft(-EG_DisplayDPX(pDisplay, 1));
-	m_TextAreaCursor.SetBorderSide(EG_BORDER_SIDE_LEFT);
-	m_TextAreaCursor.SetAnimateTime(400);
+	StyleInitialiseReset(&m_EditCursor);
+	m_EditCursor.SetBorderColor(m_TextColor);
+	m_EditCursor.SetBorderWidth(EG_DisplayDPX(pDisplay, 2));
+	m_EditCursor.SetPaddingLeft(-EG_DisplayDPX(pDisplay, 1));
+	m_EditCursor.SetBorderSide(EG_BORDER_SIDE_LEFT);
+	m_EditCursor.SetAnimateTime(400);
 
-	StyleInitialiseReset(&m_TextAreaPlaceholder);
-	m_TextAreaPlaceholder.SetTextColor((m_Flags & MODE_DARK) ? EG_DarkPalette(EG_PALETTE_GREY, 2) : EG_LightPalette(EG_PALETTE_GREY, 1));
+	StyleInitialiseReset(&m_EditPlaceholder);
+	m_EditPlaceholder.SetTextColor((m_Flags & MODE_DARK) ? EG_DarkPalette(EG_PALETTE_GREY, 2) : EG_LightPalette(EG_PALETTE_GREY, 1));
 #endif
 
 #if EG_USE_CALENDAR
@@ -543,6 +546,14 @@ static const EGStyleProperty_e TransitionProperties[] = {
 	m_KeyboardButtonBackground.SetRadius(m_DisplaySize == DISP_SMALL ? RADIUS_DEFAULT / 2 : RADIUS_DEFAULT);
 #endif
 
+#if EG_USE_SPINBOX
+	StyleInitialiseReset(&m_SpinBoxCursor);
+	m_SpinBoxCursor.SetBorderSide(EG_BORDER_SIDE_LEFT);
+	m_SpinBoxCursor.SetAnimateTime(400);
+	m_SpinBoxCursor.SetBackColor(m_PrimaryColor);
+	m_SpinBoxCursor.SetTextColor(EG_ColorWhite());
+	m_SpinBoxCursor.SetBackOPA(EG_OPA_40);
+#endif
 #if EG_USE_TABVIEW
 	StyleInitialiseReset(&m_TabButton);
 	m_TabButton.SetBorderColor(m_PrimaryColor);
@@ -594,7 +605,7 @@ void EGDefTheme::ApplyTheme(EGObject *pObj)
 		pObj->AddStyle(&m_ScrollbarScrolled, EG_PART_SCROLLBAR | EG_STATE_SCROLLED);
 		return;
 	}
-	if(EGObject::IsKindOf(pObj, &c_ObjectClass)) { 
+	if(EGObject::IsKindOf(pObj, &c_ObjectClass)) {
 
 #if EG_USE_TABVIEW
 		// Tabview content area
@@ -650,8 +661,8 @@ void EGDefTheme::ApplyTheme(EGObject *pObj)
 		pObj->AddStyle(&m_Disabled, EG_STATE_DISABLED);
 
 #if EG_USE_MENU
-		if(EGObject::IsKindOf(pParent, &c_MenuSidebarHeaderContainerClass) ||
-			  EGObject::IsKindOf(pParent, &c_MenuMainHeaderContainerClass)) {
+		if(EGObject::IsKindOf(pParent, &c_MenuSidebarHeaderClass) ||
+			  EGObject::IsKindOf(pParent, &c_MenuMainHeaderClass)) {
 			pObj->AddStyle(&m_MenuHeaderButton, 0);
 			pObj->AddStyle(&m_MenuPressed, EG_STATE_PRESSED);
 		}
@@ -887,8 +898,8 @@ void EGDefTheme::ApplyTheme(EGObject *pObj)
 		pObj->AddStyle(&m_OutlineSecondary, EG_STATE_EDITED);
 		pObj->AddStyle(&m_Scrollbar, EG_PART_SCROLLBAR);
 		pObj->AddStyle(&m_ScrollbarScrolled, EG_PART_SCROLLBAR | EG_STATE_SCROLLED);
-		pObj->AddStyle(&m_TextAreaCursor, EG_PART_CURSOR | EG_STATE_FOCUSED);
-		pObj->AddStyle(&m_TextAreaPlaceholder, EG_PART_TEXTAREA_PLACEHOLDER);
+		pObj->AddStyle(&m_EditCursor, EG_PART_CURSOR | EG_STATE_FOCUSED);
+		pObj->AddStyle(&m_EditPlaceholder, EG_PART_TEXTAREA_PLACEHOLDER);
 	}
 #endif
 
@@ -970,8 +981,8 @@ void EGDefTheme::ApplyTheme(EGObject *pObj)
 		pObj->AddStyle(&m_BackgroundColorPrimaryMuted, EG_STATE_CHECKED);
 		pObj->AddStyle(&m_BackgroundColorPrimary, EG_STATE_FOCUS_KEY);
 	}
-	else if(EGObject::IsKindOf(pObj, &c_MenuSidebarHeaderContainerClass) ||
-					EGObject::IsKindOf(pObj, &c_MenuMainHeaderContainerClass)) {
+	else if(EGObject::IsKindOf(pObj, &c_MenuSidebarHeaderClass) ||
+					EGObject::IsKindOf(pObj, &c_MenuMainHeaderClass)) {
 		pObj->AddStyle(&m_MenuHeaderContainer, 0);
 	}
 	else if(EGObject::IsKindOf(pObj, &c_MenuPageClass)) {
@@ -1000,10 +1011,12 @@ void EGDefTheme::ApplyTheme(EGObject *pObj)
 	else if(EGObject::IsKindOf(pObj, &c_SpinboxClass)) {
 		pObj->AddStyle(&m_Card, 0);
 		pObj->AddStyle(&m_PadSmall, 0);
+		pObj->AddStyle(&m_Disabled, EG_STATE_DISABLED);
 		pObj->AddStyle(&m_OutlinePrimary, EG_STATE_FOCUS_KEY);
 		pObj->AddStyle(&m_OutlineSecondary, EG_STATE_EDITED);
-		pObj->AddStyle(&m_BackgroundColorPrimary, EG_PART_CURSOR);
-	}
+		pObj->AddStyle(&m_SpinBoxCursor, EG_PART_CURSOR | EG_STATE_FOCUSED);
+
+  }
 #endif
 #if EG_USE_TILEVIEW
 	else if(EGObject::IsKindOf(pObj, &c_TabViewClass)) {

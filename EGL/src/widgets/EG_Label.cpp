@@ -71,7 +71,7 @@ EGLabel::EGLabel(void) : EGObject(),
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGLabel::EGLabel(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= LABEL_CLASS*/) :
+EGLabel::EGLabel(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= c_LabelClass*/) :
   EGObject(),
  	m_pText(nullptr),
 	m_DotEnd(EG_LABEL_DOT_END_INV),

@@ -129,6 +129,14 @@ void EGBasicTheme::InitialiseStyles(void)
 	m_TextCursor.SetBackOPA(EG_OPA_TRANSP);
 	m_TextCursor.SetAnimateTime(500);
 #endif
+#if EG_USE_SPINBOX
+	StyleInitialiseReset(&m_SpinBoxCursor);
+	m_SpinBoxCursor.SetBorderSide(EG_BORDER_SIDE_LEFT);
+	m_SpinBoxCursor.SetBorderColor(COLOR_DIM);
+	m_SpinBoxCursor.SetBorderWidth(2);
+	m_SpinBoxCursor.SetBackOPA(EG_OPA_TRANSP);
+	m_SpinBoxCursor.SetAnimateTime(500);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -343,6 +351,7 @@ void EGBasicTheme::ApplyTheme(EGObject *pObj)
 	else if(EGObject::IsKindOf(pObj, &c_SpinboxClass)) {
 		pObj->AddStyle(&m_Light, 0);
 		pObj->AddStyle(&m_Dark, EG_PART_CURSOR);
+		pObj->AddStyle(&m_SpinBoxCursor, EG_PART_CURSOR | EG_STATE_FOCUSED);
 	}
 #endif
 #if EG_USE_TILEVIEW

@@ -23,14 +23,16 @@
 
 #pragma once
 
-#include "EGL.h"
+#include "../../EG_IntrnlConfig.h"
 
 #if EG_USE_SPINBOX
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
+#include "../../widgets/EG_Edit.h"
+
 #if EG_USE_TEXTAREA == 0
-#error "Spinbox: TextArea is required. Enable it in EG_Config.h (EG_USE_TEXTAREA  1) "
+#error "EGSpinBox: EGEdit is required. Enable it in EG_Config.h (EG_USE_TEXTAREA  1) "
 #endif
 
 #define EG_SPINBOX_MAX_DIGIT_COUNT 10

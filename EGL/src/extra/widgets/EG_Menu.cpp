@@ -119,7 +119,7 @@ const EG_ClassType_t c_MenuMainContainerClass = {
 #endif
 };
 
-const EG_ClassType_t c_MenuMainHeaderContainerClass = {
+const EG_ClassType_t c_MenuMainHeaderClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = nullptr,
 	.WidthDef = 0,
@@ -131,7 +131,7 @@ const EG_ClassType_t c_MenuMainHeaderContainerClass = {
 #endif
 };
 
-const EG_ClassType_t c_MenuSidebarHeaderContainerClass = {
+const EG_ClassType_t c_MenuSidebarHeaderClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = nullptr,
 	.WidthDef = 0,
@@ -145,9 +145,19 @@ const EG_ClassType_t c_MenuSidebarHeaderContainerClass = {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGMenuPage::EGMenuPage(EGObject *pParent, const char *pTitle) : EGObject()
+EGMenuPage::~EGMenuPage(void)
 {
-  Attach(this, pParent, &c_MenuPageClass);
+	if(m_pTitle != nullptr) {
+		EG_FreeMem(m_pTitle);
+		m_pTitle = nullptr;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+EGMenuPage::EGMenuPage(EGObject *pParent, const char *pTitle, const EG_ClassType_t *pClassCnfg /*= &c_MenuPageClass*/) : EGObject()
+{
+  Attach(this, pParent, pClassCnfg);
 	Initialise();
 	if(pTitle) {
 		m_pTitle = (char*)EG_AllocMem(strlen(pTitle) + 1);
@@ -162,19 +172,11 @@ EGMenuPage::EGMenuPage(EGObject *pParent, const char *pTitle) : EGObject()
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGMenuPage::~EGMenuPage(void)
-{
-	if(m_pTitle != NULL) {
-		EG_FreeMem(m_pTitle);
-		m_pTitle = NULL;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-
 void EGMenuPage::Configure(void)
 {
   EGObject::Configure();
+  EGMenu *pMenu = (EGMenu*)GetParent();
+  SetParent(pMenu->m_pStorage);
 	EGFlexLayout::SetObjFlow(this, EG_FLEX_FLOW_COLUMN);
 	EGFlexLayout::SetObjAlign(this, EG_FLEX_ALIGN_START, EG_FLEX_ALIGN_CENTER, EG_FLEX_ALIGN_CENTER);
 	AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
@@ -182,7 +184,60 @@ void EGMenuPage::Configure(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+EGMenuContainer::EGMenuContainer(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_MenuContainerClass*/) : EGObject()
+{
+  Attach(this, pParent, pClassCnfg);
+	Initialise();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void EGMenuContainer::Configure(void)
+{
+  EGObject::Configure();
+	EGFlexLayout::SetObjFlow(this, EG_FLEX_FLOW_ROW);
+	EGFlexLayout::SetObjAlign(this, EG_FLEX_ALIGN_START, EG_FLEX_ALIGN_CENTER, EG_FLEX_ALIGN_CENTER);
+  AddFlag(EG_OBJ_FLAG_CLICKABLE);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+EGMenuSection::EGMenuSection(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_MenuSectionClass*/) : EGObject()
+{
+  Attach(this, pParent, pClassCnfg);
+	Initialise();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void EGMenuSection::Configure(void)
+{
+  EGObject::Configure();
+	EGFlexLayout::SetObjFlow(this, EG_FLEX_FLOW_COLUMN);
+  ClearFlag(EG_OBJ_FLAG_CLICKABLE);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+EGMenuSeparator::EGMenuSeparator(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_MenuSeparatorClass*/) : EGObject()
+{
+  Attach(this, pParent, pClassCnfg);
+	Initialise();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 EGMenu::EGMenu(void) : EGObject(),
+  m_pMainHeaderButton(nullptr),
+  m_pSidebarHeaderButton(nullptr),
   m_CurrentDepth(0),
   m_PreviousDepth(0),
   m_SidebarActive(0),
@@ -194,6 +249,8 @@ EGMenu::EGMenu(void) : EGObject(),
 ///////////////////////////////////////////////////////////////////////////////////////
 
 EGMenu::EGMenu(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_MenuClass*/) : EGObject(),
+  m_pMainHeaderButton(nullptr),
+  m_pSidebarHeaderButton(nullptr),
   m_CurrentDepth(0),
   m_PreviousDepth(0),
   m_SidebarActive(0),
@@ -216,7 +273,8 @@ EGMenu::~EGMenu(void)
 
 void EGMenu::Configure(void)
 {
-	SetLayout(EGFlexLayout::m_Reference);
+  EGObject::Configure();
+	SetLayout(EGFlexLayout::GetReference());
 	EGFlexLayout::SetObjFlow(this, EG_FLEX_FLOW_ROW);
 	m_ModeHeader = EG_MENU_HEADER_TOP_FIXED;
 	m_RootBackButtonMode = EG_MENU_ROOT_BACK_BTN_DISABLED;
@@ -225,44 +283,40 @@ void EGMenu::Configure(void)
 	m_SidebarActive = false;
 	m_pStorage = new EGObject(this);
 	m_pStorage->AddFlag(EG_OBJ_FLAG_HIDDEN);
-	m_pSidebar = NULL;
-	m_pSidebarHeader = NULL;
-	m_pSidebarHeaderButton = NULL;
-	m_pSidebarHeaderTitle = NULL;
-	m_pSidebarPage = NULL;
+	m_pSidebar = nullptr;
+	m_pSidebarHeader = nullptr;
+	m_pSidebarHeaderButton = nullptr;
+	m_pSidebarHeaderTitle = nullptr;
+	m_pSidebarPage = nullptr;
 
-	EGObject *pContainer = new EGObject(this, &c_MenuMainContainerClass);
-	pContainer->SetHeight(_EG_PCT(100));
-	EGFlexLayout::SetObjGrow(pContainer, 1);
-	EGFlexLayout::SetObjFlow(pContainer, EG_FLEX_FLOW_COLUMN);
-	pContainer->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
-	pContainer->ClearFlag(EG_OBJ_FLAG_CLICKABLE);
-	m_pMain = pContainer;
+	m_pMain = new EGObject(this, &c_MenuMainContainerClass);
+	m_pMain->SetHeight(_EG_PCT(100));
+	EGFlexLayout::SetObjGrow(m_pMain, 1);
+	EGFlexLayout::SetObjFlow(m_pMain, EG_FLEX_FLOW_COLUMN);
+	m_pMain->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
+	m_pMain->ClearFlag(EG_OBJ_FLAG_CLICKABLE);
 
-	EGObject *pHeader = new EGObject(pContainer, &c_MenuMainHeaderContainerClass);
-	pHeader->SetSize(_EG_PCT(100), EG_SIZE_CONTENT);
-	EGFlexLayout::SetObjFlow(pHeader, EG_FLEX_FLOW_ROW);
-	EGFlexLayout::SetObjAlign(pHeader, EG_FLEX_ALIGN_START, EG_FLEX_ALIGN_CENTER, EG_FLEX_ALIGN_CENTER);
-	pHeader->ClearFlag(EG_OBJ_FLAG_CLICKABLE);
-	pHeader->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
-	m_pMainHeader = pHeader;
+	m_pMainHeader = new EGObject(m_pMain, &c_MenuMainHeaderClass);
+	m_pMainHeader->SetSize(_EG_PCT(100), EG_SIZE_CONTENT);
+	EGFlexLayout::SetObjFlow(m_pMainHeader, EG_FLEX_FLOW_ROW);
+	EGFlexLayout::SetObjAlign(m_pMainHeader, EG_FLEX_ALIGN_START, EG_FLEX_ALIGN_CENTER, EG_FLEX_ALIGN_CENTER);
+	m_pMainHeader->ClearFlag(EG_OBJ_FLAG_CLICKABLE);
+	m_pMainHeader->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
 
-	//  Create the default simple back btn and title 
-	EGButton *pButton = new EGButton(pHeader);
-	EGEvent::AddEventCB(pButton, EGMenu::BackEventCB, EG_EVENT_CLICKED, this);
-	pButton->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
-	EGFlexLayout::SetObjFlow(pButton, EG_FLEX_FLOW_ROW);
-	m_pMainHeaderButton = pButton;
+	//  Create the default simple back btn and title
+	m_pMainHeaderButton = new EGButton(m_pMainHeader);
+	EGEvent::AddEventCB(m_pMainHeaderButton, EGMenu::BackEventCB, EG_EVENT_CLICKED, this);
+	m_pMainHeaderButton->AddFlag(EG_OBJ_FLAG_EVENT_BUBBLE);
+	EGFlexLayout::SetObjFlow(m_pMainHeaderButton, EG_FLEX_FLOW_ROW);
 
 	EGImage *pImage = new EGImage(m_pMainHeaderButton);
 	pImage->SetSource(EG_SYMBOL_LEFT);
 
-	EGLabel *pLabel = new EGLabel(pHeader);
-	pLabel->AddFlag(EG_OBJ_FLAG_HIDDEN);
-	m_pMainHeaderTitle = pLabel;
+	m_pMainHeaderTitle = new EGLabel(m_pMainHeader);
+	m_pMainHeaderTitle->AddFlag(EG_OBJ_FLAG_HIDDEN);
 
-	m_pMainPage = NULL;
-	m_pSelectedTab = NULL;
+	m_pMainPage = nullptr;
+	m_pSelectedTab = nullptr;
 
 	EGEvent::AddEventCB(this, EGMenu::ValueChangedEventCB, EG_EVENT_VALUE_CHANGED, this);
 
@@ -302,10 +356,10 @@ EGObject* EGMenu::CreateSeparator(EGObject *pParent)
 
 void EGMenu::Refresh(void)
 {
-EGMenuPage *pPage = NULL;
+EGMenuPage *pPage = nullptr;
 
 	EGMenuPage *pActivePage = (EGMenuPage*)m_History.GetHead();	//  The current menu 
-	if(pActivePage != NULL) {
+	if(pActivePage != nullptr) {
 		pPage = pActivePage;
 		m_History.RemoveHead();		//  Delete the current item from the history 
 		delete pActivePage;
@@ -319,10 +373,10 @@ EGMenuPage *pPage = NULL;
 void EGMenu::SetPage(EGMenuPage *pPage)
 {
 	if(m_pMainPage == pPage) return;	//  Guard against setting the same page again 
-	if(m_pMainPage != NULL) {	//  Hide previous page 
+	if(m_pMainPage != nullptr) {	//  Hide previous page 
 		m_pMainPage->SetParent(m_pStorage);
 	}
-	if(pPage != NULL) {
+	if(pPage != nullptr) {
 		m_History.AddHead(pPage);
 		m_CurrentDepth++;
 		pPage->SetParent(m_pMain);		//  Place page in main 
@@ -331,15 +385,15 @@ void EGMenu::SetPage(EGMenuPage *pPage)
 		m_History.RemoveAll();		//  Empty page, clear history 
 	}
 	m_pMainPage = pPage;
-	if(m_pSelectedTab != NULL) {	//  If there is a selected tab, update checked state 
-		if(m_pSidebarPage != NULL) {
+	if(m_pSelectedTab != nullptr) {	//  If there is a selected tab, update checked state 
+		if(m_pSidebarPage != nullptr) {
 			m_pSelectedTab->AddState(EG_STATE_CHECKED);
 		}
 		else {
 			m_pSelectedTab->ClearState(EG_STATE_CHECKED);
 		}
 	}
-	if(m_pSidebarPage != NULL) {	//  Back btn management 
+	if(m_pSidebarPage != nullptr) {	//  Back btn management 
 		if(m_SidebarActive) {		//  With sidebar enabled 
 			if(m_RootBackButtonMode == EG_MENU_ROOT_BACK_BTN_ENABLED) {
 				m_pSidebarHeaderButton->ClearFlag(EG_OBJ_FLAG_HIDDEN);	//  Root back btn is always shown if enabled
@@ -369,7 +423,7 @@ void EGMenu::SetPage(EGMenuPage *pPage)
 			m_pMainHeaderButton->ClearFlag(EG_OBJ_FLAG_CLICKABLE);
 		}
 	}
-	EGEvent::EventSend(this, EG_EVENT_VALUE_CHANGED, NULL);
+	EGEvent::EventSend(this, EG_EVENT_VALUE_CHANGED, nullptr);
 	RefreshMainHeaderMode();
 }
 
@@ -378,7 +432,7 @@ void EGMenu::SetPage(EGMenuPage *pPage)
 void EGMenu::SetSidebarPage(EGMenuPage *pPage)
 {
 	//  Sidebar management
-	if(pPage != NULL) {		//  Sidebar should be enabled 
+	if(pPage != nullptr) {		//  Sidebar should be enabled 
 		if(!m_SidebarActive) {			//  Create sidebar 
       EGObject *pSidebarContainer = new EGObject(this, &c_MenuSidebarContainerClass);
 			pSidebarContainer->MoveToIndex(1);
@@ -388,7 +442,7 @@ void EGMenu::SetSidebarPage(EGMenuPage *pPage)
 			pSidebarContainer->ClearFlag(EG_OBJ_FLAG_CLICKABLE);
 			m_pSidebar = pSidebarContainer;
 
-			EGObject *pHeader = new EGObject(pSidebarContainer, &c_MenuSidebarHeaderContainerClass);
+			EGObject *pHeader = new EGObject(pSidebarContainer, &c_MenuSidebarHeaderClass);
 			pHeader->SetSize(_EG_PCT(100), EG_SIZE_CONTENT);
 			EGFlexLayout::SetObjFlow(pHeader, EG_FLEX_FLOW_ROW);
 			EGFlexLayout::SetObjAlign(pHeader, EG_FLEX_ALIGN_START, EG_FLEX_ALIGN_CENTER, EG_FLEX_ALIGN_CENTER);
@@ -456,7 +510,7 @@ void EGMenu::SetLoadPageEvent(EGObject *pContainer, EGMenuPage *pPage)
 	pContainer->AddFlag(EG_OBJ_FLAG_SCROLL_ON_FOCUS);
 	//  Remove old event 
 	if(EGEvent::RemoveEventCB(pContainer, LoadPageEventCB)) {
-		EGEvent::EventSend(pContainer, EG_EVENT_DELETE, NULL);
+		EGEvent::EventSend(pContainer, EG_EVENT_DELETE, nullptr);
 		EGEvent::RemoveEventCB(pContainer, DeleteEventCB);
 	}
 	EG_PageEventData_t *pEventData = (EG_PageEventData_t*)EG_AllocMem(sizeof(EG_PageEventData_t));
@@ -487,7 +541,7 @@ void EGMenu::ClearHistory(void)
 
 void EGMenu::RefreshSidebarHeaderMode(void)
 {
-	if(m_pSidebarHeader == NULL || m_pSidebarPage == NULL) return;
+	if(m_pSidebarHeader == nullptr || m_pSidebarPage == nullptr) return;
 	switch(m_ModeHeader) {
 		case EG_MENU_HEADER_TOP_FIXED:
 			//  Content should fill the remaining space 
@@ -513,7 +567,7 @@ void EGMenu::RefreshSidebarHeaderMode(void)
 
 void EGMenu::RefreshMainHeaderMode(void)
 {
-	if(m_pMainHeader == NULL || m_pMainPage == NULL) return;
+	if(m_pMainHeader == nullptr || m_pMainPage == nullptr) return;
 	switch(m_ModeHeader) {
 		case EG_MENU_HEADER_TOP_FIXED:
 			//  Content should fill the remaining space 
@@ -544,7 +598,7 @@ void EGMenu::LoadPageEventCB(EGEvent *pEvent)
 	EG_PageEventData_t *pEventData = (EG_PageEventData_t*)pEvent->GetExtParam();
 	EGMenu *pMenu = (EGMenu*)(pEventData->pMenu);
 	EGMenuPage *pPage = pEventData->pPage;
-	if(pMenu->m_pSidebarPage != NULL) {
+	if(pMenu->m_pSidebarPage != nullptr) {
 		//  Check if clicked obj is in the sidebar 
 		bool IsSidebar = false;
 		EGObject *pParent = pContainer;
@@ -557,7 +611,7 @@ void EGMenu::LoadPageEventCB(EGEvent *pEvent)
 			pParent = pParent->GetParent();
 		}
 		if(IsSidebar) {			//  Clear checked state of previous obj 
-			if(pMenu->m_pSelectedTab != pContainer && pMenu->m_pSelectedTab != NULL) {
+			if(pMenu->m_pSelectedTab != pContainer && pMenu->m_pSelectedTab != nullptr) {
 				pMenu->m_pSelectedTab->ClearState(EG_STATE_CHECKED);
 			}
 			pMenu->m_History.RemoveAll();
@@ -565,7 +619,7 @@ void EGMenu::LoadPageEventCB(EGEvent *pEvent)
 		}
 	}
 	pMenu->SetPage(pPage);
-	if(EGGroup::GetDefault() != NULL && pMenu->m_pSidebarPage == NULL) {
+	if(EGGroup::GetDefault() != nullptr && pMenu->m_pSidebarPage == nullptr) {
 		EGGroup::GetDefault()->FocusNext();		//  Sidebar is not supported for now
 	}
 }
@@ -589,19 +643,15 @@ void EGMenu::BackEventCB(EGEvent *pEvent)
 		if(!(pButton == pMenu->m_pMainHeaderButton || pButton == pMenu->m_pSidebarHeaderButton)) return;
 		pMenu->m_PreviousDepth = pMenu->m_CurrentDepth; //  Save the previous value for user event handler 
 		if(BackButtonIsRoot(pMenu, pButton)) return;
-    POSITION Pos = 0;
-  	EGMenuPage *pActivePage = (EGMenuPage*)pMenu->m_History.GetHead(Pos);		//  The current menu 
-		EGMenuPage *pPreviousPage = (EGMenuPage*)pMenu->m_History.GetNext(Pos);		//  The previous menu 
-		if(pPreviousPage != NULL) {
-			//  Previous menu exists. Delete the current item from the history 
-      pMenu->m_History.RemoveHead();
-			delete pActivePage;
+    POSITION Pos = pMenu->m_History.GetHeadPosition();		//  The current menu 
+		pMenu->m_History.GetNextPosition(Pos);		//  The previous menu position
+		EGMenuPage *pPreviousPage = (EGMenuPage*)pMenu->m_History.GetAt(Pos);		//  The previous menu 
+		if(pPreviousPage != nullptr) {
+      pMenu->m_History.RemoveHead();	// Previous menu exists. Delete the current item from the history 
 			pMenu->m_CurrentDepth--;
-			//  Create the previous menu. Remove it from the history because `lv_menu_set_page` will add it again 
-      pMenu->m_History.RemoveHead();
+      pMenu->m_History.RemoveHead();	// Select the previous menu. Remove it from the history because `SetPage` will add it again 
 			pMenu->m_CurrentDepth--;
 			pMenu->SetPage(pPreviousPage);
-			EG_FreeMem(pPreviousPage);
 		}
 	}
 }
@@ -612,8 +662,8 @@ void EGMenu::ValueChangedEventCB(EGEvent *pEvent)
 {
 	EGMenu *pMenu = (EGMenu*)pEvent->GetExtParam();
 	EGMenuPage *pMainPage = (EGMenuPage*)pMenu->GetCurrentMainPage();
-	if(pMainPage != NULL && pMenu->m_pMainHeaderTitle != NULL) {
-		if(pMainPage->m_pTitle != NULL) {
+	if(pMainPage != nullptr && pMenu->m_pMainHeaderTitle != nullptr) {
+		if(pMainPage->m_pTitle != nullptr) {
 			pMenu->m_pMainHeaderTitle->SetText(pMainPage->m_pTitle);
 			pMenu->m_pMainHeaderTitle->ClearFlag(EG_OBJ_FLAG_HIDDEN);
 		}
@@ -622,8 +672,8 @@ void EGMenu::ValueChangedEventCB(EGEvent *pEvent)
 		}
 	}
 	EGMenuPage *pSidebarPage = (EGMenuPage*)pMenu->GetCurrentSidebarPage();
-	if(pSidebarPage != NULL && pMenu->m_pSidebarHeaderTitle != NULL) {
-		if(pSidebarPage->m_pTitle != NULL) {
+	if(pSidebarPage != nullptr && pMenu->m_pSidebarHeaderTitle != nullptr) {
+		if(pSidebarPage->m_pTitle != nullptr) {
 			pMenu->m_pSidebarHeaderTitle->SetText(pSidebarPage->m_pTitle);
 			pMenu->m_pSidebarHeaderTitle->ClearFlag(EG_OBJ_FLAG_HIDDEN);
 		}

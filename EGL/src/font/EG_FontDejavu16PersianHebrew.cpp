@@ -6559,13 +6559,9 @@ static const EG_FontFmtTextCmap_t pCmaps[] = {
  *  ALL CUSTOM DATA
  *--------------------*/
 
-#if EG_VERSION_CHECK(8, 0, 0)
 /*Store all the custom data of the font*/
 static  EG_FontFmtGlyphCache_t pCache;
 static const EG_FontFmtTextProps_t Props = {
-#else
-static EG_FontFmtTextProps_t Props = {
-#endif
     .GlyphBitmap = GlyphBitmap,
     .pGlyphProps = pGlyphProps,
     .pCmaps = pCmaps,
@@ -6575,9 +6571,7 @@ static EG_FontFmtTextProps_t Props = {
     .BitsPerPixel = 4,
     .KernClasses = 0,
     .BitmapFormat = 0,
-#if EG_VERSION_CHECK(8, 0, 0)
     .pCache = &pCache
-#endif
 };
 
 /*-----------------
@@ -6585,22 +6579,14 @@ static EG_FontFmtTextProps_t Props = {
  *----------------*/
 
 /*Initialize a public general font descriptor*/
-#if EG_VERSION_CHECK(8, 0, 0)
 const EG_Font_t lv_font_dejavu_16_persian_hebrew = {
-#else
-EG_Font_t lv_font_dejavu_16_persian_hebrew = {
-#endif
     .GetGlyphPropsCB = EG_FontGetGlyphPropsFmtText,    /*Function pointer to get glyph's data*/
     .GetGlyphBitmapCB = EG_FontGetBitmapFmtText,    /*Function pointer to get glyph's bitmap*/
     .LineHeight = 24,          /*The maximum line height required by the font*/
     .BaseLine = 7,             /*Baseline measured from the bottom of the line*/
-#if !(EG_VERSION_MAJOR == 6 && EG_VERSION_MINOR == 0)
     .SubPixel = EG_FONT_SUBPX_NONE,
-#endif
-#if EG_VERSION_CHECK(7, 4, 0) || EG_VERSION_MAJOR >= 8
     .UnderlinePosition = -1,
     .UnderlineThickness = 1,
-#endif
     .pProperties = &Props,           /*The custom font data. Will be accessed by `GetGlyphBitmapCB/dsc` */
     .pFallback = NULL,
 #if EG_USE_EXT_DATA
