@@ -243,7 +243,7 @@ uint32_t shades;
 #if EG_DRAW_COMPLEX
 		if(MaskAny) {		                                  // Apply masks if any 
 			BlendObj.m_MaskResult = DrawMaskApply(MaskBuffer + mask_p_start, FillRect.GetX1(), FillRect.GetY2(), FillWidth);
-			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_TRANSP) {
+			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
 				EG_ZeroMem(MaskBuffer + mask_p_start, FillWidth);
 			}
 		}
@@ -252,7 +252,7 @@ uint32_t shades;
 			FillRect.IncY2(1);
 		}
 		else {
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 			BlendObj.DoBlend();
 			FillRect.SetY1(FillRect.GetY2() + 1);
 			FillRect.SetY2(FillRect.GetY1());
@@ -265,7 +265,7 @@ uint32_t shades;
 	// Flush the last part 
 	if(FillRect.GetY1() != FillRect.GetY2()) {
 		FillRect.DecY2(1);   // decrement
-		BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 		BlendObj.DoBlend();
 		MaskIndex = 0;
 	}
@@ -454,7 +454,7 @@ void EGSoftContext::DrawSubpixel(EGDrawLabel *pDrawLabel, const EGPoint *pPos, E
 		if(MaskAny) {
 			BlendObj.mask_res = lv_draw_mask_apply(MaskBuffer + mask_p_start, map_area.GetX1(), map_area.GetY2(),
 																							EG_Rect_get_width(&map_area));
-			if(BlendObj.mask_res == EG_DRAW_MASK_RES_TRANSP) {
+			if(BlendObj.mask_res == EG_DRAW_MASK_RESULT_TRANSP) {
 				EG_ZeroMem(MaskBuffer + mask_p_start, EG_Rect_get_width(&map_area));
 			}
 		}
@@ -463,7 +463,7 @@ void EGSoftContext::DrawSubpixel(EGDrawLabel *pDrawLabel, const EGPoint *pPos, E
 			map_area.GetY2()++;
 		}
 		else {
-			BlendObj.mask_res = EG_DRAW_MASK_RES_CHANGED;
+			BlendObj.mask_res = EG_DRAW_MASK_RESULT_CHANGED;
       BlendObj.DoBlend();
 
 			map_area.GetY1() = map_area.GetY2() + 1;
@@ -483,7 +483,7 @@ void EGSoftContext::DrawSubpixel(EGDrawLabel *pDrawLabel, const EGPoint *pPos, E
 	// Flush the last part 
 	if(map_area.GetY1() != map_area.GetY2()) {
 		map_area.GetY2()--;
-		BlendObj.mask_res = EG_DRAW_MASK_RES_CHANGED;
+		BlendObj.mask_res = EG_DRAW_MASK_RESULT_CHANGED;
     BlendObj.DoBlend()
 	}
 

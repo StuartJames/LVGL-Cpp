@@ -77,7 +77,7 @@ public:
   void              DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t max_w, EGDrawLabel * pDrawLabel, const char *pText);
   void              DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDrawImage * pDrawImage);
   void              DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine * pDrawLine);
-  void              DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawRect *pDrawRect);
+  void              DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawPolygon *pDrawPoly);
   void              DrawArc(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Radius, int32_t StartAngle, int32_t EndAngle, EGDrawArc *pDrawArc);
 
   EGImage           m_Image;

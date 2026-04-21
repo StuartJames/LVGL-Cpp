@@ -38,15 +38,13 @@ enum {
 };
 typedef uint8_t EG_ArcMode_e;
 
-/**
- * `type` field in `EG_DrawPartDiscriptor_t` if `class_p = lv_arc_class`
- * Used in `EG_EVENT_DRAW_PART_BEGIN` and `EG_EVENT_DRAW_PART_END`
- */
+// `type` field in `EG_DrawPartDiscriptor_t` if `class_p = EGArc class`
+// Used in `EG_EVENT_DRAW_PART_BEGIN` and `EG_EVENT_DRAW_PART_END`
 typedef enum {
     EG_ARC_DRAW_PART_BACKGROUND,    //  The background arc
     EG_ARC_DRAW_PART_FOREGROUND,    //  The foreground arc
     EG_ARC_DRAW_PART_KNOB,          //  The knob
-} lv_arc_draw_part_type_t;
+} EG_Arc_Draw_Part_Type_t;
 
 extern const EG_ClassType_t c_ArcClass;
 
@@ -94,7 +92,7 @@ public:
   uint32_t          m_Dragging          : 1;
   uint32_t          m_Type              : 2;
   uint32_t          m_CloseToMinimum    : 1;  // 1: the last pressed angle was closer to minimum end
-  uint32_t          m_InOut             : 1;  //  1: The click was within the background arc angles. 0: Click outside 
+  uint32_t          m_InOut             : 1;  //  1: The click was within the background arc angles. 0: Click outside
   uint32_t          m_ChangeRate;             // Drag angle rate of change of the arc (degrees/sec)
   uint32_t          m_LastTick;               // Last dragging event timestamp of the arc
   int16_t           m_LastAngle;              // Last dragging angle of the arc

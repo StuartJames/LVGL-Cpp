@@ -111,17 +111,63 @@ void EGPoint::operator-- (void)
 
 //////////////////////////////////////////////////////////////////////////////////
 
+EGPoint EGPoint::Add(EG_Coord_t X, EG_Coord_t Y)
+{
+EGPoint Add;
+
+  Add.m_X = m_X + X;
+  Add.m_Y = m_Y + Y;
+	return Add;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+EGPoint EGPoint::Sub(EG_Coord_t X, EG_Coord_t Y)
+{
+EGPoint Sub;
+
+  Sub.m_X = m_X - X;
+  Sub.m_Y = m_Y - Y;
+	return Sub;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
 void EGPoint::Offset(EG_Coord_t X, EG_Coord_t Y)
 {
   m_X += X;
   m_Y += Y;
 }
+
 //////////////////////////////////////////////////////////////////////////////////
 
 void EGPoint::Offset(const EGPoint *pPoint)
 {
   m_X += pPoint->m_X;
   m_Y += pPoint->m_Y;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+void EGPoint::Swap(EGPoint *pPoint)
+{
+  EG_Coord_t Temp = pPoint->m_X;
+	pPoint->m_X = m_X;
+	m_X = Temp;
+  Temp = pPoint->m_Y;
+	pPoint->m_Y = m_Y;
+	m_Y = Temp;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+EGPoint EGPoint::Difference(const EGPoint *pPoint)
+{
+EGPoint Diff;
+
+  Diff.m_X = m_X - pPoint->m_X;
+  Diff.m_Y = m_Y - pPoint->m_Y;
+	return Diff;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -35,8 +35,6 @@
 
 class EGSoftBlend;
 
-extern EGDrawRect *g_pDrawRect;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
@@ -47,14 +45,14 @@ typedef struct {
 	uint16_t          StartQuarter;
 	uint16_t          EndQuarter;
 	EG_Coord_t        Width;
-	EGDrawRect       *pDrawRec;
 	const EGRect     *pDrawRect;
+	EGDrawRect       *pDrawRec;
 	EGDrawArc        *pDrawArc;
-  const EGDrawContext    *pContext;        
+  const EGDrawContext    *pContext;
 } QuadrantDiscriptor_t;
 
-#define SPLIT_RADIUS_LIMIT 10    /*With radius greater than this the arc will drawn in quarters. A quarter is drawn only if there is arc in it*/
-#define SPLIT_ANGLE_GAP_LIMIT 60 /*With small gaps in the arc don't bother with splitting because there is nothing to skip.*/
+#define SPLIT_RADIUS_LIMIT 10    // With a radius greater than this the arc will drawn in quarters. A quarter is drawn only if there is arc in it
+#define SPLIT_ANGLE_GAP_LIMIT 60 // With small gaps in the arc don't bother with splitting because there is nothing to skip.
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +71,7 @@ public:
   static void   DrawBackground(const EGDrawRect *pDrawRect, const EGRect *pRect);
   static void   DrawCharacter(const EGDrawLabel *pDrawAlpha, const EGPoint * pos_p, uint32_t letter);
   static void   DrawImageDecoded(const EGDrawImage *pDrawImage, const EGRect *pRect, const uint8_t *pSourceBuffer, EG_ImageColorFormat_t ColorFormat);
-  static void   DrawPolygon(const EGDrawPolygon *pDrawPolygon, const EGDrawRect *pRect, const EGPoint *pPoints, uint16_t PointCount);
+  static void   DrawPolygon(const EGDrawPolygon *pDrawPolygon, const EGPoint *pVertices, uint16_t VerticesCount);
   static void   DrawTransform(const EGRect *pRect, const void *pSrceBuffer, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, 
                   EG_Coord_t SourceStride, const EGDrawImage *pImage, EG_ImageColorFormat_t cf, EG_Color_t *pColorBuffer, EG_OPA_t *pOpaBuffer);
   static bool   DrawLayerCreate(EGLayerContext *pDrawLayer, EGDrawLayerFlags_e Flags);

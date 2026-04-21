@@ -26,39 +26,22 @@
 #include "../EG_IntrnlConfig.h"
 #include "../core/EG_Object.h"
 
-#if EG_USE_CHECKBOX != 0
+///////////////////////////////////////////////////////////////////////////////////////
+
+extern const EG_ClassType_t c_RectangleClass;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-extern const EG_ClassType_t c_CheckboxClass;
-
-typedef enum {
-    EG_CHECKBOX_DRAW_PART_BOX,    // The tick box
-} EG_CheckboxDrawPartType_e;
-
-///////////////////////////////////////////////////////////////////////////////////////
-
-class EGCheckbox : public EGObject
+class EGRectangle : public EGObject
 {
 public:
-                    EGCheckbox(void);
-                    EGCheckbox(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_CheckboxClass);
-                    ~EGCheckbox(void);
+                    EGRectangle(void);
+                    EGRectangle(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_RectangleClass);
+                    ~EGRectangle(void);
   virtual void      Configure(void);
-  void              SetText(const char *pText);
-  void              SetStaticText(const char *pText);
-  const char*       GetText(void);
   void              Event(EGEvent *pEvent);
-  void              Draw(EGEvent *pEvent);
 
   static void       EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
-
-  const char       *m_pText;
-  uint32_t          m_StaticText : 1;
 };
 
-
-
-
-#endif 
 

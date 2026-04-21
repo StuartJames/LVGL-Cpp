@@ -58,20 +58,20 @@ const EG_ClassType_t c_ArcClass = {
 
 EGArc::EGArc(void) :
   EGObject(),
-	m_Rotation(0),       
-	m_IndicAngleStart(135), 
-	m_IndicAngleEnd(270), 
-	m_BackgroundAngleStart(135), 
-	m_BackgroundAngleEnd(45), 
-	m_Value(VALUE_UNSET), 
-	m_MinimumValue(0), 
-	m_MaximumValue(100), 
-	m_Dragging(false), 
-	m_Type(EG_ARC_MODE_NORMAL), 
-	m_CloseToMinimum(1), 
+	m_Rotation(0),
+	m_IndicAngleStart(135),
+	m_IndicAngleEnd(270),
+	m_BackgroundAngleStart(135),
+	m_BackgroundAngleEnd(45),
+	m_Value(VALUE_UNSET),
+	m_MinimumValue(0),
+	m_MaximumValue(100),
+	m_Dragging(false),
+	m_Type(EG_ARC_MODE_NORMAL),
+	m_CloseToMinimum(1),
 	m_InOut(CLICK_OUTSIDE_BG_ANGLES),
-	m_ChangeRate(720), 
-	m_LastTick(EG_GetTick()), 
+	m_ChangeRate(720),
+	m_LastTick(EG_GetTick()),
 	m_LastAngle(m_IndicAngleEnd)
 {
 }
@@ -80,20 +80,20 @@ EGArc::EGArc(void) :
 
 EGArc::EGArc(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_LedClass*/) :
   EGObject(),
-	m_Rotation(0),       
-	m_IndicAngleStart(135), 
-	m_IndicAngleEnd(270), 
-	m_BackgroundAngleStart(135), 
-	m_BackgroundAngleEnd(45), 
-	m_Value(VALUE_UNSET), 
-	m_MinimumValue(0), 
-	m_MaximumValue(100), 
-	m_Dragging(false), 
-	m_Type(EG_ARC_MODE_NORMAL), 
-	m_CloseToMinimum(1), 
+	m_Rotation(0),
+	m_IndicAngleStart(135),
+	m_IndicAngleEnd(270),
+	m_BackgroundAngleStart(135),
+	m_BackgroundAngleEnd(45),
+	m_Value(VALUE_UNSET),
+	m_MinimumValue(0),
+	m_MaximumValue(100),
+	m_Dragging(false),
+	m_Type(EG_ARC_MODE_NORMAL),
+	m_CloseToMinimum(1),
 	m_InOut(CLICK_OUTSIDE_BG_ANGLES),
-	m_ChangeRate(720), 
-	m_LastTick(EG_GetTick()), 
+	m_ChangeRate(720),
+	m_LastTick(EG_GetTick()),
 	m_LastAngle(m_IndicAngleEnd)
 {
   Attach(this, pParent, pClassCnfg);
@@ -130,7 +130,7 @@ void EGArc::Configure(void)
 
 void EGArc::SetStartAngle(uint16_t Start)
 {
-	Start = Start % 360;
+	Start = (Start > 360) ? 360 : Start;
 	int16_t OldDelta = m_IndicAngleEnd - m_IndicAngleStart;
 	int16_t NewDelta = m_IndicAngleEnd - Start;
 	if(OldDelta < 0) OldDelta = 360 + OldDelta;
@@ -147,7 +147,7 @@ void EGArc::SetStartAngle(uint16_t Start)
 
 void EGArc::SetEndAngle(uint16_t End)
 {
-	End = End % 360;
+	End = (End > 360) ? 360 : End;
 	int16_t OldDelta = m_IndicAngleEnd - m_IndicAngleStart;
 	int16_t NewDelta = End - m_IndicAngleStart;
 	if(OldDelta < 0) OldDelta = 360 + OldDelta;
@@ -172,7 +172,7 @@ void EGArc::SetAngles(uint16_t Start, uint16_t End)
 
 void EGArc::SetBackgroundStartAngle(uint16_t Start)
 {
-  Start = Start % 360;
+	Start = (Start > 360) ? 360 : Start;
 	int16_t OldDelta = m_BackgroundAngleEnd - m_BackgroundAngleStart;
 	int16_t NewDelta = m_BackgroundAngleEnd - Start;
 	if(OldDelta < 0) OldDelta = 360 + OldDelta;
@@ -188,7 +188,7 @@ void EGArc::SetBackgroundStartAngle(uint16_t Start)
 
 void EGArc::SetBackgroundEndAngle(uint16_t End)
 {
-	End = End % 360;
+	End = (End > 360) ? 360 : End;
 	int16_t OldDelta = m_BackgroundAngleEnd - m_BackgroundAngleStart;
 	int16_t NewDelta = End - m_BackgroundAngleStart;
 	if(OldDelta < 0) OldDelta = 360 + OldDelta;
@@ -237,7 +237,6 @@ void EGArc::SetMode(EG_ArcMode_e Type)
 		default: // EG_ARC_TYPE_NORMAL
 			SetStartAngle(m_BackgroundAngleStart);
 	}
-
 	SetValue(Value);
 }
 

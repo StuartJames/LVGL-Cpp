@@ -46,8 +46,8 @@
 const EG_ClassType_t c_BarClass = {
   .pBaseClassType = &c_ObjectClass,
 	.pEventCB = EGBar::Event,
-	.WidthDef = EG_DPI_DEF * 2,
-	.HeightDef = EG_DPI_DEF / 10,
+	.WidthDef = EG_SIZE_CONTENT,
+	.HeightDef = EG_SIZE_CONTENT,
   .IsEditable = 0,
 	.GroupDef = 0,
 #if EG_USE_EXT_DATA

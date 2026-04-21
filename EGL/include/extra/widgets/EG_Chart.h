@@ -113,6 +113,7 @@ typedef struct EG_CharTickDSC_t{
 } EG_CharTickDSC_t;
 
 extern const EG_ClassType_t c_ChartClass;
+extern EGDrawRect *g_pDrawRect;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

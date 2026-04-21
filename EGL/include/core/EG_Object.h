@@ -395,6 +395,13 @@ public:
   EG_Color_t              GetStyleArcColorFiltered(uint32_t Part);
   EG_OPA_t                GetStyleArcOPA(uint32_t Part);
   const void*             GetStyleArcImageSource(uint32_t Part);
+  EG_Coord_t              GetStylePolyWidth(uint32_t Part);
+  EG_Color_t              GetStylePolyColor(uint32_t Part);
+  EG_Color_t              GetStylePolyColorFiltered(uint32_t Part);
+  EG_OPA_t                GetStylePolyOPA(uint32_t Part);
+  EG_Color_t              GetStylePolyFillColor(uint32_t Part);
+  EG_Color_t              GetStylePolyFillColorFiltered(uint32_t Part);
+  EG_OPA_t                GetStylePolyFillOPA(uint32_t Part);
   EG_Color_t              GetStyleTextColor(uint32_t Part);
   EG_Color_t              GetStyleTextColorFiltered(uint32_t Part);
   EG_OPA_t                GetStyleTextOPA(uint32_t Part);
@@ -482,6 +489,11 @@ public:
   void                    SetStyleArcColor(EG_Color_t Value, EG_StyleFlags_t SelectFlags);
   void                    SetStyleArcOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags);
   void                    SetStyleArcImageSource(const void * Value, EG_StyleFlags_t SelectFlags);
+  void                    SetStylePolyWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags);
+  void                    SetStylePolyColor(EG_Color_t Value, EG_StyleFlags_t SelectFlags);
+  void                    SetStylePolyOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags);
+  void                    SetStylePolyFillColor(EG_Color_t Value, EG_StyleFlags_t SelectFlags);
+  void                    SetStylePolyFillOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags);
   void                    SetStyleTextColor(EG_Color_t Value, EG_StyleFlags_t SelectFlags);
   void                    SetStyleTextOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags);
   void                    SetStyleTextFont(const EG_Font_t * Value, EG_StyleFlags_t SelectFlags);
@@ -601,6 +613,7 @@ public:
   void                    InititialseDrawImage(uint32_t Part, EGDrawImage *pDrawImage); // Initialize an image draw descriptor from an object's styles in its current state
   void                    InititialseDrawLine(uint32_t Part, EGDrawLine *pDrawLine); // Initialize a line draw descriptor from an object's styles in its current state
   void                    InititialseDrawArc(uint32_t Part, EGDrawArc *pDrawArc); // Initialize an arc draw descriptor from an object's styles in its current state
+  void                    InititialseDrawPoly(uint32_t Part, EGDrawPolygon *pDrawPoly); // Initialize a polygon draw descriptor from an object's styles in its current state
   EG_Coord_t              CalculateExtDrawSize(uint32_t Part); // Get the required extra size (around the object's part) to draw shadow, outline, value etc.
   void                    InitDrawDescriptor(EGDrawDiscriptor *pDescriptor, EGDrawContext *pDrawContext); // Initialize a draw descriptor used in events.
   bool                    DrawPartCheckType(EGDrawDiscriptor *pDescriptor, const EG_ClassType_t *pClass, uint32_t Type); // Check the type obj a part draw descriptor

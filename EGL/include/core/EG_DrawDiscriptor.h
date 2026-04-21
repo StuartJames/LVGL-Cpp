@@ -48,26 +48,27 @@ typedef enum : uint8_t {
 class EGDrawDiscriptor
 {
 public:
-                    EGDrawDiscriptor();
+                        EGDrawDiscriptor();
 
-    const EGDrawContext  *m_pContext;         // Draw context
-    const EG_ClassType_t *m_pClass;               // The class that sent the event 
-    uint32_t              m_Type;                 // The type if part being draw. Element of `lv_<name>_draw_part_type_t` 
-    EGRect               *m_pRect;                // The area of the part being drawn
-    EGDrawRect           *m_pDrawRect;            // A draw class that can be modified to changed what will be drawn. Set only for rectangle-like parts
-    EGDrawLabel          *m_pDrawLabel;           // A draw class that can be modified to changed what will be drawn. Set only for text-like parts
-    EGDrawLine           *m_pDrawLine;            // A draw class that can be modified to changed what will be drawn. Set only for line-like parts
-    EGDrawImage          *m_pDrawImage;           // A draw class that can be modified to changed what will be drawn. Set only for image-like parts
-    EGDrawArc            *m_pDrawArc;             // A draw class that can be modified to changed what will be drawn. Set only for arc-like parts
-    const EGPoint        *m_pPoint1;              // A point calculated during drawing. E.g. a point of chart or the center of an arc.
-    const EGPoint        *m_pPoint2;              // A point calculated during drawing. E.g. a point of chart.
-    char                 *m_pText;                // A text calculated during drawing. Can be modified. E.g. tick labels on a chart axis.
-    uint32_t              m_TextLength;           // Size of the text buffer containing null-terminated text string calculated during drawing.
-    uint32_t              m_Part;                 // The current part for which the event is sent
-    uint32_t              m_Index;                // The index of the part. E.g. a button's index on button matrix or table cell index.
-    EG_Coord_t            m_Radius;               // E.g. the radius of an arc (not the corner radius).
-    int32_t               m_Value;                // A value calculated during drawing. E.g. Chart's tick line value.
-    const void           *m_pSubPart;             // A pointer the identifies something in the part. E.g. chart series. 
+  const EGDrawContext  *m_pContext;             // Draw context
+  const EG_ClassType_t *m_pClass;               // The class that sent the event
+  uint32_t              m_Type;                 // The type if part being draw. Element of `EG_<NAME>_DRAW_PART_TYPE_t` 
+  EGRect               *m_pRect;                // The area of the part being drawn
+  EGDrawRect           *m_pDrawRect;            // A draw class that can be modified to changed what will be drawn. Set only for rectangle-like parts
+  EGDrawLabel          *m_pDrawLabel;           // A draw class that can be modified to changed what will be drawn. Set only for text-like parts
+  EGDrawLine           *m_pDrawLine;            // A draw class that can be modified to changed what will be drawn. Set only for line-like parts
+  EGDrawImage          *m_pDrawImage;           // A draw class that can be modified to changed what will be drawn. Set only for image-like parts
+  EGDrawArc            *m_pDrawArc;             // A draw class that can be modified to changed what will be drawn. Set only for arc-like parts
+  EGDrawPolygon        *m_pDrawPoly;            // A draw class that can be modified to changed what will be drawn. Set only for polygon-like parts
+  const EGPoint        *m_pPoint1;              // A point calculated during drawing. E.g. a point of chart or the center of an arc.
+  const EGPoint        *m_pPoint2;              // A point calculated during drawing. E.g. a point of chart.
+  char                 *m_pText;                // A text calculated during drawing. Can be modified. E.g. tick labels on a chart axis.
+  uint32_t              m_TextLength;           // Size of the text buffer containing null-terminated text string calculated during drawing.
+  uint32_t              m_Part;                 // The current part for which the event is sent
+  uint32_t              m_Index;                // The index of the part. E.g. a button's index on button matrix or table cell index.
+  EG_Coord_t            m_Radius;               // E.g. the radius of an arc (not the corner radius).
+  int32_t               m_Value;                // A value calculated during drawing. E.g. Chart's tick line value.
+  const void           *m_pSubPart;             // A pointer the identifies something in the part. E.g. chart series.
 };
 
 

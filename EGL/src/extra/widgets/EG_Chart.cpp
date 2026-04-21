@@ -26,12 +26,15 @@
 
 #include "misc/EG_Assert.h"
 
+///////////////////////////////////////////////////////////////////////////////////////
+
 #define EG_CHART_HDIV_DEF 3
 #define EG_CHART_VDIV_DEF 5
 #define EG_CHART_POINT_CNT_DEF 10
 #define EG_CHART_LABEL_MAX_TEXT_LENGTH 16
 
 EGDrawRect *g_pDrawRect;
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 const EG_ClassType_t c_ChartClass = {

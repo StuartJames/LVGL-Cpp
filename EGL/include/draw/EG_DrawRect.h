@@ -48,8 +48,8 @@ public:
   void              InitialiseBuffer(void){};
   void              Reset(void);
   void              operator = (const EGDrawRect &rval);
-           
-  const EGDrawContext  *m_pContext;        
+
+  const EGDrawContext  *m_pContext;
 	EG_Coord_t            m_Radius;
 	EG_BlendMode_e        m_BlendMode;
 	EG_OPA_t              m_BackgroundOPA;	      // Background

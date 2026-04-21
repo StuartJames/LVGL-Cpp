@@ -85,7 +85,7 @@ void EGSoftContext::DrawArc(EGDrawArc *pDrawArc, const EGPoint *pCenter, uint16_
 	StartAngle %= 360;
 	EndAngle %= 360;
 	MaskAngleParam_t MaskAngleParam;
-	DrawMaskSetAngle(&MaskAngleParam, pCenter->m_X, pCenter->m_Y, StartAngle, EndAngle);
+	DrawMaskSetAngle(&MaskAngleParam, pCenter, StartAngle, EndAngle);
 	int16_t MaskAngleID = DrawMaskAdd(&MaskAngleParam, nullptr);
 	int32_t AngleGap;
 	if(EndAngle > StartAngle) AngleGap = 360 - (EndAngle - StartAngle);

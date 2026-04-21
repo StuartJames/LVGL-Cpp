@@ -26,39 +26,40 @@
 #include "../EG_IntrnlConfig.h"
 #include "../core/EG_Object.h"
 
-#if EG_USE_CHECKBOX != 0
+///////////////////////////////////////////////////////////////////////////////////////
+
+extern const EG_ClassType_t c_PolygonClass;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-extern const EG_ClassType_t c_CheckboxClass;
-
+// `type` field in `EG_DrawPartDiscriptor_t` if `class_p = EGPolygon class`
+// Used in `EG_EVENT_DRAW_PART_BEGIN` and `EG_EVENT_DRAW_PART_END`
 typedef enum {
-    EG_CHECKBOX_DRAW_PART_BOX,    // The tick box
-} EG_CheckboxDrawPartType_e;
+  EG_POLY_DRAW_PART_FOREGROUND,
+} EG_Poly_Draw_Part_Type_t;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-class EGCheckbox : public EGObject
+class EGPolygon : public EGObject
 {
 public:
-                    EGCheckbox(void);
-                    EGCheckbox(EGObject *pParent, const EG_ClassType_t *pClassCnfg = &c_CheckboxClass);
-                    ~EGCheckbox(void);
+                    EGPolygon(void);
+                    EGPolygon(EGObject *pParent, uint32_t PointCount, const EG_ClassType_t *pClassCnfg = &c_PolygonClass);
+                    ~EGPolygon(void);
   virtual void      Configure(void);
-  void              SetText(const char *pText);
-  void              SetStaticText(const char *pText);
-  const char*       GetText(void);
+  void              SetRotation(uint16_t rotation);
+  void              SetVertices(EGPoint *pVertices, uint32_t VerticesCount = 3);
   void              Event(EGEvent *pEvent);
-  void              Draw(EGEvent *pEvent);
 
   static void       EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
 
-  const char       *m_pText;
-  uint32_t          m_StaticText : 1;
+private:
+  void              CalculateVertices(bool Reset = true);
+  bool              m_Recalculate;
+  bool              m_ExtVertices;
+  uint16_t          m_Rotation;
+  EGPoint           *m_pVertices;
+  uint32_t          m_VerticesCount;
 };
 
-
-
-
-#endif 
 

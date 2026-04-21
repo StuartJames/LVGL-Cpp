@@ -74,7 +74,7 @@ public:
   static void             (*DrawImageDecodedProc)(const EGDrawImage *pDrawImage, const EGRect *pRect, const uint8_t *pSourceBuffer, EG_ImageColorFormat_t ColorFormat);
   static EG_Result_t      (*DrawImageProc)(EGDrawImage *pDrawImage, const EGRect *pRect, const void * src);
   static void             (*DrawCharacterProc)(const EGDrawLabel *pDrawLabel, const EGPoint *pPos, uint32_t Alpha);
-  static void             (*DrawPolygonProc)(const EGDrawPolygon *pDrawPolygon, const EGDrawRect *pRect, const EGPoint *pPoints, uint16_t PointCount);
+  static void             (*DrawPolygonProc)(const EGDrawPolygon *pDrawPolygon, const EGPoint *m_pVertices, uint16_t m_VerticesCount);
   static void             (*TransformProc)(const EGRect *pRect, const void *pSrceBuffer, EG_Coord_t SourceWidth,
                             EG_Coord_t SourceHeight, EG_Coord_t SourceStride, const EGDrawImage *pImage, EG_ImageColorFormat_t cf, EG_Color_t *pColorBoffer, EG_OPA_t *pOpaBuf);
   static void             (*WaitForFinishProc)(void);

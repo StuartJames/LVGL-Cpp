@@ -34,23 +34,23 @@
 
 EGDrawDiscriptor::EGDrawDiscriptor(void)
 {
-  m_pContext = nullptr;        
-  m_pClass = nullptr;             
-  m_Type = 0;                
-  m_pRect = nullptr;          
-  m_pDrawRect = nullptr;    
-  m_pDrawLabel = nullptr;  
-  m_pDrawLine = nullptr;   
-  m_pDrawImage = nullptr;  
-  m_pDrawArc = nullptr;    
-  m_pPoint1 = nullptr;           
-  m_pPoint2 = nullptr;           
-  m_pText = nullptr;             
-  m_TextLength = 0;         
-  m_Part = 0;               
-  m_Index = 0;              
-  m_Radius = 0;             
-  m_Value = 0;              
+  m_pContext = nullptr;
+  m_pClass = nullptr;
+  m_Type = 0;
+  m_pRect = nullptr;
+  m_pDrawRect = nullptr;
+  m_pDrawLabel = nullptr;
+  m_pDrawLine = nullptr;
+  m_pDrawImage = nullptr;
+  m_pDrawArc = nullptr;
+  m_pPoint1 = nullptr;
+  m_pPoint2 = nullptr;
+  m_pText = nullptr;
+  m_TextLength = 0;
+  m_Part = 0;
+  m_Index = 0;
+  m_Radius = 0;
+  m_Value = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -308,6 +308,27 @@ void EGObject::InititialseDrawArc(uint32_t Part, EGDrawArc *pDrawArc)
 
 /////////////////////////////////////////////////////////////////////////////
 
+void EGObject::InititialseDrawPoly(uint32_t Part, EGDrawPolygon *pDrawPoly)
+{
+	if(pDrawPoly->m_FillOPA != EG_OPA_TRANSP) {
+		pDrawPoly->m_FillOPA = GetStylePolyFillOPA(Part);
+		if(pDrawPoly->m_FillOPA > EG_OPA_MIN) {
+			pDrawPoly->m_FillColor = GetStylePolyFillColorFiltered(Part);
+		}
+	}
+	pDrawPoly->m_Width = GetStylePolyWidth(Part);
+	if(pDrawPoly->m_Width) {
+		if(pDrawPoly->m_OPA != EG_OPA_TRANSP) {
+			pDrawPoly->m_OPA = GetStylePolyOPA(Part);
+			if(pDrawPoly->m_OPA > EG_OPA_MIN) {
+				pDrawPoly->m_Color = GetStylePolyColorFiltered(Part);
+			}
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 EG_Coord_t EGObject::CalculateExtDrawSize(uint32_t Part)
 {
 EG_Coord_t Size = 0;
@@ -336,23 +357,23 @@ EG_Coord_t Size = 0;
 
 void EGObject::InitDrawDescriptor(EGDrawDiscriptor *pDescriptor, EGDrawContext *pDrawContext)
 {
-  pDescriptor->m_pContext = pDrawContext;        
-  pDescriptor->m_pClass = nullptr;             
-  pDescriptor->m_Type = 0;                
-  pDescriptor->m_pRect = nullptr;          
-  pDescriptor->m_pDrawRect = nullptr;    
-  pDescriptor->m_pDrawLabel = nullptr;  
-  pDescriptor->m_pDrawLine = nullptr;   
-  pDescriptor->m_pDrawImage = nullptr;  
-  pDescriptor->m_pDrawArc = nullptr;    
-  pDescriptor->m_pPoint1 = nullptr;           
-  pDescriptor->m_pPoint2 = nullptr;           
-  pDescriptor->m_pText = nullptr;             
-  pDescriptor->m_TextLength = 0;         
-  pDescriptor->m_Part = 0;               
-  pDescriptor->m_Index = 0;              
-  pDescriptor->m_Radius = 0;             
-  pDescriptor->m_Value = 0;              
+  pDescriptor->m_pContext = pDrawContext;
+  pDescriptor->m_pClass = nullptr;
+  pDescriptor->m_Type = 0;
+  pDescriptor->m_pRect = nullptr;
+  pDescriptor->m_pDrawRect = nullptr;
+  pDescriptor->m_pDrawLabel = nullptr;
+  pDescriptor->m_pDrawLine = nullptr;
+  pDescriptor->m_pDrawImage = nullptr;
+  pDescriptor->m_pDrawArc = nullptr;
+  pDescriptor->m_pPoint1 = nullptr;
+  pDescriptor->m_pPoint2 = nullptr;
+  pDescriptor->m_pText = nullptr;
+  pDescriptor->m_TextLength = 0;
+  pDescriptor->m_Part = 0;
+  pDescriptor->m_Index = 0;
+  pDescriptor->m_Radius = 0;
+  pDescriptor->m_Value = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////

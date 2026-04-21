@@ -41,10 +41,10 @@
 #endif
 
 enum {
-    EG_DRAW_MASK_RES_TRANSP,
-    EG_DRAW_MASK_RES_FULL_COVER,
-    EG_DRAW_MASK_RES_CHANGED,
-    EG_DRAW_MASK_RES_UNKNOWN
+  EG_DRAW_MASK_RESULT_TRANSP,
+  EG_DRAW_MASK_RESULT_FULL_COVER,
+  EG_DRAW_MASK_RESULT_CHANGED,
+  EG_DRAW_MASK_RESULT_UNKNOWN
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ enum {
 typedef uint8_t DrawMaskRes_t;
 
 typedef struct {
-    void *pParam;
+    void *pMask;
     void *pReference;
 } EG_DrawMaskList_t;
 
@@ -75,7 +75,7 @@ typedef EG_DrawMaskList_t EG_DrawMaskListArray_t[_EG_MASK_MAX_NUM];
 #if EG_DRAW_COMPLEX
 
 enum {
-    EG_DRAW_MASK_TYPE_LINE,
+    EG_DRAW_MASK_TYPE_LINE = 0,
     EG_DRAW_MASK_TYPE_ANGLE,
     EG_DRAW_MASK_TYPE_RADIUS,
     EG_DRAW_MASK_TYPE_FADE,
@@ -99,36 +99,36 @@ typedef DrawMaskRes_t (*DrawMaskCB)(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Co
 typedef uint8_t MaskLineSide_t;
 
 typedef struct MaskCommonDiscrpt_t{
-  MaskCommonDiscrpt_t(void) : DrawCB(nullptr), Type(EG_DRAW_MASK_LINE_SIDE_LEFT){};
+  MaskCommonDiscrpt_t(void) : DrawCB(nullptr), Type(EG_DRAW_MASK_TYPE_LINE){};
   DrawMaskCB DrawCB;
   EG_DrawMask_type_t Type;
 } MaskCommonDiscrpt_t;
 
 typedef struct MaskLineParam_t{
   MaskLineParam_t(void) : SteepXY(0), SteepYX(0), Steep(0), SteepPixel(0), Flat(0), Invert(0){};
-  MaskCommonDiscrpt_t dsc;    // The first element must be the common descriptor
+  MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
   struct {
       EGPoint Point1;        // First point
       EGPoint Point2;        // Second point
       MaskLineSide_t Side : 2;       // Which side to keep?
-  } cfg;
-  EGPoint Origin;    // A point of the line
+  } Line;
+  EGPoint Origin;     // A point of the line
   int32_t SteepXY;    // X / (1024*Y) steepness (X is 0..1023 range). What is the change of X in 1024 Y?
   int32_t SteepYX;    // Y / (1024*X) steepness (Y is 0..1023 range). What is the change of Y in 1024 X?
-  int32_t Steep;    // Helper which stores yx_steep for flat lines and xy_steep for steep (non flat) lines
-  int32_t SteepPixel;    // Steepness in 1 px in 0..255 range. Used only by flat lines.
-  uint8_t Flat : 1;    // 1: It's a flat line? (Near to horizontal)
-  uint8_t Invert: 1;    // Invert the mask. The default is: Keep the left part.
+  int32_t Steep;      // Helper which stores yx_steep for flat lines and xy_steep for steep (non flat) lines
+  int32_t SteepPixel; // Steepness in 1 px in 0..255 range. Used only by flat lines.
+  uint8_t Flat : 1;   // 1: It's a flat line? (Near to horizontal)
+  uint8_t Invert: 1;  // Invert the mask. The default is: Keep the left part.
 } MaskLineParam_t;
 
 typedef struct MaskAngleParam_t{
-  MaskAngleParam_t(void) : DeltaDeg(0){cfg.StartAngle = 0; cfg.EndAngle = 0;};
-  MaskCommonDiscrpt_t dsc;    // The first element must be the common descriptor
+  MaskAngleParam_t(void) : DeltaDeg(0){Angle.StartAngle = 0; Angle.EndAngle = 0;};
+  MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
   struct {
       EGPoint Vertex;
       EG_Coord_t StartAngle;
       EG_Coord_t EndAngle;
-  } cfg;
+  } Angle;
   MaskLineParam_t StartLine;
   MaskLineParam_t EndLine;
   uint16_t DeltaDeg;
@@ -149,44 +149,44 @@ typedef struct MaskRadiusCircleDiscrpt_t{
 typedef MaskRadiusCircleDiscrpt_t EG_DrawMaskCircleListArray_t[EG_CIRCLE_CACHE_SIZE];
 
 typedef struct MaskRadiusParam_t{
-  MaskRadiusParam_t(void): pCircle(nullptr){ cfg.Radius = 0; cfg.Outer = 0;};
-MaskCommonDiscrpt_t dsc;    // The first element must be the common descriptor
+  MaskRadiusParam_t(void): pCircle(nullptr){ Radius.Radius = 0; Radius.Outer = 0;};
+MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
 struct {
   EGRect        Area;
   EG_Coord_t    Radius;
   uint8_t       Outer: 1;  // Invert the mask. 0: Keep the pixels inside.
-} cfg;
+} Radius;
 MaskRadiusCircleDiscrpt_t *pCircle;
 } MaskRadiusParam_t;
 
 typedef struct MaskFadeParam_t{
-  MaskFadeParam_t(void){cfg.TopY = 0; cfg.BottomY = 0; cfg.TopOPA = 0; cfg.BottomOPA = 0;}; 
-  MaskCommonDiscrpt_t dsc;    // The first element must be the common descriptor
+  MaskFadeParam_t(void){Fade.TopY = 0; Fade.BottomY = 0; Fade.TopOPA = 0; Fade.BottomOPA = 0;}; 
+  MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
   struct {
       EGRect      Area;
       EG_Coord_t  TopY;
       EG_Coord_t  BottomY;
       EG_OPA_t    TopOPA;
       EG_OPA_t    BottomOPA;
-  } cfg;
+  } Fade;
 } MaskFadeParam_t;
 
 typedef struct MaskMapParam_t {
-  MaskMapParam_t(void){ cfg.pMap = nullptr;}; 
-  MaskCommonDiscrpt_t dsc;   // The first element must be the common descriptor
+  MaskMapParam_t(void){ Map.pMap = nullptr;};
+  MaskCommonDiscrpt_t Mask;   // The first element must be the common descriptor
   struct {
     EGRect          Area;
     const EG_OPA_t  *pMap;
-  } cfg;
+  } Map;
 } MaskMapParam_t;
 
 typedef struct MaskPolygonParam_t{
-  MaskPolygonParam_t(void){ cfg.pPoints = nullptr; cfg.PointCount = 0;};
-  MaskCommonDiscrpt_t dsc;    // The first element must be the common descriptor
+  MaskPolygonParam_t(void){ Poly.pVertices = nullptr; Poly.Count = 0;};
+  MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
   struct {
-    EGPoint       *pPoints;
-    uint16_t       PointCount;
-  } cfg;
+    EGPoint       *pVertices;
+    uint16_t       Count;
+  } Poly;
 } MaskPolygonParam_t;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -199,17 +199,16 @@ typedef struct MaskPolygonParam_t{
   void            DrawMaskCleanup(void);
   uint8_t         DrawMaskGetCount(void);
   bool            HasAnyDrawMask(const EGRect *pRect);
-  void            DrawMaskSetLineAngle(MaskLineParam_t *pParam, EG_Coord_t PosX, EG_Coord_t PosY, int16_t Angle,  MaskLineSide_t Side);
-  void            DrawMaskSetAngle(MaskAngleParam_t *pParam, EG_Coord_t PosX, EG_Coord_t PosY, EG_Coord_t start_angle, EG_Coord_t end_angle);
+  void            DrawMaskSetLineAngle(MaskLineParam_t *pParam, EGPoint Point, int16_t Angle,  MaskLineSide_t Side);
+  void            DrawMaskSetAngle(MaskAngleParam_t *pParam, EGPoint Vertex, EG_Coord_t start_angle, EG_Coord_t end_angle);
   void            DrawMaskSetRadius(MaskRadiusParam_t *pParam, const EGRect *pRect, EG_Coord_t Radius, bool Invert);
   void            DrawMaskSetFade(MaskFadeParam_t *pParam, const EGRect *pRect, EG_OPA_t TopOPA, EG_Coord_t TopY,
                                                             EG_OPA_t BottomOPA, EG_Coord_t BottomY);
   void            DrawMaskSetMap(MaskMapParam_t *pParam, const EGRect *pRect, const EG_OPA_t *pMap);
   void            DrawMaskSetPolygon(MaskPolygonParam_t *pParam, const EGPoint *pPoints, uint16_t PointCount);
   void            DrawMaskFreeParam(void *pParam);
-  void            DrawMaskSetLinePoints(MaskLineParam_t *pParam, EG_Coord_t PosX1, EG_Coord_t PosY1, EG_Coord_t PosX2,
-                                                                            EG_Coord_t PosY2, MaskLineSide_t Side);
-#endif 
+  void            DrawMaskSetLinePoints(MaskLineParam_t *pParam, EGPoint Point1, EGPoint Point2, MaskLineSide_t Side);
+#endif
 
 
 

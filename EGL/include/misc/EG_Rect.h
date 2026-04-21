@@ -29,6 +29,7 @@
 #include "EG_Types.h"
 #include "EG_Point.h"
 #include "EG_Size.h"
+#include "../misc/EG_Math.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +89,8 @@ public:
 	uint32_t            GetSize(void) const;
   EG_Coord_t          GetWidth(void) const; 
   EG_Coord_t          GetHeight(void) const;
+  EG_Coord_t          GetMinAxis(void) const;
+  EG_Coord_t          GetMaxAxis(void) const;
   EGPoint             BottomLeft(void) const;
   EGPoint             TopRight(void) const;
   EGPoint             Center(void) const;
@@ -192,4 +195,20 @@ inline EGPoint EGRect::Center(void) const
 {
 	return EGPoint((m_X2 - m_X1) / 2, (m_Y2 - m_Y1) / 2);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+inline EG_Coord_t EGRect::GetMinAxis(void) const
+{
+  return EG_MIN(m_X2 - m_X1, m_Y2 - m_Y1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+inline EG_Coord_t EGRect::GetMaxAxis(void) const
+{
+  return EG_MAX(m_X2 - m_X1, m_Y2 - m_Y1);
+}
+
+
 

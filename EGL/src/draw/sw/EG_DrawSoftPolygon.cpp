@@ -32,119 +32,127 @@
 #include "misc/EG_Color.h"
 #include "draw/EG_DrawRect.h"
 
+#if 0
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGSoftContext::DrawPolygon(const EGDrawPolygon *pDrawPolygon, const EGDrawRect *pRect, const EGPoint *pPoints, uint16_t PointCount)
+void EGSoftContext::DrawPolygon(const EGDrawPolygon *pDrawPolygon, const EGPoint *pVertices, uint16_t VerticesCount)
 {
 #if EG_DRAW_COMPLEX
-	if(PointCount < 3) return;
-	if(pPoints == NULL) return;
-	EGPoint *pPointArray = (EGPoint *)EG_GetBufferMem(PointCount * sizeof(EGPoint));	// Join adjacent pPoints if they are on the same coordinate
-	if(pPointArray == NULL) return;
-	uint16_t i;
-	uint16_t TotalCount = 0;
-	pPointArray[0] = pPoints[0];
-	for(i = 0; i < PointCount - 1; i++) {
-		if(pPoints[i].m_X != pPoints[i + 1].m_X || pPoints[i].m_Y != pPoints[i + 1].m_Y) {
-			pPointArray[TotalCount] = pPoints[i];
+uint16_t i;
+uint16_t TotalCount = 0;
+
+	if((VerticesCount < 3)  || (pVertices == nullptr)) return;
+	EGPoint *pArray = new EGPoint[VerticesCount];	// Join adjacent vertices if they are on the same coordinate
+	if(pArray == nullptr) return;
+	pArray[0] = pVertices[0];
+	for(i = 0; i < VerticesCount - 1; i++) {
+		if(pVertices[i].m_X != pVertices[i + 1].m_X || pVertices[i].m_Y != pVertices[i + 1].m_Y) {
+			pArray[TotalCount] = pVertices[i];
 			TotalCount++;
 		}
 	}
-	if(pPoints[0].m_X != pPoints[PointCount - 1].m_X || pPoints[0].m_Y != pPoints[PointCount - 1].m_Y) {// The first and the last pPoints are also adjacent
-		pPointArray[TotalCount] = pPoints[PointCount - 1];
+	if(pVertices[0].m_X != pVertices[VerticesCount - 1].m_X || pVertices[0].m_Y != pVertices[VerticesCount - 1].m_Y) {// The first and the last pPoints are also adjacent
+		pArray[TotalCount] = pVertices[VerticesCount - 1];
 		TotalCount++;
 	}
-	PointCount = TotalCount;
-	if(PointCount < 3) {
-		EG_ReleaseBufferMem(pPointArray);
+	VerticesCount = TotalCount;
+	if(VerticesCount < 3) {
+		EG_ReleaseBufferMem(pArray);
 		return;
 	}
-	EGRect PolyArea(EG_COORD_MAX, EG_COORD_MAX,  EG_COORD_MIN,  EG_COORD_MIN);
-	for(i = 0; i < PointCount; i++) {
-		PolyArea.SetX1(EG_MIN(PolyArea.GetX1(), pPointArray[i].m_X));
-		PolyArea.SetY1(EG_MIN(PolyArea.GetY1(), pPointArray[i].m_Y));
-		PolyArea.SetX2(EG_MAX(PolyArea.GetX2(), pPointArray[i].m_X));
-		PolyArea.SetY2(EG_MAX(PolyArea.GetY2(), pPointArray[i].m_Y));
+	EGRect PolyRect(EG_COORD_MAX, EG_COORD_MAX,  EG_COORD_MIN,  EG_COORD_MIN);
+	for(i = 0; i < VerticesCount; i++) {																	// define the bounding rectangle
+		PolyRect.SetX1(EG_MIN(PolyRect.GetX1(), pArray[i].m_X));
+		PolyRect.SetY1(EG_MIN(PolyRect.GetY1(), pArray[i].m_Y));
+		PolyRect.SetX2(EG_MAX(PolyRect.GetX2(), pArray[i].m_X));
+		PolyRect.SetY2(EG_MAX(PolyRect.GetY2(), pArray[i].m_Y));
 	}
-	EGRect ClipRect;
-	if(!ClipRect.Intersect(&PolyArea, pDrawPolygon->m_pContext->m_pClipRect)){
-		EG_ReleaseBufferMem(pPointArray);
+	EGRect ClipRect;																									// check that the bounding rectangle is within the clip area
+	if(!ClipRect.Intersect(&PolyRect, pDrawPolygon->m_pContext->m_pClipRect)){
+		EG_ReleaseBufferMem(pArray);
 		return;
 	}
 	const EGRect *pClipRect = pDrawPolygon->m_pContext->m_pClipRect;  // save the original
-	pDrawPolygon->m_pContext->m_pClipRect = &ClipRect;
-	EG_Coord_t MinY = pPointArray[0].m_Y;	// Find the lowest point
-	int16_t TotalY = 0;
-	for(i = 1; i < PointCount; i++) {
-		if(pPointArray[i].m_Y < MinY) {
-			MinY = pPointArray[i].m_Y;
-			TotalY = i;
+	pDrawPolygon->m_pContext->m_pClipRect = &ClipRect;								// set the clip area as the visible part of the bounding box
+	EG_Coord_t MinY = pArray[0].m_Y;															// Find the lowest point
+	int16_t IndexMinY = 0;
+	for(i = 1; i < VerticesCount; i++) {
+		if(pArray[i].m_Y < MinY) {
+			MinY = pArray[i].m_Y;
+			IndexMinY = i;
 		}
 	}
-	MaskLineParam_t *pMask = (MaskLineParam_t *)EG_GetBufferMem(sizeof(MaskLineParam_t) * PointCount);
+	MaskLineParam_t *pMask = (MaskLineParam_t *)EG_GetBufferMem(sizeof(MaskLineParam_t) * VerticesCount);
 	MaskLineParam_t *pMaskNext = pMask;
-	int32_t PreveousLeft = TotalY;
-	int32_t PreveousRight = TotalY;
-	int32_t NextLeft;
-	int32_t NextRight;
+	int32_t PrevCCW = IndexMinY;
+	int32_t PrevCW = IndexMinY;
 	uint32_t MaxCount = 0;
-	NextLeft = TotalY - 1;	// Get the index of the left and right pPoints
-	if(NextLeft < 0) NextLeft = PointCount + NextLeft;
-	NextRight = TotalY + 1;
-	if(NextRight > PointCount - 1) NextRight = 0;
-	/* Check if the order of pPoints is inverted or not. The normal case is when the left point is on `TotalY - 1`
+	int32_t NextCCW = IndexMinY - 1;	// Get the index of the left and right pPoints
+	int32_t NextCW = IndexMinY + 1;
+	if(NextCCW < 0) NextCCW = VerticesCount + NextCCW;
+	if(NextCW > VerticesCount - 1) NextCW = 0;
+	/* Check if the order of pPoints is inverted or not. The normal case is when the left point is on `IndexMinY - 1`
      * Explanation:
      *   if angle(p_left) < angle(p_right) -> inverted
      *   dy_left/dx_left < dy_right/dx_right
      *   dy_left * dx_right < dy_right * dx_left */
-	EG_Coord_t dxl = pPointArray[NextLeft].m_X - pPointArray[TotalY].m_X;
-	EG_Coord_t dxr = pPointArray[NextRight].m_X - pPointArray[TotalY].m_X;
-	EG_Coord_t dyl = pPointArray[NextLeft].m_Y - pPointArray[TotalY].m_Y;
-	EG_Coord_t dyr = pPointArray[NextRight].m_Y - pPointArray[TotalY].m_Y;
-	bool inv = false;
-	if(dyl * dxr < dyr * dxl) inv = true;
+	EG_Coord_t DiffLeftX = pArray[NextCCW].m_X - pArray[IndexMinY].m_X;
+	EG_Coord_t DiffRightX = pArray[NextCW].m_X - pArray[IndexMinY].m_X;
+	EG_Coord_t DiffLeftY = pArray[NextCCW].m_Y - pArray[IndexMinY].m_Y;
+	EG_Coord_t DiffRightY = pArray[NextCW].m_Y - pArray[IndexMinY].m_Y;
+	bool Invert = false;
+	if(DiffLeftY * DiffRightX < DiffRightY * DiffLeftX) Invert = true;
 	do {
-		if(!inv) {
-			NextLeft = PreveousLeft - 1;
-			if(NextLeft < 0) NextLeft = PointCount + NextLeft;
-			NextRight = PreveousRight + 1;
-			if(NextRight > PointCount - 1) NextRight = 0;
+		if(!Invert) {
+			NextCCW = PrevCCW - 1;
+			if(NextCCW < 0) NextCCW = VerticesCount + NextCCW;
+			NextCW = PrevCW + 1;
+			if(NextCW > VerticesCount - 1) NextCW = 0;
 		}
 		else {
-			NextLeft = PreveousLeft + 1;
-			if(NextLeft > PointCount - 1) NextLeft = 0;
-			NextRight = PreveousRight - 1;
-			if(NextRight < 0) NextRight = PointCount + NextRight;
+			NextCCW = PrevCCW + 1;
+			if(NextCCW > VerticesCount - 1) NextCCW = 0;
+			NextCW = PrevCW - 1;
+			if(NextCW < 0) NextCW = VerticesCount + NextCW;
 		}
-		if(pPointArray[NextLeft].m_Y >= pPointArray[PreveousLeft].m_Y) {
-			if(pPointArray[NextLeft].m_Y != pPointArray[PreveousLeft].m_Y && pPointArray[NextLeft].m_X != pPointArray[PreveousLeft].m_X) {
-				DrawMaskSetLinePoints(pMaskNext, pPointArray[PreveousLeft].m_X, pPointArray[PreveousLeft].m_Y,
-																			pPointArray[NextLeft].m_X, pPointArray[NextLeft].m_Y,
-																			EG_DRAW_MASK_LINE_SIDE_RIGHT);
+		if(pArray[NextCCW].m_Y >= pArray[PrevCCW].m_Y) {
+			if(pArray[NextCCW].m_Y != pArray[PrevCCW].m_Y && pArray[NextCCW].m_X != pArray[PrevCCW].m_X) {
+				DrawMaskSetLinePoints(pMaskNext, pArray[PrevCCW].m_X, pArray[PrevCCW].m_Y,
+															pArray[NextCCW].m_X, pArray[NextCCW].m_Y,	EG_DRAW_MASK_LINE_SIDE_RIGHT);
+				DrawMaskAdd(pMaskNext, pMask);
+				pMaskNext++;
+			}
+			PrevCCW = NextCCW;
+			if(++MaxCount == VerticesCount) break;			// that's it, no more
+		}
+		if(pArray[NextCW].m_Y >= pArray[PrevCW].m_Y) {
+			if(pArray[NextCW].m_Y != pArray[PrevCW].m_Y && pArray[NextCW].m_X != pArray[PrevCW].m_X) {
+				DrawMaskSetLinePoints(pMaskNext, pArray[PrevCW].m_X, pArray[PrevCW].m_Y,
+															pArray[NextCW].m_X, pArray[NextCW].m_Y,	EG_DRAW_MASK_LINE_SIDE_LEFT);
 				DrawMaskAdd(pMaskNext, pMask);
 				pMaskNext++;
 			}
 			MaxCount++;
-			PreveousLeft = NextLeft;
+			PrevCW = NextCW;
 		}
-		if(MaxCount == PointCount) break;
-		if(pPointArray[NextRight].m_Y >= pPointArray[PreveousRight].m_Y) {
-			if(pPointArray[NextRight].m_Y != pPointArray[PreveousRight].m_Y && pPointArray[NextRight].m_X != pPointArray[PreveousRight].m_X) {
-				DrawMaskSetLinePoints(pMaskNext, pPointArray[PreveousRight].m_X, pPointArray[PreveousRight].m_Y,
-																			pPointArray[NextRight].m_X, pPointArray[NextRight].m_Y,
-																			EG_DRAW_MASK_LINE_SIDE_LEFT);
-				DrawMaskAdd(pMaskNext, pMask);
-				pMaskNext++;
-			}
-			MaxCount++;
-			PreveousRight = NextRight;
-		}
-	} while(MaxCount < PointCount);
-	DrawRect(pRect, &PolyArea);
+	}
+	while(MaxCount < VerticesCount);
+	EGDrawRect DrawRect;									// Background rectangle that will mask tothe shape of the polygon
+	DrawRect.m_BlendMode = pDrawPolygon->m_BlendMode;
+	DrawRect.m_BackgroundOPA = pDrawPolygon->m_FillOPA;
+	DrawRect.m_BackgroundColor = pDrawPolygon->m_FillColor;
+	DrawRect.Draw(pDrawPolygon->m_pContext, &PolyRect);
 	DrawMaskRemoveReferenced(pMask);
+	EGDrawLine DrawLine;									// Now draw the border arround the poygon
+	DrawLine.m_BlendMode = pDrawPolygon->m_BlendMode;
+	DrawLine.m_Color = pDrawPolygon->m_Color;
+	DrawLine.m_Width = pDrawPolygon->m_Width;
+	DrawLine.m_OPA = pDrawPolygon->m_OPA;
+	for(int16_t i = 1; i < VerticesCount; ++i) DrawLine.Draw(pDrawPolygon->m_pContext, &pArray[i - 1], &pArray[i]);
+	DrawLine.Draw(pDrawPolygon->m_pContext, &pArray[VerticesCount - 1], &pArray[0]);
 	EG_ReleaseBufferMem(pMask);
-	EG_ReleaseBufferMem(pPointArray);
-	pDrawPolygon->m_pContext->m_pClipRect = pClipRect;
+	delete[] pArray;
+	pDrawPolygon->m_pContext->m_pClipRect = pClipRect; // restore
 #else
 	EG_UNUSED(pPoints);
 	EG_UNUSED(PointCount);
@@ -153,4 +161,131 @@ void EGSoftContext::DrawPolygon(const EGDrawPolygon *pDrawPolygon, const EGDrawR
 	EG_LOG_WARN("Can't draw polygon with EG_DRAW_COMPLEX == 0");
 #endif // EG_DRAW_COMPLEX
 }
+
+#else
+//////////////////////////////////////////////////////////////////////////////////////
+
+void EGSoftContext::DrawPolygon(const EGDrawPolygon *pDrawPolygon, const EGPoint *pVertices, uint16_t VerticesCount)
+{
+#if EG_DRAW_COMPLEX
+uint16_t i;
+uint16_t TotalCount = 0;
+
+	if((VerticesCount < 3)  || (pVertices == nullptr)) return;
+	EGPoint *pArray = new EGPoint[VerticesCount];	// Join adjacent vertices if they are on the same coordinate
+	if(pArray == nullptr) return;
+	pArray[0] = pVertices[0];
+	for(i = 0; i < VerticesCount - 1; i++) {
+		if(pVertices[i].m_X != pVertices[i + 1].m_X || pVertices[i].m_Y != pVertices[i + 1].m_Y) {
+			pArray[TotalCount] = pVertices[i];
+			TotalCount++;
+		}
+	}
+	if(pVertices[0].m_X != pVertices[VerticesCount - 1].m_X || pVertices[0].m_Y != pVertices[VerticesCount - 1].m_Y) {// The first and the last pPoints are also adjacent
+		pArray[TotalCount] = pVertices[VerticesCount - 1];
+		TotalCount++;
+	}
+	VerticesCount = TotalCount;
+	if(VerticesCount < 3) {
+		delete[] pArray;
+		return;
+	}
+	EGRect PolyRect(EG_COORD_MAX, EG_COORD_MAX,  EG_COORD_MIN,  EG_COORD_MIN);
+	for(i = 0; i < VerticesCount; i++) {																	// define the bounding rectangle
+		PolyRect.SetX1(EG_MIN(PolyRect.GetX1(), pArray[i].m_X));
+		PolyRect.SetY1(EG_MIN(PolyRect.GetY1(), pArray[i].m_Y));
+		PolyRect.SetX2(EG_MAX(PolyRect.GetX2(), pArray[i].m_X));
+		PolyRect.SetY2(EG_MAX(PolyRect.GetY2(), pArray[i].m_Y));
+	}
+	EGRect ClipRect;																									// check that the bounding rectangle is within the clip area
+	if(!ClipRect.Intersect(&PolyRect, pDrawPolygon->m_pContext->m_pClipRect)){
+		delete[] pArray;
+		return;
+	}
+	const EGRect *pClipRect = pDrawPolygon->m_pContext->m_pClipRect;  // save the original
+	pDrawPolygon->m_pContext->m_pClipRect = &ClipRect;								// set the clip area as the visible part of the bounding box
+	EG_Coord_t MinY = pArray[0].m_Y;															// Find the lowest point
+	int16_t IndexMinY = 0;
+	for(i = 1; i < VerticesCount; i++) {
+		if(pArray[i].m_Y < MinY) {
+			MinY = pArray[i].m_Y;
+			IndexMinY = i;
+		}
+	}
+	MaskLineParam_t *pMask = (MaskLineParam_t *)EG_GetBufferMem(sizeof(MaskLineParam_t) * VerticesCount);
+	MaskLineParam_t *pMaskNext = pMask;
+	uint32_t MaxCount = 0;
+	int32_t PrevCCW = IndexMinY;			// Set up Mask analysis clockwise and anti-clockwise indices
+	int32_t NextCCW = PrevCCW - 1;	// Get the index of the leading vertices
+	int32_t PrevCW = IndexMinY;
+	int32_t NextCW = PrevCW + 1;
+	if(NextCCW < 0) NextCCW = VerticesCount + NextCCW;
+	if(NextCW > VerticesCount - 1) NextCW = 0;
+	/* Check if the order of vertices is inverted or not. The normal case is when the left vertices is on `IndexMinY - 1`
+     * Explanation:
+     *   if angle(p_left) < angle(p_right) -> inverted
+     *   dy_left/dx_left < dy_right/dx_right
+     *   dy_left * dx_right < dy_right * dx_left */
+	EGPoint DiffLeft = pArray[IndexMinY].Difference(&pArray[NextCCW]);
+	EGPoint DiffRight = pArray[IndexMinY].Difference(&pArray[NextCW]);
+	bool Invert = false;
+	if(DiffLeft.m_Y * DiffRight.m_X < DiffRight.m_Y * DiffLeft.m_X) Invert = true;
+	do {
+		if(!Invert) {
+			NextCCW = PrevCCW - 1;
+			if(NextCCW < 0) NextCCW = VerticesCount + NextCCW;
+			NextCW = PrevCW + 1;
+			if(NextCW > VerticesCount - 1) NextCW = 0;
+		}
+		else {
+			NextCCW = PrevCCW + 1;
+			if(NextCCW > VerticesCount - 1) NextCCW = 0;
+			NextCW = PrevCW - 1;
+			if(NextCW < 0) NextCW = VerticesCount + NextCW;
+		}
+		if(pArray[NextCCW].m_Y >= pArray[PrevCCW].m_Y) {
+			if(pArray[NextCCW].m_Y != pArray[PrevCCW].m_Y && pArray[NextCCW].m_X != pArray[PrevCCW].m_X) {
+				DrawMaskSetLinePoints(pMaskNext, pArray[PrevCCW], pArray[NextCCW],	EG_DRAW_MASK_LINE_SIDE_RIGHT);
+				DrawMaskAdd(pMaskNext, pMask);
+				pMaskNext++;
+			}
+			PrevCCW = NextCCW;
+			if(++MaxCount == VerticesCount) break;			// that's it, no more
+		}
+		if(pArray[NextCW].m_Y >= pArray[PrevCW].m_Y) {
+			if(pArray[NextCW].m_Y != pArray[PrevCW].m_Y && pArray[NextCW].m_X != pArray[PrevCW].m_X) {
+				DrawMaskSetLinePoints(pMaskNext, pArray[PrevCW], pArray[NextCW],	EG_DRAW_MASK_LINE_SIDE_LEFT);
+				DrawMaskAdd(pMaskNext, pMask);
+				pMaskNext++;
+			}
+			MaxCount++;
+			PrevCW = NextCW;
+		}
+	}
+	while(MaxCount < VerticesCount);
+	EGDrawRect DrawRect;									// Background rectangle that will mask tothe shape of the polygon
+	DrawRect.m_BlendMode = pDrawPolygon->m_BlendMode;
+	DrawRect.m_BackgroundOPA = pDrawPolygon->m_FillOPA;
+	DrawRect.m_BackgroundColor = pDrawPolygon->m_FillColor;
+	DrawRect.Draw(pDrawPolygon->m_pContext, &PolyRect);
+	DrawMaskRemoveReferenced(pMask);
+	EG_ReleaseBufferMem(pMask);
+	EGDrawLine DrawLine;									// Now draw the border arround the poygon
+	DrawLine.m_BlendMode = pDrawPolygon->m_BlendMode;
+	DrawLine.m_Color = pDrawPolygon->m_Color;
+	DrawLine.m_Width = pDrawPolygon->m_Width;
+	DrawLine.m_OPA = pDrawPolygon->m_OPA;
+	for(int16_t i = 1; i < VerticesCount; ++i) DrawLine.Draw(pDrawPolygon->m_pContext, &pArray[i - 1], &pArray[i]);
+	DrawLine.Draw(pDrawPolygon->m_pContext, &pArray[VerticesCount - 1], &pArray[0]);
+	delete[] pArray;
+	pDrawPolygon->m_pContext->m_pClipRect = pClipRect; // Restore clip area
+#else
+	EG_UNUSED(pVertices);
+	EG_UNUSED(VerticesCount);
+	EG_UNUSED(pDrawPolygon);
+	EG_LOG_WARN("Can't draw polygon with EG_DRAW_COMPLEX == 0");
+#endif
+}
+
+#endif
 

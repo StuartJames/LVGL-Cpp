@@ -33,7 +33,7 @@ void             (*EGDrawContext::DrawBackgroundProc)(const EGDrawRect *pDrawRec
 void             (*EGDrawContext::DrawImageDecodedProc)(const EGDrawImage *pDrawImage, const EGRect *pRect, const uint8_t *pSourceBuffer, EG_ImageColorFormat_t ColorFormat);
 EG_Result_t      (*EGDrawContext::DrawImageProc)(EGDrawImage *pDrawImage, const EGRect *pRect, const void * src);
 void             (*EGDrawContext::DrawCharacterProc)(const EGDrawLabel *pDrawLabel, const EGPoint *pPos, uint32_t Char);
-void             (*EGDrawContext::DrawPolygonProc)(const EGDrawPolygon *pDrawPolygon, const EGDrawRect *pRect, const EGPoint *pPoints, uint16_t PointCount);
+void             (*EGDrawContext::DrawPolygonProc)(const EGDrawPolygon *pDrawPolygon, const EGPoint *m_pVertices, uint16_t m_VerticesCount);
 void             (*EGDrawContext::TransformProc)(const EGRect *pRect, const void *pSrceBuffer, EG_Coord_t SourceWidth,
                    EG_Coord_t SourceHeight, EG_Coord_t SourceStride, const EGDrawImage *pImage, EG_ImageColorFormat_t cf, EG_Color_t *pColorBoffer, EG_OPA_t *pOpaBuf);
 void             (*EGDrawContext::WaitForFinishProc)(void);

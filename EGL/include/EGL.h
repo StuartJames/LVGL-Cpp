@@ -68,6 +68,8 @@
 #include "widgets/EG_Edit.h"
 #include "widgets/EG_Canvas.h"
 #include "widgets/EG_Switch.h"
+#include "widgets/EG_Rectangle.h"
+#include "widgets/EG_Polygon.h"
 
 #include "draw/EG_DrawContext.h"
 #include "draw/sw/EG_SoftContext.h"

@@ -437,7 +437,7 @@ void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t
 {
 
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_rect: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
+		EG_LOG_WARN("Canvas DrawRect: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -462,7 +462,7 @@ void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t
 void EGCanvas::DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t MaxWidth, EGDrawLabel * pDrawLabel, const char *pText)
 {
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_text: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
+		EG_LOG_WARN("Canvas DrawText: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -483,13 +483,13 @@ void EGCanvas::DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t MaxWidth, EGDrawL
 void EGCanvas::DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDrawImage * pDrawImage)
 {
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_img: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
+		EG_LOG_WARN("Canvas DrawImage: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EG_ImageHeader_t m_Header;
 	EG_Result_t res = EGImageDecoder::GetInfo(pSource, &m_Header);
 	if(res != EG_RES_OK) {
-		EG_LOG_WARN("lv_canvas_draw_img: Couldn't get the image data.");
+		EG_LOG_WARN("Canvas DrawImage: Couldn't get the image data.");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -510,7 +510,7 @@ void EGCanvas::DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDraw
 void EGCanvas::DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine *pDrawLine)
 {
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_line: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
+		EG_LOG_WARN("Canvas DrawLine: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -533,10 +533,10 @@ void EGCanvas::DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine 
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawRect *pDrawRect)
+void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawPolygon *pDrawPoly)
 {
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_polygon: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
+		EG_LOG_WARN("Canvas DrawPolygon: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
@@ -546,11 +546,10 @@ void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawRe
 	EGDisplay *pOriginalRefresh = GetRefreshingDisplay();
 	SetRefreshingDisplay(&FakeDisplay);
 	EG_Color_t ctransp = EG_COLOR_CHROMA_KEY;
-	if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED && pDrawRect->m_BackgroundColor.full == ctransp.full) {
+	if(m_ImageBuffer.m_Header.ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED && pDrawPoly->m_FillColor.full == ctransp.full) {
 		FakeDisplay.m_pDriver->m_AntiAliasing = 0;
 	}
-	EGDrawPolygon DrawPolygon;
-  DrawPolygon.Polygon(DisplayDriver.m_pContext, pDrawRect, Points, PointCount);
+  pDrawPoly->Draw(DisplayDriver.m_pContext, Points, PointCount);
 	SetRefreshingDisplay(pOriginalRefresh);
 	DeinitFakeDisplay(&FakeDisplay);
 	Invalidate();
@@ -562,7 +561,7 @@ void EGCanvas::DrawArc(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Radius, int32_t St
 {
 #if EG_DRAW_COMPLEX
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
-		EG_LOG_WARN("lv_canvas_draw_arc: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
+		EG_LOG_WARN("Canvas DrawArc: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
 	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.

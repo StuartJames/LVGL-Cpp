@@ -64,7 +64,7 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 		BlendObj.m_pMaskRect = pRect;
 		BlendObj.m_pSourceBuffer = nullptr;
 		BlendObj.m_Color = pDrawImage->m_Recolor;
-		BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 		BlendObj.m_pRect = pRect;
 		BlendObj.DoBlend();
 	}
@@ -77,7 +77,7 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 		BlendObj.m_pMaskBuffer += sizeof(EG_Color_t) * SourceWidth * SourceHeight;
 		BlendObj.m_pRect = pRect;
 		BlendObj.m_pMaskRect = pRect;
-		BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 		BlendObj.DoBlend();
 	}
 #endif
@@ -98,12 +98,12 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 		EG_OPA_t *pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(BufferSize);
 		BlendObj.m_pMaskBuffer = pMaskBuffer;
 		BlendObj.m_pMaskRect = &BlendRect;
-		BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 		BlendObj.m_pSourceBuffer = pBufferRGB;
 		EG_Coord_t LastY = BlendRect.GetY2();
 		BlendRect.SetY2(BlendRect.GetY1() + BufferHeight - 1);
 		DrawMaskRes_t DefMaskResult = (pDrawImage->m_Angle || (ColorFormat != EG_COLOR_FORMAT_NATIVE) || (pDrawImage->m_Scale.IsScaled())) ?
-			                              EG_DRAW_MASK_RES_CHANGED : EG_DRAW_MASK_RES_FULL_COVER;
+			                              EG_DRAW_MASK_RESULT_CHANGED : EG_DRAW_MASK_RESULT_FULL_COVER;
 		BlendObj.m_MaskResult = DefMaskResult;
 		while(BlendRect.GetY1() <= LastY) {
 			// Apply transformations if any or separate the channels
@@ -129,12 +129,12 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 				EG_OPA_t *TempMaskBuffer = pMaskBuffer;
 				for(EG_Coord_t y = BlendRect.GetY1(); y <= BlendRect.GetY2(); y++) {
 					DrawMaskRes_t LineMaskResult = DrawMaskApply(TempMaskBuffer, BlendRect.GetX1(), y, BlendWidth);
-					if(LineMaskResult == EG_DRAW_MASK_RES_TRANSP) {
+					if(LineMaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
 						EG_ZeroMem(TempMaskBuffer, BlendWidth);
-						BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+						BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 					}
-					else if(LineMaskResult == EG_DRAW_MASK_RES_CHANGED) {
-						BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					else if(LineMaskResult == EG_DRAW_MASK_RESULT_CHANGED) {
+						BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 					}
 					TempMaskBuffer += BlendWidth;
 				}

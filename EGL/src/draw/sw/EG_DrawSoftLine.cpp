@@ -72,6 +72,7 @@ const EGDrawContext *pContext = pDrawLine->m_pContext;
 	}
 	pContext->m_pClipRect = pClipRect;
 }
+
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EG_ATTRIBUTE_FAST_MEM EGSoftContext::HorizontalLine(EGDrawLine *pDrawLine, const EGPoint *pPoint1, const EGPoint *pPoint2)
@@ -81,7 +82,7 @@ int32_t HalfWidthA = Width >> 1;
 int32_t HalfWidthB = HalfWidthA + (Width & 0x1); // Compensate rounding error
 const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 
-	EGRect BlendArea(EG_MIN(pPoint1->m_X, pPoint2->m_X), EG_MAX(pPoint1->m_X, pPoint2->m_X), pPoint1->m_Y - HalfWidthB, pPoint1->m_Y + HalfWidthA);
+	EGRect BlendArea(EG_MIN(pPoint1->m_X, pPoint2->m_X), pPoint1->m_Y - HalfWidthB, EG_MAX(pPoint1->m_X, pPoint2->m_X) - 1, pPoint1->m_Y + HalfWidthA);
 	if(!BlendArea.Intersect(&BlendArea, pContext->m_pClipRect)) return;
 	bool DoDash = pDrawLine->m_DashGap && pDrawLine->m_DashWidth ? true : false;
 	bool SimpleMode = true;
@@ -107,7 +108,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 			EG_SetMemFF(m_pMaskBuffer, BlendAreaWidth);
 			BlendObj.m_MaskResult = DrawMaskApply(m_pMaskBuffer, BlendArea.GetX1(), Height, BlendAreaWidth);
 			if(DoDash) {
-				if(BlendObj.m_MaskResult != EG_DRAW_MASK_RES_TRANSP) {
+				if(BlendObj.m_MaskResult != EG_DRAW_MASK_RESULT_TRANSP) {
 					EG_Coord_t DashCount = DashStart;
 					for(EG_Coord_t i = 0; i < BlendAreaWidth; i++, DashCount++) {
 						if(DashCount <= pDrawLine->m_DashWidth) {
@@ -118,7 +119,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 						else if(DashCount >= pDrawLine->m_DashGap + pDrawLine->m_DashWidth) DashCount = 0;
 						else m_pMaskBuffer[i] = 0x00;
 					}
-					BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 			}
 			BlendObj.DoBlend();
@@ -138,11 +139,7 @@ int32_t HalfWidthA = Width >> 1;
 int32_t HalfWidthB = HalfWidthA + (Width & 0x1); // Compensate rounding error
 const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 
-	EGRect BlendArea;
-	BlendArea.SetX1(pPoint1->m_X - HalfWidthB);
-	BlendArea.SetX2(pPoint1->m_X + HalfWidthA);
-	BlendArea.SetY1(EG_MIN(pPoint1->m_Y, pPoint2->m_Y));
-	BlendArea.SetY2(EG_MAX(pPoint1->m_Y, pPoint2->m_Y) - 1);
+	EGRect BlendArea(pPoint1->m_X - HalfWidthB, EG_MIN(pPoint1->m_Y, pPoint2->m_Y), pPoint1->m_X + HalfWidthA, EG_MAX(pPoint1->m_Y, pPoint2->m_Y) - 1);
 	if(!BlendArea.Intersect(&BlendArea, pContext->m_pClipRect)) return;
 	bool DoDash = pDrawLine->m_DashGap && pDrawLine->m_DashWidth ? true : false;
 	bool SimpleMode = true;
@@ -168,9 +165,9 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 			EG_SetMemFF(m_pMaskBuffer, DrawWidth);
 			BlendObj.m_MaskResult = DrawMaskApply(m_pMaskBuffer, BlendArea.GetX1(), Height, DrawWidth);
 			if(DoDash) {
-				if(BlendObj.m_MaskResult != EG_DRAW_MASK_RES_TRANSP) {
+				if(BlendObj.m_MaskResult != EG_DRAW_MASK_RESULT_TRANSP) {
 					if(DashCount > pDrawLine->m_DashWidth) {
-						BlendObj.m_MaskResult = EG_DRAW_MASK_RES_TRANSP;
+						BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_TRANSP;
 					}
 					if(DashCount >= pDrawLine->m_DashGap + pDrawLine->m_DashWidth) {
 						DashCount = 0;
@@ -227,7 +224,7 @@ EGPoint PointA, PointB;
 	BlendArea.SetX2(EG_MAX(PointA.m_X, PointB.m_X) + Width);
 	BlendArea.SetY1(EG_MIN(PointA.m_Y, PointB.m_Y) - Width);
 	BlendArea.SetY2(EG_MAX(PointA.m_Y, PointB.m_Y) + Width);
-	//Get the union of `coords` and `clip`. 'clip` is already truncated to the `draw_buf` size in 'lv_refr_area' function
+	// Get the union of `coords` and `clip`. 'clip` is already truncated to the `draw_buf` size in 'lv_refr_area' function
 	if(!BlendArea.Intersect(&BlendArea, pDrawLine->m_pContext->m_pClipRect)) return;
 	MaskLineParam_t mask_left_param;
 	MaskLineParam_t mask_right_param;
@@ -235,36 +232,30 @@ EGPoint PointA, PointB;
 	MaskLineParam_t mask_bottom_param;
 	if(flat) {
 		if(xdiff > 0) {
-			DrawMaskSetLinePoints(&mask_left_param, PointA.m_X, PointA.m_Y - HalfWidthA, PointB.m_X, PointB.m_Y - HalfWidthA,
-																		EG_DRAW_MASK_LINE_SIDE_LEFT);
-			DrawMaskSetLinePoints(&mask_right_param, PointA.m_X, PointA.m_Y + HalfWidthB, PointB.m_X, PointB.m_Y + HalfWidthB,
-																		EG_DRAW_MASK_LINE_SIDE_RIGHT);
+			DrawMaskSetLinePoints(&mask_left_param, PointA.Sub(0, HalfWidthA), PointB.Sub(0, HalfWidthA), EG_DRAW_MASK_LINE_SIDE_LEFT);
+			DrawMaskSetLinePoints(&mask_right_param, PointA.Add(0, HalfWidthB), PointB.Add(0, HalfWidthB), EG_DRAW_MASK_LINE_SIDE_RIGHT);
 		}
 		else {
-			DrawMaskSetLinePoints(&mask_left_param, PointA.m_X, PointA.m_Y + HalfWidthB, PointB.m_X, PointB.m_Y + HalfWidthB,
-																		EG_DRAW_MASK_LINE_SIDE_LEFT);
-			DrawMaskSetLinePoints(&mask_right_param, PointA.m_X, PointA.m_Y - HalfWidthA, PointB.m_X, PointB.m_Y - HalfWidthA,
-																		EG_DRAW_MASK_LINE_SIDE_RIGHT);
+			DrawMaskSetLinePoints(&mask_left_param, PointA.Add(0, HalfWidthB), PointB.Add(0, HalfWidthB), EG_DRAW_MASK_LINE_SIDE_LEFT);
+			DrawMaskSetLinePoints(&mask_right_param, PointA.Sub(0, HalfWidthA), PointB.Sub(0, HalfWidthA), EG_DRAW_MASK_LINE_SIDE_RIGHT);
 		}
 	}
 	else {
-		DrawMaskSetLinePoints(&mask_left_param, PointA.m_X + HalfWidthB, PointA.m_Y, PointB.m_X + HalfWidthB, PointB.m_Y,
-																	EG_DRAW_MASK_LINE_SIDE_LEFT);
-		DrawMaskSetLinePoints(&mask_right_param, PointA.m_X - HalfWidthA, PointA.m_Y, PointB.m_X - HalfWidthA, PointB.m_Y,
-																	EG_DRAW_MASK_LINE_SIDE_RIGHT);
+		DrawMaskSetLinePoints(&mask_left_param, PointA.Add(HalfWidthB, 0), PointB.Add(HalfWidthB, 0),	EG_DRAW_MASK_LINE_SIDE_LEFT);
+		DrawMaskSetLinePoints(&mask_right_param, PointA.Sub(HalfWidthA, 0), PointB.Sub(HalfWidthA, 0), EG_DRAW_MASK_LINE_SIDE_RIGHT);
 	}
 	int16_t mask_left_id = DrawMaskAdd(&mask_left_param, NULL);	// Use the normal vector for the endings
 	int16_t mask_right_id = DrawMaskAdd(&mask_right_param, NULL);
 	int16_t mask_top_id = EG_MASK_ID_INVALID;
 	int16_t mask_bottom_id = EG_MASK_ID_INVALID;
 	if(!pDrawLine->m_RawEnd) {
-		DrawMaskSetLinePoints(&mask_top_param, PointA.m_X, PointA.m_Y, PointA.m_X - ydiff, PointA.m_Y + xdiff, EG_DRAW_MASK_LINE_SIDE_BOTTOM);
-		DrawMaskSetLinePoints(&mask_bottom_param, PointB.m_X, PointB.m_Y, PointB.m_X - ydiff, PointB.m_Y + xdiff, EG_DRAW_MASK_LINE_SIDE_TOP);
+		DrawMaskSetLinePoints(&mask_top_param, PointA, PointA.Add(-ydiff, xdiff), EG_DRAW_MASK_LINE_SIDE_BOTTOM);
+		DrawMaskSetLinePoints(&mask_bottom_param, PointB, PointB.Add(-ydiff, xdiff), EG_DRAW_MASK_LINE_SIDE_TOP);
 		mask_top_id = DrawMaskAdd(&mask_top_param, NULL);
 		mask_bottom_id = DrawMaskAdd(&mask_bottom_param, NULL);
 	}
-	/*The real draw area is around the line. It's easy to calculate with steep lines, but the area can be very wide with
-   very flat lines. So deal with it only with steep lines.*/
+	// The real draw area is around the line. It's easy to calculate with steep lines, but the area can be very wide with
+  // very flat lines. So deal with it only with steep lines.
 	int32_t DrawWidth = BlendArea.GetWidth();
 	uint32_t hor_res = (uint32_t)GetRefreshingDisplay()->GetHorizontalRes();	// Draw the background line by line
 	size_t pMaskBufferSize = EG_MIN(BlendArea.GetSize(), hor_res);
@@ -281,7 +272,7 @@ EGPoint PointA, PointB;
 	BlendObj.m_pMaskRect = &BlendArea;
 	for(int32_t Height = BlendArea.GetY1(); Height <= Y2; Height++) {	// Fill the first row with 'color'
 		BlendObj.m_MaskResult = DrawMaskApply(&m_pMaskBuffer[pMask], BlendArea.GetX1(), Height, DrawWidth);
-		if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_TRANSP) {
+		if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
 			EG_ZeroMem(&m_pMaskBuffer[pMask], DrawWidth);
 		}
 		pMask += DrawWidth;
@@ -289,7 +280,7 @@ EGPoint PointA, PointB;
 			BlendArea.SetY2(BlendArea.GetY2() + 1);
 		}
 		else {
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 			BlendObj.DoBlend();
 			BlendArea.SetY1(BlendArea.GetY2() + 1);
 			BlendArea.SetY2(BlendArea.GetY1());
@@ -299,7 +290,7 @@ EGPoint PointA, PointB;
 	}
 	if(BlendArea.GetY1() != BlendArea.GetY2()) {	// Flush the last part
 		BlendArea.SetY2(BlendArea.GetY2() - 1);
-		BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 		BlendObj.DoBlend();
 	}
 	EG_ReleaseBufferMem(m_pMaskBuffer);

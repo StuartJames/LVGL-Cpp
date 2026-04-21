@@ -537,6 +537,46 @@ void EGObject::SetStyleArcOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_ARC_OPA, v, SelectFlags);
 }
 
+void EGObject::SetStylePolyWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+{
+  EG_StyleValue_t v = {
+    .Number = (int32_t)Value
+  };
+  SetLocalStyleProperty(EG_STYLE_POLY_WIDTH, v, SelectFlags);
+}
+
+void EGObject::SetStylePolyColor(EG_Color_t Value, EG_StyleFlags_t SelectFlags)
+{
+  EG_StyleValue_t v = {
+    .Color = Value
+  };
+  SetLocalStyleProperty(EG_STYLE_POLY_COLOR, v, SelectFlags);
+}
+
+void EGObject::SetStylePolyOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
+{
+  EG_StyleValue_t v = {
+    .Number = (int32_t)Value
+  };
+  SetLocalStyleProperty(EG_STYLE_POLY_OPA, v, SelectFlags);
+}
+
+void EGObject::SetStylePolyFillColor(EG_Color_t Value, EG_StyleFlags_t SelectFlags)
+{
+  EG_StyleValue_t v = {
+    .Color = Value
+  };
+  SetLocalStyleProperty(EG_STYLE_POLY_FILL_COLOR, v, SelectFlags);
+}
+
+void EGObject::SetStylePolyFillOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
+{
+  EG_StyleValue_t v = {
+    .Number = (int32_t)Value
+  };
+  SetLocalStyleProperty(EG_STYLE_POLY_FILL_OPA, v, SelectFlags);
+}
+
 void EGObject::SetStyleArcImageSource(const void *pValue, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {

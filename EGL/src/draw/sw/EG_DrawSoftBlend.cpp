@@ -51,7 +51,7 @@ EGSoftBlend::EGSoftBlend(const EGSoftContext *pContext) : m_pRect(nullptr),
   m_pSourceBuffer(nullptr),
   m_Color(EG_ColorBlack()),
   m_pMaskBuffer(nullptr),
-  m_MaskResult(EG_DRAW_MASK_RES_UNKNOWN),
+  m_MaskResult(EG_DRAW_MASK_RESULT_UNKNOWN),
   m_pMaskRect(nullptr),
   m_OPA(EG_OPA_COVER),
   m_BlendMode(EG_BLEND_MODE_NORMAL),
@@ -86,8 +86,8 @@ EG_OPA_t *pMask;
 const EGDrawContext *pContext = pBlend->m_pContext;
 
 	if(pBlend->m_pMaskBuffer == nullptr) pMask = nullptr;
-	if(pBlend->m_pMaskBuffer && pBlend->m_MaskResult == EG_DRAW_MASK_RES_TRANSP) return;
-	else if(pBlend->m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) pMask = nullptr;
+	if(pBlend->m_pMaskBuffer && pBlend->m_MaskResult == EG_DRAW_MASK_RESULT_TRANSP) return;
+	else if(pBlend->m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) pMask = nullptr;
 	else pMask = pBlend->m_pMaskBuffer;
 	EG_Coord_t DestStep = pContext->m_pDrawRect->GetWidth();
 	if(!DestRect.Intersect(pBlend->m_pRect, pContext->m_pClipRect)) return;

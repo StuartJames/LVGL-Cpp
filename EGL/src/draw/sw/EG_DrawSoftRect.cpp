@@ -179,7 +179,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 			// Initialize the mask to BackOPA instead of 0xFF and blend with EG_OPA_COVER. It saves calculating the final BackOPA in lv_draw_sw_blend
 			EG_SetMem(pMaskBuffer, BackOPA, ClippedWidth);
 			BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClippedArea.GetX1(), Height, ClippedWidth);
-			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 
 #if _DITHER_GRADIENT
 			if(dither_func) dither_func(pGrad, BlendRect.GetX1(), Height - BackgroundRect.GetY1(), grad_size);
@@ -196,7 +196,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
       // Initialize the mask to BackOPA instead of 0xFF and blend with EG_OPA_COVER. It saves calculating the final BackOPA in lv_draw_sw_blend
       EG_SetMem(pMaskBuffer, BackOPA, ClippedWidth);
       BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, BlendRect.GetX1(), TopY, ClippedWidth);
-      if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+      if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
       if(TopY >= ClippedArea.GetY1()) {
         BlendRect.SetY1(TopY);
         BlendRect.SetY2(TopY);
@@ -229,7 +229,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
     }
     else {	// With gradient and/or mask draw line by line
       BlendObj.m_OPA = BackOPA;
-      BlendObj.m_MaskResult = EG_DRAW_MASK_RES_FULL_COVER;
+      BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_FULL_COVER;
       int32_t h_end = BackgroundRect.GetY2() - OutsideRadius;
       for(Height = BackgroundRect.GetY1() + OutsideRadius; Height <= h_end; Height++) {
         // If there is no other mask do not apply mask as in the center there is no m_Radius to mask
@@ -453,14 +453,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 			BlendObj.m_pMaskBuffer = pMaskBuffer;
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED; // In Simple mode it won't be overwritten
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED; // In Simple mode it won't be overwritten
 			for(y = ClipRectSub.GetY1(); y <= ClipRectSub.GetY2(); y++) {
 				BlendRect.SetY1(y);
 				BlendRect.SetY2(y);
 				if(!SimpleSub) {
 					EG_CopyMem(pMaskBuffer, ShadowBufferTmp, CornerSize);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 				else {
 					BlendObj.m_pMaskBuffer = ShadowBufferTmp;
@@ -489,14 +489,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 			BlendObj.m_pMaskBuffer = pMaskBuffer;
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED; // In Simple mode it won't be overwritten
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED; // In Simple mode it won't be overwritten
 			for(y = ClipRectSub.GetY2(); y >= ClipRectSub.GetY1(); y--) {
 				BlendRect.SetY1(y);
 				BlendRect.SetY2(y);
 				if(!SimpleSub) {
 					EG_CopyMem(pMaskBuffer, ShadowBufferTmp, CornerSize);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 				else {
 					BlendObj.m_pMaskBuffer = ShadowBufferTmp;
@@ -529,7 +529,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 				if(!SimpleSub) {
 					EG_SetMem(pMaskBuffer, ShadowBufferTmp[0], Width);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 					BlendObj.DoBlend();
 				}
 				else {
@@ -567,7 +567,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 				if(!SimpleSub) {
 					EG_SetMem(pMaskBuffer, ShadowBufferTmp[0], Width);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 					BlendObj.DoBlend();
 				}
 				else {
@@ -598,14 +598,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		if(Width > 0) {
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED; // In Simple mode it won't be overwritten
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED; // In Simple mode it won't be overwritten
 			for(y = ClipRectSub.GetY1(); y <= ClipRectSub.GetY2(); y++) {
 				BlendRect.SetY1(y);
 				BlendRect.SetY2(y);
 				if(!SimpleSub) {
 					EG_CopyMem(pMaskBuffer, ShadowBufferTmp, Width);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 				BlendObj.DoBlend();
 			}
@@ -646,14 +646,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		if(Width > 0) {
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED; // In Simple mode it won't be overwritten
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED; // In Simple mode it won't be overwritten
 			for(y = ClipRectSub.GetY1(); y <= ClipRectSub.GetY2(); y++) {
 				BlendRect.SetY1(y);
 				BlendRect.SetY2(y);
 				if(!SimpleSub) {
 					EG_CopyMem(pMaskBuffer, ShadowBufferTmp, Width);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 				BlendObj.DoBlend();
 			}
@@ -677,14 +677,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		if(Width > 0) {
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED; // In Simple mode it won't be overwritten
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED; // In Simple mode it won't be overwritten
 			for(y = ClipRectSub.GetY1(); y <= ClipRectSub.GetY2(); y++) {
 				BlendRect.SetY1(y);
 				BlendRect.SetY2(y);
 				if(!SimpleSub) {
 					EG_CopyMem(pMaskBuffer, ShadowBufferTmp, CornerSize);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 				else BlendObj.m_pMaskBuffer = ShadowBufferTmp;
 				BlendObj.DoBlend();
@@ -711,14 +711,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		if(Width > 0) {
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
-			BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED; // In Simple mode it won't be overwritten
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED; // In Simple mode it won't be overwritten
 			for(y = ClipRectSub.GetY2(); y >= ClipRectSub.GetY1(); y--) {
 				BlendRect.SetY1(y);
 				BlendRect.SetY2(y);
 				if(!SimpleSub) {
 					EG_CopyMem(pMaskBuffer, ShadowBufferTmp, CornerSize);
 					BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClipRectSub.GetX1(), y, Width);
-					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RES_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RES_CHANGED;
+					if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 				}
 				else BlendObj.m_pMaskBuffer = ShadowBufferTmp;
 				BlendObj.DoBlend();
@@ -777,8 +777,8 @@ int32_t size = sw_ori + Radius;
 	uint16_t *sh_ups_tmp_buf = (uint16_t *)pShadowBuffer;
 	for(int32_t y = 0; y < size; y++) {
 		EG_SetMemFF(MaskLine, size);
-		DrawMaskRes_t m_MaskResult = MaskParam.dsc.DrawCB(MaskLine, 0, y, size, &MaskParam);
-		if(m_MaskResult == EG_DRAW_MASK_RES_TRANSP) {
+		DrawMaskRes_t m_MaskResult = MaskParam.Mask.DrawCB(MaskLine, 0, y, size, &MaskParam);
+		if(m_MaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
 			EG_ZeroMem(sh_ups_tmp_buf, size * sizeof(sh_ups_tmp_buf[0]));
 		}
 		else {
@@ -1011,7 +1011,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	if(LeftSide && RightSide && top_side && bottom_side && core_w < SPLIT_LIMIT) {
 		HorizontalSplit = false;
 	}
-	BlendObj.m_MaskResult = EG_DRAW_MASK_RES_FULL_COVER;
+	BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_FULL_COVER;
 	if(top_side && HorizontalSplit) {   	// Draw the straight lines first if they are long enough
 		BlendRect.SetX1(CoreArea.GetX1());
 		BlendRect.SetX2(CoreArea.GetX2());

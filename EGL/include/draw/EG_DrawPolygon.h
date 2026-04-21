@@ -34,9 +34,14 @@ class EGDrawContext;
 class EGDrawPolygon
 {
 public:
-                    EGDrawPolygon() : m_pContext(nullptr){};
-  void              Polygon(const EGDrawContext *pDrawContext, const EGDrawRect *pRect, const EGPoint Points[], uint16_t PointCount);
-  void              Triangle(const EGDrawContext *pDrawContext, const EGDrawRect *pRect, const EGPoint Points[]);
+                    EGDrawPolygon();
+  void              Draw(const EGDrawContext *pDrawContext, const EGPoint *pVertices, uint16_t VerticesCount);
 
-  const EGDrawContext  *m_pContext;        
+  const EGDrawContext  *m_pContext;
+  EG_BlendMode_e        m_BlendMode;
+	EG_OPA_t              m_FillOPA;	      // Background
+	EG_Color_t            m_FillColor;      // First element of a gradient is a color, so it maps well here
+	EG_Color_t            m_Color;	        // Border
+	EG_Coord_t            m_Width;
+	EG_OPA_t              m_OPA;
 };

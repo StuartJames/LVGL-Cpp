@@ -568,6 +568,48 @@ inline EG_OPA_t EGObject::GetStyleArcOPA(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
+inline EG_Coord_t EGObject::GetStylePolyWidth(uint32_t Part)
+{
+  EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_POLY_WIDTH);
+  return (EG_Coord_t)Value.Number;
+}
+
+inline EG_Color_t EGObject::GetStylePolyColor(uint32_t Part)
+{
+  EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_POLY_COLOR);
+  return Value.Color;
+}
+
+inline EG_Color_t EGObject::GetStylePolyColorFiltered(uint32_t Part)
+{
+  EG_StyleValue_t Value = ApplyColorFilter(Part, GetProperty(Part, EG_STYLE_POLY_COLOR));
+  return Value.Color;
+}
+
+inline EG_OPA_t EGObject::GetStylePolyOPA(uint32_t Part)
+{
+  EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_POLY_OPA);
+  return (EG_OPA_t)Value.Number;
+}
+
+inline EG_Color_t EGObject::GetStylePolyFillColor(uint32_t Part)
+{
+  EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_POLY_FILL_COLOR);
+  return Value.Color;
+}
+
+inline EG_Color_t EGObject::GetStylePolyFillColorFiltered(uint32_t Part)
+{
+  EG_StyleValue_t Value = ApplyColorFilter(Part, GetProperty(Part, EG_STYLE_POLY_FILL_COLOR));
+  return Value.Color;
+}
+
+inline EG_OPA_t EGObject::GetStylePolyFillOPA(uint32_t Part)
+{
+  EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_POLY_FILL_OPA);
+  return (EG_OPA_t)Value.Number;
+}
+
 inline const void * EGObject::GetStyleArcImageSource(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_ARC_IMG_SRC);

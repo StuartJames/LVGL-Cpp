@@ -41,7 +41,7 @@ public:
                     EGDrawLine(void);
   void              Draw(const EGDrawContext  *pDrawContext, const EGPoint *pPoint1, const EGPoint *pPoint2);
 
-  const EGDrawContext  *m_pContext;        
+  const EGDrawContext  *m_pContext;
   EG_Color_t        m_Color;
   EG_Coord_t        m_Width;
   EG_Coord_t        m_DashWidth;
@@ -50,5 +50,5 @@ public:
   EG_BlendMode_e    m_BlendMode  : 3;
   uint8_t           m_RoundStart : 1;
   uint8_t           m_RoundEnd   : 1;
-  uint8_t           m_RawEnd     : 1;    /*Do not bother with perpendicular line ending if it's not visible for any reason*/
+  uint8_t           m_RawEnd     : 1; // Do not bother with perpendicular line ending if it's not visible
 };

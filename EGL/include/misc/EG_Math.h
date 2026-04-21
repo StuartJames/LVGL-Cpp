@@ -28,6 +28,9 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
+#define EG_PI			3.14159265358979323846
+#define EG_DEG2RAD(x) ((double)(x) * (EG_PI / 180))
+#define EG_RAD2DEG(x) ((double)(x) * (180 / EG_PI))
 #define EG_TRIGO_SIN_MAX 32767
 #define EG_TRIGO_SHIFT 15 /**<  >> EG_TRIGO_SHIFT to normalize*/
 

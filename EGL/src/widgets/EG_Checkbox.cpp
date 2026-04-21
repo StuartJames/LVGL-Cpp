@@ -193,10 +193,10 @@ void EGCheckbox::Draw(EGEvent *pEvent)
 	EGDrawDiscriptor DrawDiscriptor;
 	DrawDiscriptor.m_pDrawRect = &DrawRect;
 	DrawDiscriptor.m_pClass = m_pClass;
-	DrawDiscriptor.m_Type = LV_CHECKBOX_DRAW_PART_BOX;
+	DrawDiscriptor.m_Type = EG_CHECKBOX_DRAW_PART_BOX;
 	DrawDiscriptor.m_pRect = &MarkerTransform;
 	DrawDiscriptor.m_Part = EG_PART_INDICATOR;
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor); 
 	DrawRect.Draw(pContext, &MarkerTransform);
 	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
 	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);

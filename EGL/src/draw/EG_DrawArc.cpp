@@ -59,8 +59,7 @@ void EGDrawArc::Draw(const EGDrawContext *pDrawContext, const EGPoint *pCenter, 
 void EGDrawArc::GetArcRect(EG_Coord_t x, EG_Coord_t y, uint16_t Radius, uint16_t StartAngle, uint16_t EndAngle, EG_Coord_t Width, bool Rounded, EGRect *pRect)
 {
 	EG_Coord_t OutsideRad = Radius;
-	// Special case: full arc invalidation 
-	if(EndAngle == StartAngle + 360) {
+	if(EndAngle == StartAngle + 360) {	// Special case: full arc invalidation
 		pRect->SetX1(x - OutsideRad);
 		pRect->SetY1(y - OutsideRad);
 		pRect->SetX2(x + OutsideRad);

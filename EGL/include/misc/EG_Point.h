@@ -47,8 +47,12 @@ public:
 	void                operator -= (const EGPoint rval);
 	void                operator++ (void);
 	void                operator-- (void);
+  EGPoint             Add(EG_Coord_t X, EG_Coord_t Y);
+  EGPoint             Sub(EG_Coord_t X, EG_Coord_t Y);
   void                Offset(EG_Coord_t X, EG_Coord_t Y);
   void                Offset(const EGPoint *pPoint);
+  void                Swap(EGPoint *pPoint);
+  EGPoint             Difference(const EGPoint *pPoint);
   void                PointTransform(int32_t Angle, EGScale Scale, const EGPoint *pPivot, bool ZoomFirst =false);
 
 	EG_Coord_t          m_X;
