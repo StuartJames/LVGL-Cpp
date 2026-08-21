@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -194,16 +195,16 @@ int Mode = 0;
       rPosition = nullptr;
       break;
     }
-  }  
+  } 
 	FreeNode(pDeleteNode);
   return m_pData;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-POSITION EGList::FindIndexed(int nIndex) const 
+POSITION EGList::FindIndexed(uint32_t nIndex) const
 {
-	if(nIndex >= m_EntryCount || nIndex < 0) return 0;  // 0 base index
+	if(nIndex >= m_EntryCount) return 0;  // 0 base index
 	EG_Node_t *pNode = m_pNodeHead;
 	while(nIndex--)	pNode = pNode->m_pNext;
 	return (POSITION)pNode;

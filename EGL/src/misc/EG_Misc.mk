@@ -1,0 +1,31 @@
+CSRCS += EL_Animate.cpp
+CSRCS += EG_ArabicPersianText.cpp
+CSRCS += EL_Array.cpp
+CSRCS += EL_Async.cpp
+CSRCS += EL_Color.cpp
+CSRCS += EL_FileSystem.cpp
+CSRCS += EL_LinkList.cpp
+CSRCS += EL_List.cpp
+CSRCS += EL_Log.cpp
+CSRCS += EL_LRU.cpp
+CSRCS += EL_Math.cpp
+CSRCS += EL_Memory.cpp
+CSRCS += EL_Misc.cpp
+CSRCS += EL_Point.cpp
+CSRCS += EL_Rect.cpp
+CSRCS += EL_Size.cpp
+CSRCS += EL_Style.cpp
+CSRCS += EL_StyleGen.cpp
+CSRCS += EL_Text.cpp
+CSRCS += EL_TimeLine.cpp
+CSRCS += EL_Timer.cpp
+CSRCS += EL_Utilities.cpp
+CSRCS += lv_bidi.cpp
+CSRCS += lv_printf.cpp
+CSRCS += lv_tlsf.cpp
+CSRCS += lv_txt_ap.cpp
+
+DEPPATH += --dep-path $(EGL_DIR)/$(EGL_DIR_NAME)/src/misc
+VPATH += :$(EGL_DIR)/$(EGL_DIR_NAME)/src/misc
+
+CFLAGS += "-I$(EGL_DIR)/$(EGL_DIR_NAME)/src/misc"

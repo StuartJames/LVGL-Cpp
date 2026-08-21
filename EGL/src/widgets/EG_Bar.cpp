@@ -27,7 +27,7 @@
 #if EG_USE_BAR != 0
 
 #include "misc/EG_Assert.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Animate.h"
 #include "misc/EG_Math.h"
 
@@ -206,15 +206,15 @@ void EGBar::Event(const EG_ClassType_t *pClass, EGEvent *pEvent)
 	EGObject *pObj = pEvent->GetTarget();
 	EGBar *pBar = (EGBar*)pEvent->GetTarget();
 	if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {
-		EG_Coord_t IndicatorSize;
+		int32_t IndicatorSize;
 		IndicatorSize = pObj->CalculateExtDrawSize(EG_PART_INDICATOR);
-		EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();	// Bg size is handled by lv_obj
+		int32_t *pSize = (int32_t*)pEvent->GetParam();	// Bg size is handled by EGObject
 		*pSize = EG_MAX(*pSize, IndicatorSize);
-		EG_Coord_t PadLeft = pObj->GetStylePadLeft(EG_PART_MAIN);		// Calculate the indicator area
-		EG_Coord_t PadRight = pObj->GetStylePadRight(EG_PART_MAIN);
-		EG_Coord_t PadTop = pObj->GetStylePadTop(EG_PART_MAIN);
-		EG_Coord_t PadBottom = pObj->GetStylePadBottom(EG_PART_MAIN);
-		EG_Coord_t pad = EG_MIN4(PadLeft, PadRight, PadTop, PadBottom);
+		int32_t PadLeft = pObj->GetStylePadLeft(EG_PART_MAIN);		// Calculate the indicator area
+		int32_t PadRight = pObj->GetStylePadRight(EG_PART_MAIN);
+		int32_t PadTop = pObj->GetStylePadTop(EG_PART_MAIN);
+		int32_t PadBottom = pObj->GetStylePadBottom(EG_PART_MAIN);
+		int32_t pad = EG_MIN4(PadLeft, PadRight, PadTop, PadBottom);
 		if(pad < 0) {
 			*pSize = EG_MAX(*pSize, -pad);
 		}
@@ -231,13 +231,13 @@ void EGBar::Event(const EG_ClassType_t *pClass, EGEvent *pEvent)
 
 void EGBar::DrawIndicator(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	EGRect Rect(m_Rect);
-	EG_Coord_t TransferWidth = GetStyleTransformWidth(EG_PART_MAIN);
-	EG_Coord_t TransferHeight = GetStyleTransformHeight(EG_PART_MAIN);
+	int32_t TransferWidth = GetStyleTransformWidth(EG_PART_MAIN);
+	int32_t TransferHeight = GetStyleTransformHeight(EG_PART_MAIN);
 	Rect.Inflate(TransferWidth, TransferHeight);
-	EG_Coord_t BarWidth = Rect.GetWidth();
-	EG_Coord_t BarHeight = Rect.GetHeight();
+	int32_t BarWidth = Rect.GetWidth();
+	int32_t BarHeight = Rect.GetHeight();
 	int32_t range = m_MaximumValue - m_MinimumValue;
 	bool Horizontal = BarWidth >= BarHeight ? true : false;
 	bool sym = false;
@@ -245,10 +245,10 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 		 m_StartValue == m_MinimumValue) sym = true;
 
 	// Calculate the indicator area
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t PadRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t PadTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
 	// Respect padding and minimum width/height too
 	Rect.Copy(&m_IndicatorRect);
 	m_IndicatorRect.Deflate(PadLeft, PadRight, PadTop, PadBottom);
@@ -260,12 +260,12 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 		m_IndicatorRect.SetX1(m_Rect.GetX1() + (BarWidth / 2) - (EG_BAR_SIZE_MIN / 2));
 		m_IndicatorRect.SetX2(m_IndicatorRect.GetX1() + EG_BAR_SIZE_MIN);
 	}
-	EG_Coord_t indicw = m_IndicatorRect.GetWidth();
-	EG_Coord_t indich = m_IndicatorRect.GetHeight();
-	EG_Coord_t anim_length = Horizontal ? indicw : indich;	// Calculate the indicator length
-	EG_Coord_t anim_cur_value_x, anim_start_value_x;
-	EG_Coord_t Axis1, Axis2;
-  EG_Coord_t CalculatedLength;
+	int32_t indicw = m_IndicatorRect.GetWidth();
+	int32_t indich = m_IndicatorRect.GetHeight();
+	int32_t anim_length = Horizontal ? indicw : indich;	// Calculate the indicator length
+	int32_t anim_cur_value_x, anim_start_value_x;
+	int32_t Axis1, Axis2;
+  int32_t CalculatedLength;
 	if(Horizontal) {
 		Axis1 = m_IndicatorRect.GetX1();
 	  Axis2 = m_IndicatorRect.GetX2();
@@ -275,8 +275,8 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 		Axis2 = m_IndicatorRect.GetY2();
 	}
 	if(EG_BAR_IS_ANIMATING(m_StartValueAnimation)) {
-		EG_Coord_t anim_start_value_start_x =	(int32_t)((int32_t)anim_length * (m_StartValueAnimation.AnimstionStart - m_MinimumValue)) / range;
-		EG_Coord_t anim_start_value_end_x =	(int32_t)((int32_t)anim_length * (m_StartValueAnimation.AnimationEnd - m_MinimumValue)) / range;
+		int32_t anim_start_value_start_x =	(int32_t)((int32_t)anim_length * (m_StartValueAnimation.AnimstionStart - m_MinimumValue)) / range;
+		int32_t anim_start_value_end_x =	(int32_t)((int32_t)anim_length * (m_StartValueAnimation.AnimationEnd - m_MinimumValue)) / range;
 		anim_start_value_x = (((anim_start_value_end_x - anim_start_value_start_x) * m_StartValueAnimation.AnimationState) / EG_BAR_ANIM_STATE_END);
 		anim_start_value_x += anim_start_value_start_x;
 	}
@@ -284,8 +284,8 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 		anim_start_value_x = (int32_t)((int32_t)anim_length * (m_StartValue - m_MinimumValue)) / range;
 	}
 	if(EG_BAR_IS_ANIMATING(m_CurrentValueAnimation)) {
-		EG_Coord_t anim_cur_value_start_x = (int32_t)((int32_t)anim_length * (m_CurrentValueAnimation.AnimstionStart - m_MinimumValue)) / range;
-		EG_Coord_t anim_cur_value_end_x = (int32_t)((int32_t)anim_length * (m_CurrentValueAnimation.AnimationEnd - m_MinimumValue)) / range;
+		int32_t anim_cur_value_start_x = (int32_t)((int32_t)anim_length * (m_CurrentValueAnimation.AnimstionStart - m_MinimumValue)) / range;
+		int32_t anim_cur_value_end_x = (int32_t)((int32_t)anim_length * (m_CurrentValueAnimation.AnimationEnd - m_MinimumValue)) / range;
 		anim_cur_value_x = anim_cur_value_start_x + (((anim_cur_value_end_x - anim_cur_value_start_x) *	m_CurrentValueAnimation.AnimationState) / EG_BAR_ANIM_STATE_END);
 	}
 	else {
@@ -293,7 +293,7 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 	}
 	EG_BaseDirection_e base_dir = GetStyleBaseDirection(EG_PART_MAIN);
 	if(Horizontal && base_dir == EG_BASE_DIR_RTL) {
-		EG_Coord_t tmp;		// Swap axes
+		int32_t tmp;		// Swap axes
 		tmp = Axis1;
 		Axis1 = Axis2;
 		Axis2 = tmp;
@@ -309,7 +309,7 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 		Axis2 -= anim_start_value_x;
 	}
 	if(sym) {
-		EG_Coord_t zero, shift;
+		int32_t zero, shift;
 		shift = (-m_MinimumValue * anim_length) / range;
 		if(Horizontal) {
 			zero = Axis1 + shift;
@@ -345,31 +345,29 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
   } 
   // Do not draw Animate zero length indicator but at least call the draw part events
 	if(!sym && CalculatedLength <= 1) {
-		EGDrawDiscriptor DrawDiscriptor;
-		InitDrawDescriptor(&DrawDiscriptor, pContext);
-		DrawDiscriptor.m_Part = EG_PART_INDICATOR;
-		DrawDiscriptor.m_pClass = m_pClass;
-		DrawDiscriptor.m_Type = EG_BAR_DRAW_PART_INDICATOR;
-		DrawDiscriptor.m_pRect = &m_IndicatorRect;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
+		EGEventDC EventDC(pDC); 
+		EventDC.m_Part = EG_PART_INDICATOR;
+		EventDC.m_pClass = m_pClass;
+		EventDC.m_Type = EG_BAR_DRAW_PART_INDICATOR;
+		EventDC.m_pRect = &m_IndicatorRect;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
 		return;
 	}
 //	EGRect indic_area(m_IndicatorRect);
 	EGDrawRect DrawRect;
 	InititialseDrawRect(EG_PART_INDICATOR, &DrawRect);
-  EGDrawDiscriptor DrawDiscriptor;
-	InitDrawDescriptor(&DrawDiscriptor, pContext);
-	DrawDiscriptor.m_Part = EG_PART_INDICATOR;
-	DrawDiscriptor.m_pClass = m_pClass;
-	DrawDiscriptor.m_Type = EG_BAR_DRAW_PART_INDICATOR;
-	DrawDiscriptor.m_pDrawRect = &DrawRect;
-	DrawDiscriptor.m_pRect = &m_IndicatorRect;
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
-	EG_Coord_t bg_radius = GetStyleRadius(EG_PART_MAIN);
-	EG_Coord_t short_side = EG_MIN(BarWidth, BarHeight);
+	EGEventDC EventDC(pDC); 
+	EventDC.m_Part = EG_PART_INDICATOR;
+	EventDC.m_pClass = m_pClass;
+	EventDC.m_Type = EG_BAR_DRAW_PART_INDICATOR;
+	EventDC.m_pDrawRect = &DrawRect;
+	EventDC.m_pRect = &m_IndicatorRect;
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC);
+	int32_t bg_radius = GetStyleRadius(EG_PART_MAIN);
+	int32_t short_side = EG_MIN(BarWidth, BarHeight);
 	if(bg_radius > short_side >> 1) bg_radius = short_side >> 1;
-	EG_Coord_t indic_radius = DrawRect.m_Radius;
+	int32_t indic_radius = DrawRect.m_Radius;
 	short_side = EG_MIN(indicw, indich);
 	if(indic_radius > short_side >> 1) indic_radius = short_side >> 1;
 	/* Draw only the shadow and outline only if the indicator is long enough.
@@ -383,7 +381,7 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 		DrawRect.m_BackgroundOPA = EG_OPA_TRANSP;
 		DrawRect.m_BackImageOPA = EG_OPA_TRANSP;
 		DrawRect.m_BorderOPA = EG_OPA_TRANSP;
-		DrawRect.Draw(pContext, &m_IndicatorRect);
+		DrawRect.Draw(pDC, &m_IndicatorRect);
 		DrawRect.m_BackgroundOPA = bg_opa;
 		DrawRect.m_BackImageOPA = bg_img_opa;
 		DrawRect.m_BorderOPA = border_opa;
@@ -396,7 +394,7 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 	BackMaskRect.SetY1(m_Rect.GetY1() + PadTop);
 	BackMaskRect.SetY2(m_Rect.GetY2() - PadBottom);
 	DrawMaskSetRadius(&BackMaskParam, &BackMaskRect, bg_radius, false);
-	EG_Coord_t mask_bg_id = DrawMaskAdd(&BackMaskParam, NULL);
+	int32_t mask_bg_id = DrawMaskAdd(&BackMaskParam, NULL);
 #endif
 	// Draw_only the background and background image
 	EG_OPA_t shadow_opa = DrawRect.m_ShadowOPA;
@@ -420,21 +418,21 @@ void EGBar::DrawIndicator(EGEvent *pEvent)
 	DrawMaskSetRadius(&mask_indic_param, &m_IndicatorRect, DrawRect.m_Radius, false);
 	int16_t mask_indic_id = DrawMaskAdd(&mask_indic_param, NULL);
 #endif
-	DrawRect.Draw(pContext, &MaskMaxRect);
+	DrawRect.Draw(pDC, &MaskMaxRect);
 	DrawRect.m_BorderOPA = border_opa;
 	DrawRect.m_ShadowOPA = shadow_opa;
 	// Draw the border
 	DrawRect.m_BackgroundOPA = EG_OPA_TRANSP;
 	DrawRect.m_BackImageOPA = EG_OPA_TRANSP;
 	DrawRect.m_ShadowOPA = EG_OPA_TRANSP;
-	DrawRect.Draw(pContext, &m_IndicatorRect);
+	DrawRect.Draw(pDC, &m_IndicatorRect);
 #if EG_DRAW_COMPLEX
 	DrawMaskFreeParam(&mask_indic_param);
 	DrawMaskFreeParam(&BackMaskParam);
-	DrawMaskRemove(mask_indic_id);
-	DrawMaskRemove(mask_bg_id);
+	DrawMaskRemoveID(mask_indic_id);
+	DrawMaskRemoveID(mask_bg_id);
 #endif
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

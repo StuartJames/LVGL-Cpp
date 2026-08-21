@@ -17,7 +17,7 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
  *
  */
 
@@ -40,23 +40,23 @@ public:
                       EGPoint();
 	                    EGPoint(const EGPoint &InPoint);
 	                    EGPoint(const EGPoint *pInPoint);
-	                    EGPoint(EG_Coord_t X, EG_Coord_t Y);
-	void                Set(EG_Coord_t X, EG_Coord_t Y);
+	                    EGPoint(int32_t X, int32_t Y);
+	void                Set(int32_t X, int32_t Y);
   void                operator = (const EGPoint &rval);
 	void                operator += (const EGPoint rval);
 	void                operator -= (const EGPoint rval);
 	void                operator++ (void);
 	void                operator-- (void);
-  EGPoint             Add(EG_Coord_t X, EG_Coord_t Y);
-  EGPoint             Sub(EG_Coord_t X, EG_Coord_t Y);
-  void                Offset(EG_Coord_t X, EG_Coord_t Y);
+  EGPoint             Add(int32_t X, int32_t Y);
+  EGPoint             Sub(int32_t X, int32_t Y);
+  void                Offset(int32_t X, int32_t Y);
   void                Offset(const EGPoint *pPoint);
   void                Swap(EGPoint *pPoint);
   EGPoint             Difference(const EGPoint *pPoint);
   void                PointTransform(int32_t Angle, EGScale Scale, const EGPoint *pPivot, bool ZoomFirst =false);
 
-	EG_Coord_t          m_X;
-	EG_Coord_t          m_Y;
+	int32_t             m_X;
+	int32_t             m_Y;
 	static int32_t      m_SIN;
 	static int32_t      m_COS;
   static int32_t      m_PreviousAngle;

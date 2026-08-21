@@ -1,28 +1,29 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #include "draw/EG_DrawLabel.h"
-//#include "draw/EG_DrawContext.h"
+//#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Math.h"
 #include "hal/EG_HALDisplay.h"
 #include "core/EG_Refresh.h"
@@ -49,8 +50,7 @@ static uint8_t HexToNumber(char hex);
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawLabel::EGDrawLabel(void) :
-  m_pContext(nullptr),
+EGDrawLabel::EGDrawLabel(void) : EGDrawBase(),
 	m_pFont(EG_FONT_DEFAULT),
 	m_SelectStart(EG_DRAW_LABEL_NO_TXT_SEL),
 	m_SelectEnd(EG_DRAW_LABEL_NO_TXT_SEL),
@@ -72,7 +72,7 @@ EGDrawLabel::EGDrawLabel(void) :
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext, const EGRect *pRect, const char *pText, EG_DrawLabelHint_t *Hint)
+void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(EGDeviceContext  *pDC, const EGRect *pRect, const char *pText, EG_DrawLabelHint_t *Hint)
 {
 	if(m_OPA <= EG_OPA_MIN) return;
 	if(m_pFont == nullptr) {
@@ -83,13 +83,13 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 		EG_LOG_WARN("There is no function to draw characters");
 		return;
 	}
-  m_pContext = pDrawContext;
+  m_pContext = pDC;
 	const EG_Font_t *pFont = m_pFont;
 	int32_t Width;
 	// No need to waste processor time if string is empty
 	if(pText == nullptr || pText[0] == '\0')	return;
 	EGRect ClippedArea;
-	if(!ClippedArea.Intersect(pRect, pDrawContext->m_pClipRect)) return;
+	if(!ClippedArea.Intersect(pRect, pDC->m_pClipRect)) return;
 	EG_TextAlignment_t Align = m_Align;
 	EG_BaseDirection_e BaseDirection = m_BidiDirection;
 	lv_bidi_calculate_align(&Align, &BaseDirection, pText);
@@ -97,9 +97,9 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 		Width = pRect->GetWidth();		// Normally use the label width as width
 	}
 	else {
-		EGPoint Point;		// If EXPAND is enabled then not limit the text's width to the object's width
-		EG_GetTextSize(&Point, pText, m_pFont, m_Kerning, m_LineSpace, EG_COORD_MAX,	m_Flag);
-		Width = Point.m_X;
+		EGSize Size;		// If EXPAND is enabled then not limit the text's width to the object's width
+		EG_GetTextSize(&Size, pText, m_pFont, m_Kerning, m_LineSpace, EG_COORD_MAX,	m_Flag);
+		Width = Size.m_X;
 	}
 	int32_t FontHeight = EG_FontGetLineHeight(pFont);
 	int32_t LineHeight = FontHeight + m_LineSpace;
@@ -126,7 +126,7 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 		Point.m_Y += Hint->Y;
 	}
 	uint32_t LineEnd = LineStart + EG_GetNextTextLine(&pText[LineStart], pFont, m_Kerning, Width, nullptr, m_Flag);
-	while(Point.m_Y + FontHeight < pDrawContext->m_pClipRect->GetY1()) {	// Goto the first visible line
+	while(Point.m_Y + FontHeight < pDC->m_pClipRect->GetY1()) {	// Goto the first visible line
 		LineStart = LineEnd;		// Go to next line
 		LineEnd += EG_GetNextTextLine(&pText[LineStart], pFont, m_Kerning, Width, nullptr, m_Flag);
 		Point.m_Y += LineHeight;
@@ -231,12 +231,12 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 			if(SeletStart != 0xFFFF && SeletEnd != 0xFFFF) {
 				if(logical_char_pos >= SeletStart && logical_char_pos < SeletEnd) {
 					EGRect SelectArea(Point.m_X, Point.m_Y, Point.m_X + CharWidth + m_Kerning - 1, Point.m_Y + LineHeight - 1);
-					SelectRect.Draw(pDrawContext, &SelectArea);
+					SelectRect.Draw(pDC, &SelectArea);
 					Color = m_SelectColor;
 				}
 			}
 			m_Color = Color;
-			DrawChar(pDrawContext, &Point, Chr);
+			DrawChar(pDC, &Point, Chr);
 			if(CharWidth > 0) {
 				Point.m_X += CharWidth + m_Kerning;
 			}
@@ -248,7 +248,7 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 			Point2.m_X = Point.m_X;
 			Point2.m_Y = Point1.m_Y;
 			DrawLine.m_Color = Color;
-			DrawLine.Draw(pDrawContext, &Point1, &Point2);
+			DrawLine.Draw(pDC, &Point1, &Point2);
 		}
 		if(m_Decoration & EG_TEXT_DECOR_UNDERLINE) {
 			EGPoint Point1;
@@ -258,7 +258,7 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 			Point2.m_X = Point.m_X;
 			Point2.m_Y = Point1.m_Y;
 			DrawLine.m_Color = Color;
-			DrawLine.Draw(pDrawContext, &Point1, &Point2);
+			DrawLine.Draw(pDC, &Point1, &Point2);
 		}
 #if EG_USE_BIDI
 		EG_ReleaseBufferMem(bidi_txt);
@@ -276,17 +276,17 @@ void EG_ATTRIBUTE_FAST_MEM EGDrawLabel::Draw(const EGDrawContext  *pDrawContext,
 			Point.m_X += pRect->GetWidth() - LineWidth;
 		}
 		Point.m_Y += LineHeight;		// Go the next line position
-		if(Point.m_Y > pDrawContext->m_pClipRect->GetY2()) return;
+		if(Point.m_Y > pDC->m_pClipRect->GetY2()) return;
 	}
 	EG_ASSERT_MEM_INTEGRITY();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGDrawLabel::DrawChar(const EGDrawContext  *pDrawContext, const EGPoint *pPos, uint32_t Char)
+void EGDrawLabel::DrawChar(EGDeviceContext  *pDC, const EGPoint *pPos, uint32_t Char)
 {
-  m_pContext = pDrawContext;
-	pDrawContext->DrawCharacterProc(this, pPos, Char);
+  m_pContext = pDC;
+	pDC->DrawCharacterProc(this, pPos, Char);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -36,7 +37,7 @@ EGDecoderPNG DecoderPNG;
 
 EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 {
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 	if(SourceType == EG_IMG_SRC_FILE) {	// If it's a PNG file...
 		const char *pFileName = (char*)pSource;
 		if(strcmp(EGFileSystem::GetExt((const char *)pFileName), "png") == 0) { // Check the extension
@@ -52,8 +53,8 @@ EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 			pHeader->AlwaysZero = 0;
 			pHeader->ColorFormat = EG_COLOR_FORMAT_NATIVE_ALPHA;
 			// The width and height are stored in Big endian format so convert them to little endian
-			pHeader->Width = (EG_Coord_t)((Size[0] & 0xff000000) >> 24) + ((Size[0] & 0x00ff0000) >> 8);
-			pHeader->Height = (EG_Coord_t)((Size[1] & 0xff000000) >> 24) + ((Size[1] & 0x00ff0000) >> 8);
+			pHeader->Width = (int32_t)((Size[0] & 0xff000000) >> 24) + ((Size[0] & 0x00ff0000) >> 8);
+			pHeader->Height = (int32_t)((Size[1] & 0xff000000) >> 24) + ((Size[1] & 0x00ff0000) >> 8);
 			return EG_RES_OK;
 		}
 	}
@@ -75,13 +76,13 @@ EG_Result_t EGDecoderPNG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 			pHeader->Width = pImageBuffer->m_Header.Width; // Save the image width
 		}
 		else {
-			pHeader->Width = (EG_Coord_t)((pSize[0] & 0xff000000) >> 24) + ((pSize[0] & 0x00ff0000) >> 8);
+			pHeader->Width = (int32_t)((pSize[0] & 0xff000000) >> 24) + ((pSize[0] & 0x00ff0000) >> 8);
 		}
 		if(pImageBuffer->m_Header.Height) {
 			pHeader->Height = pImageBuffer->m_Header.Height; // Save the color height
 		}
 		else {
-			pHeader->Height = (EG_Coord_t)((pSize[1] & 0xff000000) >> 24) + ((pSize[1] & 0x00ff0000) >> 8);
+			pHeader->Height = (int32_t)((pSize[1] & 0xff000000) >> 24) + ((pSize[1] & 0x00ff0000) >> 8);
 		}
 		return EG_RES_OK;
 	}

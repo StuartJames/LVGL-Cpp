@@ -17,11 +17,12 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "draw/EG_DrawArc.h"
 #include "core/EG_Refresh.h"
 
@@ -55,18 +56,18 @@ EGLayerContext::~EGLayerContext()
 }
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGLayerContext* EGLayerContext::Create(EGDrawContext *pContext, const EGRect *pLayerRect, EGDrawLayerFlags_e Flags)
+EGLayerContext* EGLayerContext::Create(EGDeviceContext *pDC, const EGRect *pLayerRect, EGDrawLayerFlags_e Flags)
 {
-	if(pContext->LayerIntialiseProc == nullptr) return nullptr;
+	if(pDC->LayerIntialiseProc == nullptr) return nullptr;
   EGLayerContext *pDrawLayer = new EGLayerContext;
 	EGDisplay *pDisplay = GetRefreshingDisplay();
-  pDrawLayer->m_pContext = pContext;
-	pDrawLayer->m_Original.pBuffer = pContext->m_pDrawBuffer;
-	pDrawLayer->m_Original.pBuferArea = pContext->m_pDrawRect;
-	pDrawLayer->m_Original.pClipRect = pContext->m_pClipRect;
+  pDrawLayer->m_pContext = pDC;
+	pDrawLayer->m_Original.pBuffer = pDC->m_pDrawBuffer;
+	pDrawLayer->m_Original.pBuferArea = pDC->m_pDrawRect;
+	pDrawLayer->m_Original.pClipRect = pDC->m_pClipRect;
 	pDrawLayer->m_Original.ScreenTransparent = pDisplay->m_pDriver->m_ScreenTransparent;
 	pLayerRect->Copy(&pDrawLayer->m_FullRect);
-	if(!pContext->LayerIntialiseProc(pDrawLayer, Flags)){
+	if(!pDC->LayerIntialiseProc(pDrawLayer, Flags)){
 		delete pDrawLayer;
     return nullptr;
 	}

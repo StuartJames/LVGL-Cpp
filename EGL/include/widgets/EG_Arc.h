@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -38,13 +39,13 @@ enum {
 };
 typedef uint8_t EG_ArcMode_e;
 
-// `type` field in `EG_DrawPartDiscriptor_t` if `class_p = EGArc class`
+// `type` field in `EG_DrawPartDescriptor_t` if `class_p = EGArc class`
 // Used in `EG_EVENT_DRAW_PART_BEGIN` and `EG_EVENT_DRAW_PART_END`
-typedef enum {
+enum EG_ArcDrawPartType_e{
     EG_ARC_DRAW_PART_BACKGROUND,    //  The background arc
     EG_ARC_DRAW_PART_FOREGROUND,    //  The foreground arc
     EG_ARC_DRAW_PART_KNOB,          //  The knob
-} EG_Arc_Draw_Part_Type_t;
+};
 
 extern const EG_ClassType_t c_ArcClass;
 
@@ -75,8 +76,8 @@ public:
   int16_t           GetMinValue(void);
   int16_t           GetMaxValue(void);
   EG_ArcMode_e      GetMode(void);
-  void              AlignToAngle(EGObject *pObj, EG_Coord_t Offset);
-  void              RotateToAngle(EGObject * pObj, EG_Coord_t Offset);
+  void              AlignToAngle(EGObject *pObj, int32_t Offset);
+  void              RotateToAngle(EGObject * pObj, int32_t Offset);
   void              Event(EGEvent *pEvent);
 
   static void       EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent);
@@ -101,11 +102,11 @@ private:
   void              Draw(EGEvent *pEvent);
   void              InvalidateArcArea(uint16_t StartAngle, uint16_t EndAngle, EGPart_t Part);
   void              InvalidateKnobArea();
-  void              GetCenter(EGPoint *center, EG_Coord_t *arc_r);
-  EG_Coord_t        GetAngle();
-  void              GetKnobArea(const EGPoint *pCenter, EG_Coord_t Radius, EGRect *pKnobRect);
+  void              GetCenter(EGPoint *center, int32_t *arc_r);
+  int32_t        GetAngle();
+  void              GetKnobArea(const EGPoint *pCenter, int32_t Radius, EGRect *pKnobRect);
   void              ValueUpdate(void);
-  EG_Coord_t        KnobGetExtraSize(void);
+  int32_t        KnobGetExtraSize(void);
   bool              IsAngleWithinBackgroundBounds(const uint32_t angle, const uint32_t tolerance_deg);
 
 };

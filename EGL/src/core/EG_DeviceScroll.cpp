@@ -1,26 +1,26 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
-
 
 #include "core/EG_InputDevice.h"
 
@@ -57,16 +57,16 @@ void EGInputDevice::ScrollHandler(EG_ProcessedInput_t *pProcess)
 		EGPoint Pivot = {0, 0};
 		pProcess->Pointer.Vector.PointTransform(Angle, EGScale(Zoom), &Pivot);
 	}
-	EG_Coord_t DifferenceX = 0;
-	EG_Coord_t DifferenceY = 0;
+	int32_t DifferenceX = 0;
+	int32_t DifferenceY = 0;
 	if(pProcess->Pointer.ScrollDirection == EG_DIR_HOR) {
-		EG_Coord_t sr = pScrollObj->GetScrollRight();
-		EG_Coord_t sl = pScrollObj->GetScrollLeft();
+		int32_t sr = pScrollObj->GetScrollRight();
+		int32_t sl = pScrollObj->GetScrollLeft();
 		DifferenceX = ElasticDifference(pScrollObj, pProcess->Pointer.Vector.m_X, sl, sr, EG_DIR_HOR);
 	}
 	else {
-		EG_Coord_t st = pScrollObj->GetScrollTop();
-		EG_Coord_t sb = pScrollObj->GetScrollBottom();
+		int32_t st = pScrollObj->GetScrollTop();
+		int32_t sb = pScrollObj->GetScrollBottom();
 		DifferenceY = ElasticDifference(pScrollObj, pProcess->Pointer.Vector.m_Y, st, sb, EG_DIR_VER);
 	}
 	EG_DirType_e scroll_dir = pScrollObj->GetScrollDirection();
@@ -89,7 +89,7 @@ void EGInputDevice::ScrollThrowHandler(EG_ProcessedInput_t *pProcess)
 	if(pScrollObj == nullptr) return;
 	if(pProcess->Pointer.ScrollDirection == EG_DIR_NONE) return;
 	EGInputDevice *pActiveInput = EGInputDevice::GetActive();
-	EG_Coord_t ScrollThrow = pActiveInput->m_pDriver->m_ScrollThrow;
+	int32_t ScrollThrow = pActiveInput->m_pDriver->m_ScrollThrow;
 	if(pScrollObj->HasFlagSet(EG_OBJ_FLAG_SCROLL_MOMENTUM) == false) {
 		pProcess->Pointer.ScrollThrowVector.m_Y = 0;
 		pProcess->Pointer.ScrollThrowVector.m_X = 0;
@@ -100,16 +100,16 @@ void EGInputDevice::ScrollThrowHandler(EG_ProcessedInput_t *pProcess)
 		pProcess->Pointer.ScrollThrowVector.m_X = 0;
 		if(align_y == EG_SCROLL_SNAP_NONE) {		// If no snapping "throw"
 			pProcess->Pointer.ScrollThrowVector.m_Y *= (100 - ScrollThrow) / 100;
-			EG_Coord_t sb = pScrollObj->GetScrollBottom();
-			EG_Coord_t st = pScrollObj->GetScrollTop();
+			int32_t sb = pScrollObj->GetScrollBottom();
+			int32_t st = pScrollObj->GetScrollTop();
 			pProcess->Pointer.ScrollThrowVector.m_Y = ElasticDifference(pScrollObj, pProcess->Pointer.ScrollThrowVector.m_Y, st, sb, EG_DIR_VER);
 			pScrollObj->ScrollBy(0, pProcess->Pointer.ScrollThrowVector.m_Y, EG_ANIM_OFF);
 		}
 		else {		// With snapping find the nearest Snap point and scroll there
-			EG_Coord_t DifferenceY = ScrollThrowPredictY(pProcess);
+			int32_t DifferenceY = ScrollThrowPredictY(pProcess);
 			pProcess->Pointer.ScrollThrowVector.m_Y = 0;
 			ScrollLimitDifference(pProcess, nullptr, &DifferenceY);
-			EG_Coord_t y = FindSnapPointY(pScrollObj, EG_COORD_MIN, EG_COORD_MAX, DifferenceY);
+			int32_t y = FindSnapPointY(pScrollObj, EG_COORD_MIN, EG_COORD_MAX, DifferenceY);
 			pScrollObj->ScrollBy(0, DifferenceY + y, EG_ANIM_ON);
 		}
 	}
@@ -118,24 +118,24 @@ void EGInputDevice::ScrollThrowHandler(EG_ProcessedInput_t *pProcess)
 		// If no snapping "throw"
 		if(align_x == EG_SCROLL_SNAP_NONE) {
 			pProcess->Pointer.ScrollThrowVector.m_X *= (100 - ScrollThrow) / 100;
-			EG_Coord_t sl = pScrollObj->GetScrollLeft();
-			EG_Coord_t sr = pScrollObj->GetScrollRight();
+			int32_t sl = pScrollObj->GetScrollLeft();
+			int32_t sr = pScrollObj->GetScrollRight();
 			pProcess->Pointer.ScrollThrowVector.m_X = ElasticDifference(pScrollObj, pProcess->Pointer.ScrollThrowVector.m_X, sl, sr, EG_DIR_HOR);
 			pScrollObj->ScrollBy(pProcess->Pointer.ScrollThrowVector.m_X, 0, EG_ANIM_OFF);
 		}
 		// With snapping find the nearest Snap point and scroll there
 		else {
-			EG_Coord_t DifferenceX = ScrollThrowPredictX(pProcess);
+			int32_t DifferenceX = ScrollThrowPredictX(pProcess);
 			pProcess->Pointer.ScrollThrowVector.m_X = 0;
 			ScrollLimitDifference(pProcess, &DifferenceX, nullptr);
-			EG_Coord_t x = FindSnapPointX(pScrollObj, EG_COORD_MIN, EG_COORD_MAX, DifferenceX);
+			int32_t x = FindSnapPointX(pScrollObj, EG_COORD_MIN, EG_COORD_MAX, DifferenceX);
 			pScrollObj->ScrollBy(x + DifferenceX, 0, EG_ANIM_ON);
 		}
 	}
 	if((pProcess->Pointer.ScrollThrowVector.m_X == 0) && (pProcess->Pointer.ScrollThrowVector.m_Y == 0)){	// Check if the scroll has finished
 		if(align_y == EG_SCROLL_SNAP_NONE) {		// Revert if scrolled in If vertically scrollable and not controlled by Snap
-			EG_Coord_t st = pScrollObj->GetScrollTop();
-			EG_Coord_t sb = pScrollObj->GetScrollBottom();
+			int32_t st = pScrollObj->GetScrollTop();
+			int32_t sb = pScrollObj->GetScrollBottom();
 			if(st > 0 || sb > 0) {
 				if(st < 0) {
 					pScrollObj->ScrollBy(0, st, EG_ANIM_ON);
@@ -146,8 +146,8 @@ void EGInputDevice::ScrollThrowHandler(EG_ProcessedInput_t *pProcess)
 			}
 		}
 		if(align_x == EG_SCROLL_SNAP_NONE) {	// If horizontally scrollable and not controlled by Snap
-			EG_Coord_t sl = pScrollObj->GetScrollLeft();
-			EG_Coord_t sr = pScrollObj->GetScrollRight();
+			int32_t sl = pScrollObj->GetScrollLeft();
+			int32_t sr = pScrollObj->GetScrollRight();
 			if(sl > 0 || sr > 0) {
 				if(sl < 0) {
 					pScrollObj->ScrollBy(sl, 0, EG_ANIM_ON);
@@ -166,10 +166,10 @@ void EGInputDevice::ScrollThrowHandler(EG_ProcessedInput_t *pProcess)
 
 //////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGInputDevice::ScrollThrowPredict(EG_DirType_e Direction)
+int32_t EGInputDevice::ScrollThrowPredict(EG_DirType_e Direction)
 {
-EG_Coord_t Value;
-	EG_Coord_t Sum = 0;
+int32_t Value;
+	int32_t Sum = 0;
 
 	switch(Direction) {
 		case EG_DIR_VER:
@@ -181,7 +181,7 @@ EG_Coord_t Value;
 		default:
 			return 0;
 	}
-	EG_Coord_t ScrollThrow = m_pDriver->m_ScrollThrow;
+	int32_t ScrollThrow = m_pDriver->m_ScrollThrow;
 	while(Value) {
 		Sum += Value;
 		Value = Value * (100 - ScrollThrow) / 100;
@@ -206,7 +206,7 @@ EG_DirType_e Direction = EG_DIR_NONE;
 bool HorizontalEnable = false, VerticalEnable = false;
 
 	EGInputDevice *pActiveInput = GetActive();
-	EG_Coord_t ScrollLimit = pActiveInput->m_pDriver->m_ScrollLimit;
+	int32_t ScrollLimit = pActiveInput->m_pDriver->m_ScrollLimit;
 	/* Go until find a scrollable object in the current direction
      *More precisely:
      * 1. Check the pressed object and all of its ancestors and try to find an object which is scrollable
@@ -257,10 +257,10 @@ bool HorizontalEnable = false, VerticalEnable = false;
 		if((scroll_dir & EG_DIR_TOP) == 0) UpEnable = false;
 		if((scroll_dir & EG_DIR_BOTTOM) == 0) DownEnable = false;
 		// The object is scrollable to a direction if its content overflow in that direction.
-		EG_Coord_t st = pActiveObj->GetScrollTop();
-		EG_Coord_t sb = pActiveObj->GetScrollBottom();
-		EG_Coord_t sl = pActiveObj->GetScrollLeft();
-		EG_Coord_t sr = pActiveObj->GetScrollRight();
+		int32_t st = pActiveObj->GetScrollTop();
+		int32_t sb = pActiveObj->GetScrollBottom();
+		int32_t sl = pActiveObj->GetScrollLeft();
+		int32_t sr = pActiveObj->GetScrollRight();
 		/* If this object is scrollable into the current scroll direction then save it as a candidate.
          *It's important only to be scrollable on the current axis (hor/ver) because if the scroll
          *is propagated to this object it can show at least elastic scroll effect.
@@ -325,7 +325,7 @@ void EGInputDevice::InitScrollLimits(EG_ProcessedInput_t *pProcess)
 				break;
       }
 			case EG_SCROLL_SNAP_CENTER: {
-				EG_Coord_t Middle = pObj->m_Rect.GetY1() + pObj->m_Rect.GetHeight() / 2;
+				int32_t Middle = pObj->m_Rect.GetY1() + pObj->m_Rect.GetHeight() / 2;
 				pProcess->Pointer.ScrollArea.SetY1(FindSnapPointY(pObj, Middle + 1, EG_COORD_MAX, 0));
 				pProcess->Pointer.ScrollArea.SetY2(FindSnapPointY(pObj, EG_COORD_MIN, Middle - 1, 0));
 				break;
@@ -348,7 +348,7 @@ void EGInputDevice::InitScrollLimits(EG_ProcessedInput_t *pProcess)
 				break;
       }
 			case EG_SCROLL_SNAP_CENTER: {
-				EG_Coord_t Middle = pObj->m_Rect.GetX1() + pObj->m_Rect.GetWidth() / 2;
+				int32_t Middle = pObj->m_Rect.GetX1() + pObj->m_Rect.GetWidth() / 2;
 				pProcess->Pointer.ScrollArea.SetX1(FindSnapPointX(pObj, Middle + 1, EG_COORD_MAX, 0));
 				pProcess->Pointer.ScrollArea.SetX2(FindSnapPointX(pObj, EG_COORD_MIN, Middle - 1, 0));
 				break;
@@ -369,20 +369,20 @@ void EGInputDevice::InitScrollLimits(EG_ProcessedInput_t *pProcess)
 
 //////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGInputDevice::FindSnapPointX(EGObject *pObj, EG_Coord_t Min, EG_Coord_t Max, EG_Coord_t Offset)
+int32_t EGInputDevice::FindSnapPointX(EGObject *pObj, int32_t Min, int32_t Max, int32_t Offset)
 {
 	EG_ScrollSnap_e Align = pObj->GetScrollSnapX();
 	if(Align == EG_SCROLL_SNAP_NONE) return 0;
-	EG_Coord_t Distance = EG_COORD_MAX;
-	EG_Coord_t PadLeft = pObj->GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t PadRight = pObj->GetStylePadRight(EG_PART_MAIN);
+	int32_t Distance = EG_COORD_MAX;
+	int32_t PadLeft = pObj->GetStylePadLeft(EG_PART_MAIN);
+	int32_t PadRight = pObj->GetStylePadRight(EG_PART_MAIN);
 	uint32_t ChildCount = pObj->GetChildCount();
 	for(uint32_t i = 0; i < ChildCount; i++) {
 		EGObject *pChild = pObj->m_pAttributes->ppChildren[i];
 		if(pChild->HasAnyFlagSet(EG_OBJ_FLAG_HIDDEN | EG_OBJ_FLAG_FLOATING)) continue;
 		if(pChild->HasFlagSet(EG_OBJ_FLAG_SNAPPABLE)) {
-			EG_Coord_t ChildX = 0;
-			EG_Coord_t ParentX = 0;
+			int32_t ChildX = 0;
+			int32_t ParentX = 0;
 			switch(Align) {
 				case EG_SCROLL_SNAP_START:
 					ChildX = pChild->m_Rect.GetX1();
@@ -401,7 +401,7 @@ EG_Coord_t EGInputDevice::FindSnapPointX(EGObject *pObj, EG_Coord_t Min, EG_Coor
 			}
 			ChildX += Offset;
 			if(ChildX >= Min && ChildX <= Max) {
-				EG_Coord_t x = ChildX - ParentX;
+				int32_t x = ChildX - ParentX;
 				if(EG_ABS(x) < EG_ABS(Distance)) Distance = x;
 			}
 		}
@@ -411,20 +411,20 @@ EG_Coord_t EGInputDevice::FindSnapPointX(EGObject *pObj, EG_Coord_t Min, EG_Coor
 
 //////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGInputDevice::FindSnapPointY(EGObject *pObj, EG_Coord_t Min, EG_Coord_t Max, EG_Coord_t Offset)
+int32_t EGInputDevice::FindSnapPointY(EGObject *pObj, int32_t Min, int32_t Max, int32_t Offset)
 {
 	EG_ScrollSnap_e Align = pObj->GetScrollSnapY();
 	if(Align == EG_SCROLL_SNAP_NONE) return 0;
-	EG_Coord_t Distance = EG_COORD_MAX;
-	EG_Coord_t PadTop = pObj->GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PadBottom = pObj->GetStylePadBottom(EG_PART_MAIN);
+	int32_t Distance = EG_COORD_MAX;
+	int32_t PadTop = pObj->GetStylePadTop(EG_PART_MAIN);
+	int32_t PadBottom = pObj->GetStylePadBottom(EG_PART_MAIN);
 	uint32_t ChildCount = pObj->GetChildCount();
 	for(uint32_t i = 0; i < ChildCount; i++) {
 		EGObject *pChild = pObj->m_pAttributes->ppChildren[i];
 		if(pChild->HasAnyFlagSet(EG_OBJ_FLAG_HIDDEN | EG_OBJ_FLAG_FLOATING)) continue;
 		if(pChild->HasFlagSet(EG_OBJ_FLAG_SNAPPABLE)) {
-			EG_Coord_t ChildY = 0;
-			EG_Coord_t ParentY = 0;
+			int32_t ChildY = 0;
+			int32_t ParentY = 0;
 			switch(Align) {
 				case EG_SCROLL_SNAP_START:
 					ChildY = pChild->m_Rect.GetY1();
@@ -443,7 +443,7 @@ EG_Coord_t EGInputDevice::FindSnapPointY(EGObject *pObj, EG_Coord_t Min, EG_Coor
 			}
 			ChildY += Offset;
 			if(ChildY >= Min && ChildY <= Max) {
-				EG_Coord_t y = ChildY - ParentY;
+				int32_t y = ChildY - ParentY;
 				if(EG_ABS(y) < EG_ABS(Distance)) Distance = y;
 			}
 		}
@@ -453,7 +453,7 @@ EG_Coord_t EGInputDevice::FindSnapPointY(EGObject *pObj, EG_Coord_t Min, EG_Coor
 
 //////////////////////////////////////////////////////////////////////////////
 
-void EGInputDevice::ScrollLimitDifference(EG_ProcessedInput_t *pProcess, EG_Coord_t *DifferenceX, EG_Coord_t *DifferenceY)
+void EGInputDevice::ScrollLimitDifference(EG_ProcessedInput_t *pProcess, int32_t *DifferenceX, int32_t *DifferenceY)
 {
 	if(DifferenceY) {
 		if(pProcess->Pointer.ScrollSum.m_Y + *DifferenceY < pProcess->Pointer.ScrollArea.GetY1()) {
@@ -475,13 +475,13 @@ void EGInputDevice::ScrollLimitDifference(EG_ProcessedInput_t *pProcess, EG_Coor
 
 //////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGInputDevice::ScrollThrowPredictY(EG_ProcessedInput_t *pProcess)
+int32_t EGInputDevice::ScrollThrowPredictY(EG_ProcessedInput_t *pProcess)
 {
-EG_Coord_t Move = 0;
+int32_t Move = 0;
 
-	EG_Coord_t PosY = pProcess->Pointer.ScrollThrowVector.m_Y;
+	int32_t PosY = pProcess->Pointer.ScrollThrowVector.m_Y;
 	EGInputDevice *pActiveInput = GetActive();
-	EG_Coord_t ScrollThrow = pActiveInput->m_pDriver->m_ScrollThrow;
+	int32_t ScrollThrow = pActiveInput->m_pDriver->m_ScrollThrow;
 	while(PosY) {
 		Move += PosY;
 		PosY = PosY * (100 - ScrollThrow) / 100;
@@ -491,13 +491,13 @@ EG_Coord_t Move = 0;
 
 //////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGInputDevice::ScrollThrowPredictX(EG_ProcessedInput_t *pProcess)
+int32_t EGInputDevice::ScrollThrowPredictX(EG_ProcessedInput_t *pProcess)
 {
-EG_Coord_t Move = 0;
+int32_t Move = 0;
 
-	EG_Coord_t PosX = pProcess->Pointer.ScrollThrowVector.m_X;
+	int32_t PosX = pProcess->Pointer.ScrollThrowVector.m_X;
 	EGInputDevice *pActiveInput = GetActive();
-	EG_Coord_t ScrollThrow = pActiveInput->m_pDriver->m_ScrollThrow;
+	int32_t ScrollThrow = pActiveInput->m_pDriver->m_ScrollThrow;
 	while(PosX) {
 		Move += PosX;
 		PosX = PosX * (100 - ScrollThrow) / 100;
@@ -507,18 +507,18 @@ EG_Coord_t Move = 0;
 
 //////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGInputDevice::ElasticDifference(EGObject *pScrollObj, EG_Coord_t Difference, EG_Coord_t ScrollStart, EG_Coord_t ScrollEnd, EG_DirType_e Direction)
+int32_t EGInputDevice::ElasticDifference(EGObject *pScrollObj, int32_t Difference, int32_t ScrollStart, int32_t ScrollEnd, EG_DirType_e Direction)
 {
 	if(pScrollObj->HasFlagSet(EG_OBJ_FLAG_SCROLL_ELASTIC)) {
 		// If there is snapping in the current direction don't use the elastic factor 
 		EG_ScrollSnap_e Snap;
 		Snap = (Direction == EG_DIR_HOR) ? pScrollObj->GetScrollSnapX() : pScrollObj->GetScrollSnapY();
 		EGObject *pActiveObj = GetActive()->GetActiveObj();
-		EG_Coord_t SnapPoint = 0;
-		EG_Coord_t ActiveObjPoint = 0;
+		int32_t SnapPoint = 0;
+		int32_t ActiveObjPoint = 0;
 		if(Direction == EG_DIR_HOR) {
-			EG_Coord_t PadLeft = pScrollObj->GetStylePadLeft(EG_PART_MAIN);
-			EG_Coord_t PadRight = pScrollObj->GetStylePadRight(EG_PART_MAIN);
+			int32_t PadLeft = pScrollObj->GetStylePadLeft(EG_PART_MAIN);
+			int32_t PadRight = pScrollObj->GetStylePadRight(EG_PART_MAIN);
 
 			switch((uint8_t)Snap){
 				case EG_SCROLL_SNAP_CENTER:
@@ -536,8 +536,8 @@ EG_Coord_t EGInputDevice::ElasticDifference(EGObject *pScrollObj, EG_Coord_t Dif
 			}
 		}
 		else {
-			EG_Coord_t PadTop = pScrollObj->GetStylePadTop(EG_PART_MAIN);
-			EG_Coord_t PadBottom = pScrollObj->GetStylePadBottom(EG_PART_MAIN);
+			int32_t PadTop = pScrollObj->GetStylePadTop(EG_PART_MAIN);
+			int32_t PadBottom = pScrollObj->GetStylePadBottom(EG_PART_MAIN);
 			switch((uint8_t)Snap){
 				case EG_SCROLL_SNAP_CENTER:
 					SnapPoint = PadTop + (pScrollObj->m_Rect.GetHeight() - PadTop - PadBottom) / 2 + pScrollObj->m_Rect.GetY1();

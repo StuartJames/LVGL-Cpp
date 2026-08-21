@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -120,20 +121,20 @@ void EGImage::Configure(void)
 void EGImage::SetSource(const void *pSource)
 {
 	Invalidate();
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 #if EG_USE_LOG && EG_LOG_LEVEL >= EG_LOG_LEVEL_INFO
 	switch(SourceType) {
 		case EG_IMG_SRC_FILE:
-			EG_LOG_TRACE("lv_img_set_src: `EG_IMG_SRC_FILE` type found");
+			EG_LOG_TRACE("EGImage::SetSource: `EG_IMG_SRC_FILE` type found");
 			break;
 		case EG_IMG_SRC_VARIABLE:
-			EG_LOG_TRACE("lv_img_set_src: `EG_IMG_SRC_VARIABLE` type found");
+			EG_LOG_TRACE("EGImage::SetSource: `EG_IMG_SRC_VARIABLE` type found");
 			break;
 		case EG_IMG_SRC_SYMBOL:
-			EG_LOG_TRACE("lv_img_set_src: `EG_IMG_SRC_SYMBOL` type found");
+			EG_LOG_TRACE("EGImage::SetSource: `EG_IMG_SRC_SYMBOL` type found");
 			break;
 		default:
-			EG_LOG_WARN("lv_img_set_src: unknown type");
+			EG_LOG_WARN("EGImage::SetSource: unknown type");
 	}
 #endif
 
@@ -175,14 +176,14 @@ void EGImage::SetSource(const void *pSource)
 		}
 	}
 	if(SourceType == EG_IMG_SRC_SYMBOL) {
-		// `lv_img_dsc_get_info` couldn't set the width and height of a font so set it here
+		// couldn't set the width and height of a font so set it here
 		const EG_Font_t *font = GetStyleTextFont(EG_PART_MAIN);
-		EG_Coord_t letter_space = GetStyleTextKerning(EG_PART_MAIN);
-		EG_Coord_t line_space = GetStyleTextLineSpace(EG_PART_MAIN);
-		EGPoint size;
-		EG_GetTextSize(&size, (char*)pSource, font, letter_space, line_space, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
-		Header.Width = size.m_X;
-		Header.Height = size.m_Y;
+		int32_t letter_space = GetStyleTextKerning(EG_PART_MAIN);
+		int32_t line_space = GetStyleTextLineSpace(EG_PART_MAIN);
+		EGSize Size;
+		EG_GetTextSize(&Size, (char*)pSource, font, letter_space, line_space, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
+		Header.Width = Size.m_X;
+		Header.Height = Size.m_Y;
 	}
 	m_SourceType = SourceType;
 	m_Width = Header.Width;
@@ -197,7 +198,7 @@ void EGImage::SetSource(const void *pSource)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGImage::SetOffsetX(EG_Coord_t X)
+void EGImage::SetOffsetX(int32_t X)
 {
 	m_Offset.m_X = X;
 	Invalidate();
@@ -205,7 +206,7 @@ void EGImage::SetOffsetX(EG_Coord_t X)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGImage::SetOffsetY(EG_Coord_t Y)
+void EGImage::SetOffsetY(int32_t Y)
 {
 	m_Offset.m_Y = Y;
 	Invalidate();
@@ -219,14 +220,14 @@ void EGImage::SetRotation(int16_t Angle)
 	while(Angle < 0) Angle += 3600;
 	if(Angle == m_Rotation) return;
 	UpdateLayout(); // Be sure the object's size is calculated
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t Height = GetHeight();
+	int32_t Width = GetWidth();
+	int32_t Height = GetHeight();
 	EGRect Rect;
 	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Scale, &m_Pivot);
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
 	InvalidateArea( &Rect);
 	m_Rotation = Angle;
-	//  Disable invalidations because lv_obj_refresh_ext_draw_size would invalidate the whole ext draw area 
+	//  Disable invalidations because EGObject.RefreshExtDrawSize would invalidate the whole ext draw area 
 	EGDisplay *pDisplay = GetDisplay();
 	EGDisplay::EnableInvalidation(pDisplay, false);
 	RefreshExtDrawSize();
@@ -238,7 +239,7 @@ void EGImage::SetRotation(int16_t Angle)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGImage::SetPivot(EG_Coord_t X, EG_Coord_t Y)
+void EGImage::SetPivot(int32_t X, int32_t Y)
 {
   SetPivot(EGPoint(X, Y));
 }
@@ -249,14 +250,14 @@ void EGImage::SetPivot(EGPoint Pivot)
 {
 	if((m_Pivot.m_X == Pivot.m_X) && (m_Pivot.m_Y == Pivot.m_Y)) return;
 	UpdateLayout(); // Be sure the object's size is calculated
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t Height = GetHeight();
+	int32_t Width = GetWidth();
+	int32_t Height = GetHeight();
 	EGRect Rect;
 	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Scale, &m_Pivot);
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
 	InvalidateArea(&Rect);
 	m_Pivot = Pivot;
-	// Disable invalidations because lv_obj_refresh_ext_draw_size would invalidate the whole ext draw area 
+	// Disable invalidations because EGObject.RefreshExtDrawSize would invalidate the whole ext draw area 
 	EGDisplay *pDisplay = GetDisplay();
 	EGDisplay::EnableInvalidation(pDisplay, false);
 	RefreshExtDrawSize();
@@ -273,8 +274,8 @@ void EGImage::SetZoom(uint16_t Zoom)
 	if((Zoom == m_Scale.m_X) && (Zoom == m_Scale.m_Y)) return;
 	if(Zoom == 0) Zoom = 1;
 	UpdateLayout(); // Be sure the object'pSize size is calculated
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t Height = GetHeight();
+	int32_t Width = GetWidth();
+	int32_t Height = GetHeight();
 	EGRect Rect;
 	EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Scale, &m_Pivot);
 	Rect.IncX1(m_Rect.GetX1() - 1);
@@ -307,7 +308,7 @@ void EGImage::SetScale(EGScale Scale)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGImage::SetScaleX(uint32_t ScaleX)
+void EGImage::SetScaleX(int32_t ScaleX)
 {
   if(m_Align > EG_IMAGE_ALIGN_AUTO_TRANSFORM) return;   // If scale is set internally, do no overwrite it
   if(ScaleX == m_Scale.m_X) return;
@@ -317,7 +318,7 @@ void EGImage::SetScaleX(uint32_t ScaleX)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGImage::SetScaleY(uint32_t ScaleY)
+void EGImage::SetScaleY(int32_t ScaleY)
 {
   if(m_Align > EG_IMAGE_ALIGN_AUTO_TRANSFORM) return;   // If scale is set internally, do no overwrite it
   if(ScaleY == m_Scale.m_Y) return;
@@ -393,11 +394,11 @@ void EGImage::Event(EGEvent *pEvent)
 		else RefreshExtDrawSize();			// With transformation it might change
 	}
 	else if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {
-		EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();
+		int32_t *pSize = (int32_t*)pEvent->GetParam();
 		if(m_Rotation || m_Scale.IsScaled()) {		// If the image has Angle provide enough room for the rotated corners
 			EGRect Rect;
-			EG_Coord_t Width = GetWidth();
-			EG_Coord_t Height = GetHeight();
+			int32_t Width = GetWidth();
+			int32_t Height = GetHeight();
 			EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Scale, &m_Pivot);
 			*pSize = EG_MAX(*pSize, -Rect.GetX1());
 			*pSize = EG_MAX(*pSize, -Rect.GetY1());
@@ -410,8 +411,8 @@ void EGImage::Event(EGEvent *pEvent)
 		// If the object is exactly image sized (not cropped, not mosaic) and transformed perform hit test on its transformed area
 		if(m_Width == GetWidth() && m_Height == GetHeight() && (m_Scale.IsScaled() || m_Rotation != 0 ||
       m_Pivot.m_X != m_Width / 2 || m_Pivot.m_Y != m_Height / 2)) {
-			EG_Coord_t Width = GetWidth();
-			EG_Coord_t Height = GetHeight();
+			int32_t Width = GetWidth();
+			int32_t Height = GetHeight();
 			EGRect Rect;
 			EGImageBuffer::GetTransformedRect(&Rect, Width, Height, m_Rotation, m_Scale, &m_Pivot);
 			Rect.IncX1(m_Rect.GetX1());
@@ -488,13 +489,13 @@ void EGImage::Draw(EGEvent *pEvent)
 		}
 	}
 	else if(Code == EG_EVENT_DRAW_MAIN || Code == EG_EVENT_DRAW_POST) {
-		EG_Coord_t Width = GetWidth();
-		EG_Coord_t Height = GetHeight();
-		EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-		EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
-		EG_Coord_t PadRight = GetStylePadRight(EG_PART_MAIN) + BorderWidth;
-		EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
-		EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
+		int32_t Width = GetWidth();
+		int32_t Height = GetHeight();
+		int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+		int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
+		int32_t PadRight = GetStylePadRight(EG_PART_MAIN) + BorderWidth;
+		int32_t PadTop = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+		int32_t PadBottom = GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
 		EGPoint BackgroundPivot;
 		BackgroundPivot.m_X = m_Pivot.m_X + PadLeft;
 		BackgroundPivot.m_Y = m_Pivot.m_Y + PadTop;
@@ -514,7 +515,7 @@ void EGImage::Draw(EGEvent *pEvent)
 		if(Code == EG_EVENT_DRAW_MAIN) {
 			if(m_Height == 0 || m_Width == 0) return;
 			if(m_Scale == EGScale(0)) return;
-			EGDrawContext *pContext = pEvent->GetDrawContext();
+			EGDeviceContext *pDC = pEvent->GetDeviceContext();
 			EGRect ImageRect(m_Rect);
 			EGPoint ImageSize = GetTransformedSize();
 			if(m_SizeMode == EG_IMG_SIZE_MODE_REAL) {
@@ -534,12 +535,12 @@ void EGImage::Draw(EGEvent *pEvent)
 				DrawImage.m_Pivot.m_Y = m_Pivot.m_Y;
 				DrawImage.m_AntiAlias = m_AntiAlias;
 				EGRect ClipRect(BackgroundRect.GetX1() + PadLeft, BackgroundRect.GetY1() + PadTop, BackgroundRect.GetX2() - PadRight, BackgroundRect.GetY2() - PadBottom);
-				const EGRect *pOriginalClip = pContext->m_pClipRect;
-				if(!ClipRect.Intersect(&ClipRect, pContext->m_pClipRect)) return;
-				pContext->m_pClipRect = &ClipRect;
+				const EGRect *pOriginalClip = pDC->m_pClipRect;
+				if(!ClipRect.Intersect(&ClipRect, pDC->m_pClipRect)) return;
+				pDC->m_pClipRect = &ClipRect;
 				EGRect SegmentRect;
-				EG_Coord_t OffsetX = m_Offset.m_X % m_Width;
-				EG_Coord_t OffsetY = m_Offset.m_Y % m_Height;
+				int32_t OffsetX = m_Offset.m_X % m_Width;
+				int32_t OffsetY = m_Offset.m_Y % m_Height;
 				SegmentRect.SetY1(ImageRect.GetY1() + OffsetY);
 				if(SegmentRect.GetY1() > ImageRect.GetY1()) SegmentRect.DecY1(m_Height);
 				SegmentRect.SetY2(SegmentRect.GetY1() + m_Height - 1);
@@ -548,20 +549,20 @@ void EGImage::Draw(EGEvent *pEvent)
 					if(SegmentRect.GetX1() > ImageRect.GetX1()) SegmentRect.DecX1(m_Width);
 					SegmentRect.SetX2(SegmentRect.GetX1() + m_Width - 1);
 					for(; SegmentRect.GetX1() < ImageRect.GetX2(); SegmentRect.IncX1(ImageSize.m_X), SegmentRect.IncX2(ImageSize.m_X)) {
-						DrawImage.Draw(pContext, &SegmentRect, m_pSource);
+						DrawImage.Draw(pDC, &SegmentRect, m_pSource);
 					}
 				}
-				pContext->m_pClipRect = pOriginalClip;
+				pDC->m_pClipRect = pOriginalClip;
 			}
 			else if(m_SourceType == EG_IMG_SRC_SYMBOL) {
 				EGDrawLabel DrawLabel;
 				InititialseDrawLabel(EG_PART_MAIN, &DrawLabel);
-				DrawLabel.Draw(pContext, &m_Rect, (char*)m_pSource, nullptr);
+				DrawLabel.Draw(pDC, &m_Rect, (char*)m_pSource, nullptr);
 			}
 			else {		// Trigger the error handler of image draw
 				EG_LOG_WARN("Image source type is unknown");
 				EGDrawImage DrawImage;
-				DrawImage.Draw(pContext, &m_Rect, nullptr);
+				DrawImage.Draw(pDC, &m_Rect, nullptr);
 			}
 		}
 	}

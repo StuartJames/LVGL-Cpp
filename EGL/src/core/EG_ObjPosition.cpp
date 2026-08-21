@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -33,7 +34,7 @@ uint32_t EGObject::m_LayoutCount = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetPosition(EG_Coord_t X, EG_Coord_t Y)
+void EGObject::SetPosition(int32_t X, int32_t Y)
 {
 	SetX(X);
 	SetY(Y);
@@ -41,7 +42,7 @@ void EGObject::SetPosition(EG_Coord_t X, EG_Coord_t Y)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetX(EG_Coord_t X)
+void EGObject::SetX(int32_t X)
 {
 EG_Result_t Result;
 EG_StyleValue_t Value;
@@ -54,7 +55,7 @@ EG_StyleValue_t Value;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetY(EG_Coord_t Y)
+void EGObject::SetY(int32_t Y)
 {
 EG_Result_t Result;
 EG_StyleValue_t Value;
@@ -71,34 +72,34 @@ bool EGObject::RefreshSize(void)
 {
 bool WidthIsContent = false, HeightIsContent = false;   // Content controls
 bool WidthIsPct = false, HeightIsPct = false;           // Percentage controls
-EG_Coord_t Height, Width;
+int32_t Height, Width;
 EGRect OriginalRect, ParentRect;
 
 	if(m_WidthLayout && m_HeightLayout) return false;	// If the width or height is set by a layout do not modify them
 	EGObject *pParent = GetParent();
 	if(pParent == nullptr) return false;
-	EG_Coord_t ScrollLeft = GetScrollLeft();
+	int32_t ScrollLeft = GetScrollLeft();
 	if(m_WidthLayout)  Width = GetWidth();
 	else {
 		Width = GetStyleWidth(EG_PART_MAIN);
 		WidthIsContent = (Width == EG_SIZE_CONTENT) ? true : false;
 		WidthIsPct = EG_COORD_IS_PCT(Width) ? true : false;
-		EG_Coord_t ParentWidth = pParent->GetContentWidth();
+		int32_t ParentWidth = pParent->GetContentWidth();
 		if(WidthIsContent) Width = CalcContentWidth();
 		else if(WidthIsPct) {
 			// If pParent has content size and the child has pct size a circular dependency will occur. To solve it keep child size at zero 
 			if((pParent->m_WidthLayout == 0) && (pParent->GetStyleWidth(0) == EG_SIZE_CONTENT)) {
-				EG_Coord_t BorderWidth = GetStyleBorderWidth(0);
+				int32_t BorderWidth = GetStyleBorderWidth(0);
 				Width = GetStylePadLeft(0) + BorderWidth;
 				Width += GetStylePadRight(0) + BorderWidth;
 			}
 			else Width = (EG_COORD_GET_PCT(Width) * ParentWidth) / 100;
 		}
-		EG_Coord_t MinWidth = GetStyleMinWidth(EG_PART_MAIN);
-		EG_Coord_t MaxWidth = GetStyleMaxWidth(EG_PART_MAIN);
+		int32_t MinWidth = GetStyleMinWidth(EG_PART_MAIN);
+		int32_t MaxWidth = GetStyleMaxWidth(EG_PART_MAIN);
 		Width = ClampWidth(Width, MinWidth, MaxWidth, ParentWidth);
 	}
-	EG_Coord_t ScrollTop = GetScrollTop();
+	int32_t ScrollTop = GetScrollTop();
 	if(m_HeightLayout){
 		Height = GetHeight();
 	}
@@ -106,12 +107,12 @@ EGRect OriginalRect, ParentRect;
 		Height = GetStyleHeight(EG_PART_MAIN);
 		HeightIsContent = (Height == EG_SIZE_CONTENT) ? true : false;
 		HeightIsPct = EG_COORD_IS_PCT(Height) ? true : false;
-		EG_Coord_t ParentHeight = pParent->GetContentHeight();
+		int32_t ParentHeight = pParent->GetContentHeight();
 		if(HeightIsContent) Height = CalcContentHeight();
 		else if(HeightIsPct) {
 			// If pParent has content size and the child has pct size a circular dependency will occur. To solve it keep child size at zero 
 			if((pParent->m_HeightLayout == 0) && (pParent->GetStyleHeight(0) == EG_SIZE_CONTENT)) {
-				EG_Coord_t BorderWidth = GetStyleBorderWidth(0);
+				int32_t BorderWidth = GetStyleBorderWidth(0);
 				Height = GetStylePadTop(0) + BorderWidth;
 				Height += GetStylePadBottom(0) + BorderWidth;
 			}
@@ -119,8 +120,8 @@ EGRect OriginalRect, ParentRect;
 				Height = (EG_COORD_GET_PCT(Height) * ParentHeight) / 100;
 			}
 		}
-		EG_Coord_t MinHeight = GetStyleMinHeight(EG_PART_MAIN);
-		EG_Coord_t MaxHeight = GetStyleMaxHeight(EG_PART_MAIN);
+		int32_t MinHeight = GetStyleMinHeight(EG_PART_MAIN);
+		int32_t MaxHeight = GetStyleMaxHeight(EG_PART_MAIN);
 		Height = ClampHeight(Height, MinHeight, MaxHeight, ParentHeight);
 	}
 	if(WidthIsContent || HeightIsContent) {	//calc_auto_size set the scroll x/y to 0 so revert the original value
@@ -151,7 +152,7 @@ EGRect OriginalRect, ParentRect;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetSize(EG_Coord_t Width, EG_Coord_t Height)
+void EGObject::SetSize(int32_t Width, int32_t Height)
 {
 	SetWidth(Width);
 	SetHeight(Height);
@@ -159,7 +160,7 @@ void EGObject::SetSize(EG_Coord_t Width, EG_Coord_t Height)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetWidth(EG_Coord_t Width)
+void EGObject::SetWidth(int32_t Width)
 {
 EG_Result_t Result;
 EG_StyleValue_t Value;
@@ -172,7 +173,7 @@ EG_StyleValue_t Value;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetHeight(EG_Coord_t Height)
+void EGObject::SetHeight(int32_t Height)
 {
 EG_Result_t Result;
 EG_StyleValue_t Value;
@@ -185,21 +186,21 @@ EG_StyleValue_t Value;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetContentWidth(EG_Coord_t Width)
+void EGObject::SetContentWidth(int32_t Width)
 {
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t PsdRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t PsdRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	SetWidth(Width + PadLeft + PsdRight + 2 * BorderWidth);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetContentHeight(EG_Coord_t Height)
+void EGObject::SetContentHeight(int32_t Height)
 {
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t PadTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	SetHeight(Height + PadTop + PadBottom + 2 * BorderWidth);
 }
 
@@ -260,7 +261,7 @@ static bool Mutex = false;
 uint32_t EGObject::LayoutRegister(EG_LayoutUpdateCB_t LayoutCB, void *pUserData)
 {
 	m_LayoutCount++;
-	EG_LayoutDiscriptor *pNewLayout = (EG_LayoutDiscriptor *)EG_AllocMem(sizeof(EG_LayoutDiscriptor));
+	EG_LayoutDescriptor *pNewLayout = (EG_LayoutDescriptor *)EG_AllocMem(sizeof(EG_LayoutDescriptor));
 	EG_ASSERT_MALLOC(pNewLayout);
 	pNewLayout->UpdateCB = LayoutCB;
 	pNewLayout->pUserData = pUserData;
@@ -276,7 +277,7 @@ void EGObject::SetAlign(EG_AlignType_e Align)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::Align(EG_AlignType_e Align, EG_Coord_t OffsetX, EG_Coord_t OfsetY)
+void EGObject::Align(EG_AlignType_e Align, int32_t OffsetX, int32_t OfsetY)
 {
 	SetStyleAlign(Align, 0);
 	SetPosition(OffsetX, OfsetY);
@@ -284,20 +285,20 @@ void EGObject::Align(EG_AlignType_e Align, EG_Coord_t OffsetX, EG_Coord_t OfsetY
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::AlignTo(EGObject *pAnchor, EG_AlignType_e Align, EG_Coord_t OffsetX, EG_Coord_t OffsetY)
+void EGObject::AlignTo(EGObject *pAnchor, EG_AlignType_e Align, int32_t OffsetX, int32_t OffsetY)
 {
-EG_Coord_t X = 0;
-EG_Coord_t Y = 0;
+int32_t X = 0;
+int32_t Y = 0;
 
 	UpdateLayout();
 	if(pAnchor == nullptr) pAnchor = GetParent();
 	EGObject *pParent = GetParent();
-	EG_Coord_t ParentBorder = pParent->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t ParentLeft = pParent->GetStylePadLeft(EG_PART_MAIN) + ParentBorder;
-	EG_Coord_t ParentTop = pParent->GetStylePadTop(EG_PART_MAIN) + ParentBorder;
-	EG_Coord_t AnchorBorder = pAnchor->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t AnchorLeft = pAnchor->GetStylePadLeft(EG_PART_MAIN) + AnchorBorder;
-	EG_Coord_t AnchorTop = pAnchor->GetStylePadTop(EG_PART_MAIN) + AnchorBorder;
+	int32_t ParentBorder = pParent->GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t ParentLeft = pParent->GetStylePadLeft(EG_PART_MAIN) + ParentBorder;
+	int32_t ParentTop = pParent->GetStylePadTop(EG_PART_MAIN) + ParentBorder;
+	int32_t AnchorBorder = pAnchor->GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t AnchorLeft = pAnchor->GetStylePadLeft(EG_PART_MAIN) + AnchorBorder;
+	int32_t AnchorTop = pAnchor->GetStylePadTop(EG_PART_MAIN) + AnchorBorder;
 	if(Align == EG_ALIGN_DEFAULT) {
 		if(pAnchor->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL)	Align = EG_ALIGN_TOP_RIGHT;
 		else Align = EG_ALIGN_TOP_LEFT;
@@ -421,9 +422,9 @@ EG_Coord_t Y = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetX(void)
+int32_t EGObject::GetX(void)
 {
-EG_Coord_t Coord;
+int32_t Coord;
 EGObject *pParent = GetParent();
 
 	if(pParent) {
@@ -438,16 +439,16 @@ EGObject *pParent = GetParent();
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetX2(void)
+int32_t EGObject::GetX2(void)
 {
 	return GetX() + GetWidth();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetY(void)
+int32_t EGObject::GetY(void)
 {
-EG_Coord_t Coord;
+int32_t Coord;
 EGObject *pParent = GetParent();
 
 	if(pParent) {
@@ -462,57 +463,57 @@ EGObject *pParent = GetParent();
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetY2(void)
+int32_t EGObject::GetY2(void)
 {
 	return GetY() + GetHeight();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetAlignedX(void)
+int32_t EGObject::GetAlignedX(void)
 {
 	return GetStyleX(EG_PART_MAIN);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetAlignedY(void)
+int32_t EGObject::GetAlignedY(void)
 {
 	return GetStyleY(EG_PART_MAIN);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetWidth(void)
+int32_t EGObject::GetWidth(void)
 {
 	return m_Rect.GetWidth();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetHeight(void)
+int32_t EGObject::GetHeight(void)
 {
 	return m_Rect.GetHeight();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetContentWidth()
+int32_t EGObject::GetContentWidth()
 {
-	EG_Coord_t Left = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t Right = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t Width = (m_Rect.GetWidth() - Left - Right - BorderWidth * 2);
+	int32_t Left = GetStylePadLeft(EG_PART_MAIN);
+	int32_t Right = GetStylePadRight(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t Width = (m_Rect.GetWidth() - Left - Right - BorderWidth * 2);
   return Width;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetContentHeight()
+int32_t EGObject::GetContentHeight()
 {
-	EG_Coord_t Top = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t Bottom = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t Top = GetStylePadTop(EG_PART_MAIN);
+	int32_t Bottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	return m_Rect.GetHeight() - Top - Bottom - BorderWidth * 2;
 }
 
@@ -520,7 +521,7 @@ EG_Coord_t EGObject::GetContentHeight()
 
 void EGObject::GetContentArea(EGRect *pRect)
 {
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	m_Rect.Copy(pRect);
 	pRect->Deflate(BorderWidth, BorderWidth);
 	pRect->Deflate(GetStylePadLeft(EG_PART_MAIN), GetStylePadRight(EG_PART_MAIN), GetStylePadTop(EG_PART_MAIN), GetStylePadBottom(EG_PART_MAIN));
@@ -528,7 +529,7 @@ void EGObject::GetContentArea(EGRect *pRect)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetSelfWidth(void)
+int32_t EGObject::GetSelfWidth(void)
 {
 	EGPoint Point = {0, EG_COORD_MIN};
 	EGEvent::EventSend((EGObject *)this, EG_EVENT_GET_SELF_SIZE, &Point);
@@ -537,7 +538,7 @@ EG_Coord_t EGObject::GetSelfWidth(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetSelfHeight(void)
+int32_t EGObject::GetSelfHeight(void)
 {
 	EGPoint Point = {EG_COORD_MIN, 0};
 	EGEvent::EventSend((EGObject *)this, EG_EVENT_GET_SELF_SIZE, &Point);
@@ -548,8 +549,8 @@ EG_Coord_t EGObject::GetSelfHeight(void)
 
 bool EGObject::RefreshSelfSize(void)
 {
-	EG_Coord_t StyleWidth = GetStyleWidth(EG_PART_MAIN);
-	EG_Coord_t StyleHeight = GetStyleHeight(EG_PART_MAIN);
+	int32_t StyleWidth = GetStyleWidth(EG_PART_MAIN);
+	int32_t StyleHeight = GetStyleHeight(EG_PART_MAIN);
 	if(StyleWidth != EG_SIZE_CONTENT && StyleHeight != EG_SIZE_CONTENT) return false;
 	MarkLayoutDirty();
 	return true;
@@ -561,20 +562,20 @@ void EGObject::RefreshPosition(void)
 {
 	if(IsLayoutPositioned()) return;
 	EGObject *pParent = GetParent();
-	EG_Coord_t X = GetStyleX(EG_PART_MAIN);
-	EG_Coord_t Y = GetStyleY(EG_PART_MAIN);
+	int32_t X = GetStyleX(EG_PART_MAIN);
+	int32_t Y = GetStyleY(EG_PART_MAIN);
 	if(pParent == nullptr) {
 		MoveTo(X, Y);
 		return;
 	}
-	EG_Coord_t ParentWidth = pParent->GetContentWidth();	// Handle percentage value
-	EG_Coord_t ParentHeight = pParent->GetContentHeight();
+	int32_t ParentWidth = pParent->GetContentWidth();	// Handle percentage value
+	int32_t ParentHeight = pParent->GetContentHeight();
 	if(EG_COORD_IS_PCT(X)) X = (ParentWidth * EG_COORD_GET_PCT(X)) / 100;
 	if(EG_COORD_IS_PCT(Y)) Y = (ParentHeight * EG_COORD_GET_PCT(Y)) / 100;
-	EG_Coord_t TranslateX = GetStyleTranslateX(EG_PART_MAIN);	// Handle percentage value of translate
-	EG_Coord_t TranslateY = GetStyleTranslateY(EG_PART_MAIN);
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t Height = GetHeight();
+	int32_t TranslateX = GetStyleTranslateX(EG_PART_MAIN);	// Handle percentage value of translate
+	int32_t TranslateY = GetStyleTranslateY(EG_PART_MAIN);
+	int32_t Width = GetWidth();
+	int32_t Height = GetHeight();
 	if(EG_COORD_IS_PCT(TranslateX)) TranslateX = (Width * EG_COORD_GET_PCT(TranslateX)) / 100;
 	if(EG_COORD_IS_PCT(TranslateY)) TranslateY = (Height * EG_COORD_GET_PCT(TranslateY)) / 100;
 	X += TranslateX;	// Use the translation
@@ -631,14 +632,14 @@ void EGObject::RefreshPosition(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::MoveTo(EG_Coord_t X, EG_Coord_t Y)
+void EGObject::MoveTo(int32_t X, int32_t Y)
 {
 EGObject *pParent = GetParent();
 bool Invalidate1 = false;
 
 	if(pParent) {
-		EG_Coord_t LeftPadding = pParent->GetStylePadLeft(EG_PART_MAIN);
-		EG_Coord_t TopPadding = pParent->GetStylePadTop(EG_PART_MAIN);
+		int32_t LeftPadding = pParent->GetStylePadLeft(EG_PART_MAIN);
+		int32_t TopPadding = pParent->GetStylePadTop(EG_PART_MAIN);
 		if(HasFlagSet(EG_OBJ_FLAG_FLOATING)) {
 			X += LeftPadding + pParent->m_Rect.GetX1();
 			Y += TopPadding + pParent->m_Rect.GetY1();
@@ -647,7 +648,7 @@ bool Invalidate1 = false;
 			X += LeftPadding + pParent->m_Rect.GetX1() - pParent->GetScrollX();
 			Y += TopPadding + pParent->m_Rect.GetY1() - pParent->GetScrollY();
 		}
-		EG_Coord_t BorderWidth = pParent->GetStyleBorderWidth(EG_PART_MAIN);
+		int32_t BorderWidth = pParent->GetStyleBorderWidth(EG_PART_MAIN);
 		X += BorderWidth;
 		Y += BorderWidth;
 	}
@@ -681,7 +682,7 @@ bool Invalidate1 = false;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::MoveChildrenBy(EG_Coord_t AdjustmentX, EG_Coord_t AdjustmentY, bool IgnoreFloating)
+void EGObject::MoveChildrenBy(int32_t AdjustmentX, int32_t AdjustmentY, bool IgnoreFloating)
 {
 uint32_t i;
 
@@ -750,7 +751,7 @@ void EGObject::InvalidateArea(const EGRect *pRect)
 
 void EGObject::Invalidate(void)
 {
-	EG_Coord_t ExtenSize = GetExtDrawSize();
+	int32_t ExtenSize = GetExtDrawSize();
   EGRect Area(m_Rect);
   Area.Inflate(ExtenSize, ExtenSize);
 	InvalidateArea(&Area);
@@ -767,7 +768,7 @@ bool EGObject::AreaIsVisible(EGRect *pRect)
 	if((pScreen != EGDisplay::GetActiveScreen(pDisplay)) && (pScreen != EGDisplay::GetPrevoiusScreen(pDisplay)) &&
 		 (pScreen != EGDisplay::GetTopLayer(pDisplay)) && (pScreen != EGDisplay::GetSystemLayer(pDisplay))) return false;
 	if(!HasAnyFlagSet(EG_OBJ_FLAG_OVERFLOW_VISIBLE)){	// Truncate the area to the object
-		EG_Coord_t ExtenSize = GetExtDrawSize();
+		int32_t ExtenSize = GetExtDrawSize();
 		EGRect Area(m_Rect);
     Area.Inflate(ExtenSize, ExtenSize);
 		if(!pRect->Intersect(pRect, &Area)) return false;		// return if the area is not on the object
@@ -790,7 +791,7 @@ bool EGObject::AreaIsVisible(EGRect *pRect)
 
 bool EGObject::IsVisible(void)
 {
-	EG_Coord_t ExtenSize = GetExtDrawSize();
+	int32_t ExtenSize = GetExtDrawSize();
 	EGRect Area(m_Rect);
   Area.Inflate(ExtenSize, ExtenSize);
 	return AreaIsVisible(&Area);
@@ -798,7 +799,7 @@ bool EGObject::IsVisible(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetExtClickArea(EG_Coord_t Size)
+void EGObject::SetExtClickArea(int32_t Size)
 {
 	AllocateAttribute();
 	m_pAttributes->ExtendedClickPadding = Size;
@@ -834,7 +835,7 @@ EGRect Rect;
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::ClampWidth(EG_Coord_t width, EG_Coord_t min_width, EG_Coord_t max_width, EG_Coord_t ref_width)
+int32_t EGObject::ClampWidth(int32_t width, int32_t min_width, int32_t max_width, int32_t ref_width)
 {
 	if(EG_COORD_IS_PCT(min_width)) min_width = (ref_width * EG_COORD_GET_PCT(min_width)) / 100;
 	if(EG_COORD_IS_PCT(max_width)) max_width = (ref_width * EG_COORD_GET_PCT(max_width)) / 100;
@@ -843,7 +844,7 @@ EG_Coord_t EGObject::ClampWidth(EG_Coord_t width, EG_Coord_t min_width, EG_Coord
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::ClampHeight(EG_Coord_t height, EG_Coord_t min_height, EG_Coord_t max_height, EG_Coord_t ref_height)
+int32_t EGObject::ClampHeight(int32_t height, int32_t min_height, int32_t max_height, int32_t ref_height)
 {
 	if(EG_COORD_IS_PCT(min_height)) min_height = (ref_height * EG_COORD_GET_PCT(min_height)) / 100;
 	if(EG_COORD_IS_PCT(max_height)) max_height = (ref_height * EG_COORD_GET_PCT(max_height)) / 100;
@@ -853,16 +854,16 @@ EG_Coord_t EGObject::ClampHeight(EG_Coord_t height, EG_Coord_t min_height, EG_Co
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::CalcContentWidth(void)
+int32_t EGObject::CalcContentWidth(void)
 {
 uint32_t i;
 
 	ScrollToX(0, EG_ANIM_OFF);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t RightPadding = GetStylePadRight(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t LeftPadding = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t Width = GetSelfWidth() + LeftPadding + RightPadding;
-	EG_Coord_t ChildResolution = EG_COORD_MIN;
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t RightPadding = GetStylePadRight(EG_PART_MAIN) + BorderWidth;
+	int32_t LeftPadding = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
+	int32_t Width = GetSelfWidth() + LeftPadding + RightPadding;
+	int32_t ChildResolution = EG_COORD_MIN;
 	uint32_t ChildCount = GetChildCount();
 	// With RTL find the left most coordinate
 	if(GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) {
@@ -932,14 +933,14 @@ uint32_t i;
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::CalcContentHeight(void)
+int32_t EGObject::CalcContentHeight(void)
 {
 	ScrollToY(0, EG_ANIM_OFF);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t TopPadding = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t BottomPadding = GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t Height = GetSelfHeight() + TopPadding + BottomPadding;
-	EG_Coord_t ChildResolution = EG_COORD_MIN;
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t TopPadding = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+	int32_t BottomPadding = GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
+	int32_t Height = GetSelfHeight() + TopPadding + BottomPadding;
+	int32_t ChildResolution = EG_COORD_MIN;
 	uint32_t ChildCount = GetChildCount();
 	for(uint32_t i = 0; i < ChildCount; i++) {
 		EGObject *pChild = m_pAttributes->ppChildren[i];
@@ -988,7 +989,7 @@ void EGObject::LayoutUpdateCore(void)
 		if(ChildCount > 0) {
 			uint32_t LayoutReference = GetStyleLayout(EG_PART_MAIN);
       if(LayoutReference > 0){
-			  EG_LayoutDiscriptor *pLayout  = (EG_LayoutDiscriptor*)m_LayoutList.GetAt((POSITION)LayoutReference);
+			  EG_LayoutDescriptor *pLayout  = (EG_LayoutDescriptor*)m_LayoutList.GetAt((POSITION)LayoutReference);
         void *pUserData = pLayout->pUserData;     // get the layout to update
   		  pLayout->UpdateCB(this, pUserData);       // call the update function
       }

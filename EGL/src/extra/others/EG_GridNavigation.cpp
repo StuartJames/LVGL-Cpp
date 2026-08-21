@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -89,7 +90,7 @@ void EGGridNav::EventCB(EGEvent *pEvent)
         case EG_KEY_RIGHT: {
           if((pGridNav->m_Control & EG_GRIDNAV_CTRL_SCROLL_FIRST) && pGridNav->m_pFocused->HasFlagSet(EG_OBJ_FLAG_SCROLLABLE) &&
               pGridNav->m_pFocused->GetScrollRight() > 0) {
-            EG_Coord_t d = pGridNav->m_pFocused->GetWidth() / 4;
+            int32_t d = pGridNav->m_pFocused->GetWidth() / 4;
             if(d <= 0) d = 1;
             pGridNav->m_pFocused->ScrollByBounded(-d, 0, EG_ANIM_ON);
           }
@@ -108,7 +109,7 @@ void EGGridNav::EventCB(EGEvent *pEvent)
         case EG_KEY_LEFT: {
           if((pGridNav->m_Control & EG_GRIDNAV_CTRL_SCROLL_FIRST) && pGridNav->m_pFocused->HasFlagSet(EG_OBJ_FLAG_SCROLLABLE) &&
               pGridNav->m_pFocused->GetScrollLeft() > 0) {
-            EG_Coord_t d = pGridNav->m_pFocused->GetWidth() / 4;
+            int32_t d = pGridNav->m_pFocused->GetWidth() / 4;
             if(d <= 0) d = 1;
             pGridNav->m_pFocused->ScrollByBounded(d, 0, EG_ANIM_ON);
           }
@@ -127,7 +128,7 @@ void EGGridNav::EventCB(EGEvent *pEvent)
         case EG_KEY_DOWN: {
           if((pGridNav->m_Control & EG_GRIDNAV_CTRL_SCROLL_FIRST) && pGridNav->m_pFocused->HasFlagSet(EG_OBJ_FLAG_SCROLLABLE) &&
               pGridNav->m_pFocused->GetScrollBottom() > 0) {
-            EG_Coord_t d = pGridNav->m_pFocused->GetHeight() / 4;
+            int32_t d = pGridNav->m_pFocused->GetHeight() / 4;
             if(d <= 0) d = 1;
             pGridNav->m_pFocused->ScrollByBounded(0, -d, EG_ANIM_ON);
           }
@@ -147,7 +148,7 @@ void EGGridNav::EventCB(EGEvent *pEvent)
         case EG_KEY_UP: {
           if((pGridNav->m_Control & EG_GRIDNAV_CTRL_SCROLL_FIRST) && pGridNav->m_pFocused->HasFlagSet(EG_OBJ_FLAG_SCROLLABLE) &&
               pGridNav->m_pFocused->GetScrollTop() > 0) {
-            EG_Coord_t d = pGridNav->m_pFocused->GetHeight() / 4;
+            int32_t d = pGridNav->m_pFocused->GetHeight() / 4;
             if(d <= 0) d = 1;
             pGridNav->m_pFocused->ScrollByBounded(0, d, EG_ANIM_ON);
           }
@@ -244,21 +245,21 @@ void EGGridNav::EventCB(EGEvent *pEvent)
 
 EGObject* EGGridNav::FindChild(EGObject *pObj, EGObject *pStartChild, EG_FindMode_e Mode)
 {
-	EG_Coord_t StartX = GetCenterX(pStartChild);
-	EG_Coord_t StartY = GetCenterY(pStartChild);
+	int32_t StartX = GetCenterX(pStartChild);
+	int32_t StartY = GetCenterY(pStartChild);
 	uint32_t Count = pObj->GetChildCount();
 	EGObject *pGuess = nullptr;
-	EG_Coord_t GuessErrorX = EG_COORD_MAX;
-	EG_Coord_t GuessErrorY = EG_COORD_MAX;
-	EG_Coord_t HalfHeight = pStartChild->GetHeight() / 2;
-	EG_Coord_t FullHeight = pObj->GetHeight() + pObj->GetScrollTop() + pObj->GetScrollBottom();
+	int32_t GuessErrorX = EG_COORD_MAX;
+	int32_t GuessErrorY = EG_COORD_MAX;
+	int32_t HalfHeight = pStartChild->GetHeight() / 2;
+	int32_t FullHeight = pObj->GetHeight() + pObj->GetScrollTop() + pObj->GetScrollBottom();
 	uint32_t i;
 	for(i = 0; i < Count; i++) {
 		EGObject *pChild = pObj->GetChild(i);
 		if(pChild == pStartChild) continue;
 		if(IsFocusable(pChild) == false) continue;
-		EG_Coord_t ErrorX = 0;
-		EG_Coord_t ErrorY = 0;
+		int32_t ErrorX = 0;
+		int32_t ErrorY = 0;
 		switch(Mode) {
 			case FIND_LEFT:
 				ErrorX = GetCenterX(pChild) - StartX;
@@ -344,14 +345,14 @@ bool EGGridNav::IsFocusable(EGObject *pObj)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGGridNav::GetCenterX(EGObject *pObj)
+int32_t EGGridNav::GetCenterX(EGObject *pObj)
 {
 	return pObj->m_Rect.GetX1() + pObj->m_Rect.GetWidth() / 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGGridNav::GetCenterY(EGObject *pObj)
+int32_t EGGridNav::GetCenterY(EGObject *pObj)
 {
 	return pObj->m_Rect.GetY1() + pObj->m_Rect.GetHeight() / 2;
 }

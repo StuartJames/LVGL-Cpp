@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -32,55 +33,45 @@
 #include "EG_SoftContext.h"
 #include "../EG_DrawMask.h"
 
+class EGSoftContext;
+
 //////////////////////////////////////////////////////////////////////////////////////
 
-class EGSoftBlend
+class EGSoftBlend : public EGBlendBase
 {
 public:
-                    EGSoftBlend(const EGSoftContext *pContext);
+                    EGSoftBlend(EGSoftContext *pDC);
                     ~EGSoftBlend(void);
   void              DoBlend(void);
 
-  void              (*BlendProc)(EGSoftBlend *pBlend);
-
-  static void       BlendBasic(EGSoftBlend *pBlend);
-  static void       FillSetPixel(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *blend_area, EG_Coord_t dest_stride,
-									        EG_Color_t color, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stide);
-  static void       FillNormal(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride,
-                          EG_Color_t color, EG_OPA_t opa,	const EG_OPA_t *mask, EG_Coord_t mask_stride);
-  static void       MapSetPixel(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride,	const EG_Color_t *src_buf, 
-                          EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride);
-  static void       MapNormal(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, const EG_Color_t *src_buf,
-									        EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride);
+  static void       BlendBasic(EGBlendBase *pBlend);
+  static void       FillSetPixel(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *blend_area, int32_t dest_stride,
+									        EG_Color_t color, EG_OPA_t opa, const EG_OPA_t *mask, int32_t mask_stide);
+  static void       FillNormal(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride,
+                          EG_Color_t color, EG_OPA_t opa,	const EG_OPA_t *mask, int32_t mask_stride);
+  static void       MapSetPixel(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride,	const EG_Color_t *src_buf, 
+                          int32_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, int32_t mask_stride);
+  static void       MapNormal(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride, const EG_Color_t *src_buf,
+									        int32_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, int32_t mask_stride);
 
 #if EG_DRAW_COMPLEX
-  static  void      FillBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, 
-                          EG_Color_t color, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride, EG_BlendMode_e blend_mode);
-  static void       MapBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, const EG_Color_t *src_buf,
-                          EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride, EG_BlendMode_e blend_mode);
+  static  void      FillBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride, 
+                          EG_Color_t color, EG_OPA_t opa, const EG_OPA_t *mask, int32_t mask_stride, EG_BlendMode_e blend_mode);
+  static void       MapBlended(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride, const EG_Color_t *src_buf,
+                          int32_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, int32_t mask_stride, EG_BlendMode_e blend_mode);
   static EG_Color_t BlendTrueColorAdditive(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t opa);
   static EG_Color_t BlendTrueColorSubtractive(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t opa);
   static EG_Color_t BlendTrueColorMultiply(EGSoftBlend *pBlend, EG_Color_t ForeColor, EG_Color_t BackColor, EG_OPA_t opa);
 #endif
 
 #if EG_COLOR_SCREEN_TRANSP
-  static void       FillARGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride,
-                  EG_Color_t color, EG_OPA_t opa,	const EG_OPA_t *mask, EG_Coord_t mask_stride);
-  static void       MapARGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, EG_Coord_t dest_stride, const EG_Color_t *src_buf,
-								  EG_Coord_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, EG_Coord_t mask_stride, EG_BlendMode_e blend_mode);
+  static void       FillARGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride,
+                          EG_Color_t color, EG_OPA_t opa,	const EG_OPA_t *mask, int32_t mask_stride);
+  static void       MapARGB(EGSoftBlend *pBlend, EG_Color_t *dest_buf, const EGRect *dest_area, int32_t dest_stride, const EG_Color_t *src_buf,
+								          int32_t src_stride, EG_OPA_t opa, const EG_OPA_t *mask, int32_t mask_stride, EG_BlendMode_e blend_mode);
   static void       SetPixelARGB(uint8_t *buf, EG_Color_t Color, EG_OPA_t OPA);
   static void       SetPixelBlendedARGB(EGSoftBlend *pBlend, uint8_t *pBuffer, EG_Color_t Color, EG_OPA_t OPA, EG_Color_t (*BlendFunc)(EGSoftBlend *, EG_Color_t, EG_Color_t, EG_OPA_t));
-#endif 
-
-  const EGRect         *m_pRect;          // The area with absolute coordinates to draw on 
-  const EG_Color_t     *m_pSourceBuffer;  // Pointer to an image to blend. If set `fill_color` is ignored 
-  EG_Color_t            m_Color;          // Fill color
-  EG_OPA_t             *m_pMaskBuffer;    // NULL if ignored, or an alpha mask to apply on `blend_area`
-  DrawMaskRes_t         m_MaskResult;     // The result of the previous mask operation 
-  const EGRect         *m_pMaskRect;      // The area of `mask_buf` with absolute coordinates
-  EG_OPA_t              m_OPA;            // The overall opacity
-  EG_BlendMode_e        m_BlendMode;      // E.g. EG_BLEND_MODE_ADDITIVE
-  const EGSoftContext  *m_pContext;
+#endif
 
 };
 
@@ -193,10 +184,10 @@ EG_Color_t BackColor;
 EG_Color_t ResultColor;
 EG_OPA_t BackOPA = pBuffer[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 
-#if LV_COLOR_DEPTH == 8
+#if EG_COLOR_DEPTH == 8
 	BackColor.full = pBuffer[0];
-	lv_color_mix_with_alpha(BackColor, BackOPA, color, opa, &ResultColor, &pBuffer[1]);
-	if(pBuffer[1] <= LV_OPA_MIN) return;
+	EG_ColorMixWithAlpha(BackColor, BackOPA, color, opa, &ResultColor, &pBuffer[1]);
+	if(pBuffer[1] <= EG_OPA_MIN) return;
 	pBuffer[0] = ResultColor.full;
 #elif EG_COLOR_DEPTH == 16
 	BackColor.full = pBuffer[0] + (pBuffer[1] << 8);
@@ -206,8 +197,8 @@ EG_OPA_t BackOPA = pBuffer[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
 	pBuffer[1] = ResultColor.full >> 8;
 #elif EG_COLOR_DEPTH == 32
 	BackColor = *((EG_Color_t *)pBuffer);
-	lv_color_mix_with_alpha(BackColor, BackOPA, color, opa, &ResultColor, &pBuffer[3]);
-	if(pBuffer[3] <= LV_OPA_MIN) return;
+	EG_ColorMixWithAlpha(BackColor, BackOPA, color, opa, &ResultColor, &pBuffer[3]);
+	if(pBuffer[3] <= EG_OPA_MIN) return;
 	pBuffer[0] = ResultColor.ch.blue;
 	pBuffer[1] = ResultColor.ch.green;
 	pBuffer[2] = ResultColor.ch.red;
@@ -226,14 +217,14 @@ uint32_t LastOPA = 0xffff;  // Set to an invalid value for first
 
 
 // Get the BG color
-#if LV_COLOR_DEPTH == 8
-	if(pBuffer[1] <= LV_OPA_MIN) return;
+#if EG_COLOR_DEPTH == 8
+	if(pBuffer[1] <= EG_OPA_MIN) return;
 	BackColor.full = pBuffer[0];
 #elif EG_COLOR_DEPTH == 16
 	if(pBuffer[2] <= EG_OPA_MIN) return;
 	BackColor.full = pBuffer[0] + (pBuffer[1] << 8);
 #elif EG_COLOR_DEPTH == 32
-	if(pBuffer[3] <= LV_OPA_MIN) return;
+	if(pBuffer[3] <= EG_OPA_MIN) return;
 	BackColor = *((EG_Color_t *)pBuffer);
 #endif
 	// Get the result color
@@ -245,7 +236,7 @@ uint32_t LastOPA = 0xffff;  // Set to an invalid value for first
 		ResultColor = BlendFunc(pBlend, SrceColor, DestColor, LastOPA);
 	}
 // Set the result color
-#if LV_COLOR_DEPTH == 8
+#if EG_COLOR_DEPTH == 8
 	pBuffer[0] = ResultColor.full;
 #elif EG_COLOR_DEPTH == 16
 	pBuffer[0] = ResultColor.full & 0xff;

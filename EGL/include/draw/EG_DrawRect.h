@@ -1,36 +1,38 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #pragma once
 
 #include "../EG_IntrnlConfig.h"
+#include "EG_DrawBase.h"
 #include "../misc/EG_Color.h"
 #include "../misc/EG_Point.h"
 #include "../misc/EG_Rect.h"
 #include "../misc/EG_Style.h"
 #include "sw/EG_DrawSoftGradient.h"
 
-class EGDrawContext;
+class EGDeviceContext;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,18 +41,18 @@ EG_EXPORT_CONST_INT(EG_RADIUS_CIRCLE);
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-class EGDrawRect
+class EGDrawRect : public EGDrawBase
 {
 public:
                     EGDrawRect(void);
-  void              Draw(const EGDrawContext *pContext, const EGRect *pRect);
-  void              DrawBackground(const EGDrawContext *pContext, const EGRect *pRect);
+  void              Draw(EGDeviceContext *pDC, const EGRect *pRect);
+  void              DrawBackground(EGDeviceContext *pDC, const EGRect *pRect);
   void              InitialiseBuffer(void){};
   void              Reset(void);
   void              operator = (const EGDrawRect &rval);
+  void              operator = (const EGDrawRect *pval);
 
-  const EGDrawContext  *m_pContext;
-	EG_Coord_t            m_Radius;
+	int32_t               m_Radius;
 	EG_BlendMode_e        m_BlendMode;
 	EG_OPA_t              m_BackgroundOPA;	      // Background
 	EG_Color_t            m_BackgroundColor;      // First element of a gradient is a color, so it maps well here
@@ -62,18 +64,12 @@ public:
 	EG_OPA_t              m_BackImageRecolorOPA;
 	uint8_t               m_BackImageTiled;
 	EG_Color_t            m_BorderColor;	        // Border
-	EG_Coord_t            m_BorderWidth;
+	int32_t               m_BorderWidth;
 	EG_OPA_t              m_BorderOPA;
 	uint8_t               m_BorderPost : 1;       // There is a border it will be drawn later.
 	EG_BorderSide_t       m_BorderSide : 5;
 	EG_Color_t            m_OutlineColor;	        // Outline
-	EG_Coord_t            m_OutlineWidth;
-	EG_Coord_t            m_OutlinePadding;
+	int32_t               m_OutlineWidth;
+	int32_t               m_OutlinePadding;
 	EG_OPA_t              m_OutlineOPA;
-	EG_Color_t            m_ShadowColor;	        // Shadow
-	EG_Coord_t            m_ShadowWidth;
-	EG_Coord_t            m_ShadowOffsetX;
-	EG_Coord_t            m_ShadowOffsetY;
-	EG_Coord_t            m_ShadowSpread;
-	EG_OPA_t              m_ShadowOPA;
 };

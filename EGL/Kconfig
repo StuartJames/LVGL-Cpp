@@ -483,8 +483,15 @@ menu "EGL configuration"
                 help
                     Set this option to configure IRAM as EG_ATTRIBUTE_FAST_MEM
 
-            config EG_USE_LARGE_COORD
-                bool "Extend the default -32k..32k coordinate range to -4M..4M by using int32_t for coordinates instead of int16_t"
+            config EG_USE_FLOAT
+              bool "Use float as EG_Precise_t"
+              default n
+
+            config EG_USE_MATRIX
+              bool "Enable matrix support"
+              default n
+              select EG_USE_FLOAT
+
         endmenu
     endmenu
 

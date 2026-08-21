@@ -1,34 +1,35 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DrawBase.h"
 #include "draw/EG_DrawRect.h"
 #include "misc/EG_Assert.h"
+#include "draw/sw/EG_SoftContext.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawRect::EGDrawRect(void) : 
-  m_pContext(nullptr),
+EGDrawRect::EGDrawRect(void) : EGDrawBase(),
   m_Radius(0),
   m_BlendMode(EG_BLEND_MODE_NORMAL),
 	m_BackgroundOPA(EG_OPA_COVER),
@@ -47,36 +48,31 @@ EGDrawRect::EGDrawRect(void) :
   m_OutlineColor(EG_ColorBlack()),
   m_OutlineWidth(0),
   m_OutlinePadding(0),
-	m_OutlineOPA(EG_OPA_COVER),
-	m_ShadowColor(EG_ColorBlack()),
-  m_ShadowWidth(0),
-  m_ShadowOffsetX(0),
-  m_ShadowOffsetY(0),
-	m_ShadowOPA(EG_OPA_COVER)
+	m_OutlineOPA(EG_OPA_COVER)
 {
 	m_BackgroundGrad.stops[0].color = EG_ColorWhite();
 	m_BackgroundGrad.stops[1].color = EG_ColorBlack();
 	m_BackgroundGrad.stops[1].frac = 0xFF;
-	m_BackgroundGrad.stops_count = 2;
+	m_BackgroundGrad.StopCount = 2;
   m_BackgroundGrad.dir = EG_GRAD_DIR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGDrawRect::Draw(const EGDrawContext *pContext, const EGRect *pRect)
+void EGDrawRect::Draw(EGDeviceContext *pDC, const EGRect *pRect)
 {
 	if(pRect->GetHeight() < 1 || pRect->GetWidth() < 1) return;
-  m_pContext = pContext;
-	pContext->DrawRectProc(this, pRect);
+  m_pContext = pDC;
+	pDC->DrawRectProc(this, pRect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGDrawRect::DrawBackground(const EGDrawContext *pContext, const EGRect *pRect)
+void EGDrawRect::DrawBackground(EGDeviceContext *pDC, const EGRect *pRect)
 {
 	if(pRect->GetHeight() < 1 || pRect->GetWidth() < 1) return;
-  m_pContext = pContext;
-	pContext->DrawBackgroundProc(this, pRect);
+  m_pContext = pDC;
+	pDC->DrawBackgroundProc(this, pRect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +85,7 @@ void EGDrawRect::Reset(void)
 	m_BackgroundGrad.stops[0].color = EG_ColorWhite();
 	m_BackgroundGrad.stops[1].color = EG_ColorBlack();
 	m_BackgroundGrad.stops[1].frac = 0xFF;
-	m_BackgroundGrad.stops_count = 2;
+	m_BackgroundGrad.StopCount = 2;
 	m_BorderColor = EG_ColorBlack();
 	m_ShadowColor = EG_ColorBlack();
   m_pBackImageSource = nullptr;
@@ -106,33 +102,66 @@ void EGDrawRect::Reset(void)
 
 void EGDrawRect::operator=(const EGDrawRect &rval)
 {
-  m_pContext              = rval.m_pContext;        
+  m_pContext              = rval.m_pContext;
 	m_Radius                = rval.m_Radius;
 	m_BlendMode             = rval.m_BlendMode;
-	m_BackgroundOPA         = rval.m_BackgroundOPA;	   
-	m_BackgroundColor       = rval.m_BackgroundColor;     
-	m_pBackImageSource      = rval.m_pBackImageSource;	   
-	m_pBackImageSymbolFont  = rval.m_pBackImageSymbolFont;	
+	m_BackgroundOPA         = rval.m_BackgroundOPA;
+	m_BackgroundColor       = rval.m_BackgroundColor;
+	m_pBackImageSource      = rval.m_pBackImageSource;
+	m_pBackImageSymbolFont  = rval.m_pBackImageSymbolFont;
   m_BackImageRecolor      = rval.m_BackImageRecolor;
 	m_BackImageOPA          = rval.m_BackImageOPA;
 	m_BackImageRecolorOPA   = rval.m_BackImageRecolorOPA;
 	m_BackImageTiled        = rval.m_BackImageTiled;
-	m_BorderColor           = rval.m_BorderColor;	       
+	m_BorderColor           = rval.m_BorderColor;
 	m_BorderWidth           = rval.m_BorderWidth;
 	m_BorderOPA             = rval.m_BorderOPA;
-	m_BorderPost            = rval.m_BorderPost;      
+	m_BorderPost            = rval.m_BorderPost;
 	m_BorderSide            = rval.m_BorderSide;
-	m_OutlineColor          = rval.m_OutlineColor;	       
+	m_OutlineColor          = rval.m_OutlineColor;
 	m_OutlineWidth          = rval.m_OutlineWidth;
 	m_OutlinePadding        = rval.m_OutlinePadding;
 	m_OutlineOPA            = rval.m_OutlineOPA;
-	m_ShadowColor           = rval.m_ShadowColor;	       
+	m_ShadowColor           = rval.m_ShadowColor;
 	m_ShadowWidth           = rval.m_ShadowWidth;
 	m_ShadowOffsetX         = rval.m_ShadowOffsetX;
 	m_ShadowOffsetY         = rval.m_ShadowOffsetY;
 	m_ShadowSpread          = rval.m_ShadowSpread;
 	m_ShadowOPA             = rval.m_ShadowOPA;
   EG_CopyMem(&m_BackgroundGrad, &rval.m_BackgroundGrad, sizeof(EG_GradDescriptor_t));
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+void EGDrawRect::operator=(const EGDrawRect *pval)
+{
+  m_pContext              = pval->m_pContext;
+	m_Radius                = pval->m_Radius;
+	m_BlendMode             = pval->m_BlendMode;
+	m_BackgroundOPA         = pval->m_BackgroundOPA;
+	m_BackgroundColor       = pval->m_BackgroundColor;
+	m_pBackImageSource      = pval->m_pBackImageSource;
+	m_pBackImageSymbolFont  = pval->m_pBackImageSymbolFont;
+  m_BackImageRecolor      = pval->m_BackImageRecolor;
+	m_BackImageOPA          = pval->m_BackImageOPA;
+	m_BackImageRecolorOPA   = pval->m_BackImageRecolorOPA;
+	m_BackImageTiled        = pval->m_BackImageTiled;
+	m_BorderColor           = pval->m_BorderColor;
+	m_BorderWidth           = pval->m_BorderWidth;
+	m_BorderOPA             = pval->m_BorderOPA;
+	m_BorderPost            = pval->m_BorderPost;
+	m_BorderSide            = pval->m_BorderSide;
+	m_OutlineColor          = pval->m_OutlineColor;
+	m_OutlineWidth          = pval->m_OutlineWidth;
+	m_OutlinePadding        = pval->m_OutlinePadding;
+	m_OutlineOPA            = pval->m_OutlineOPA;
+	m_ShadowColor           = pval->m_ShadowColor;
+	m_ShadowWidth           = pval->m_ShadowWidth;
+	m_ShadowOffsetX         = pval->m_ShadowOffsetX;
+	m_ShadowOffsetY         = pval->m_ShadowOffsetY;
+	m_ShadowSpread          = pval->m_ShadowSpread;
+	m_ShadowOPA             = pval->m_ShadowOPA;
+  EG_CopyMem(&m_BackgroundGrad, &pval->m_BackgroundGrad, sizeof(EG_GradDescriptor_t));
 }
 
 

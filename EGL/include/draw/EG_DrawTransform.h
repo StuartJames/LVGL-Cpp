@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -25,8 +26,8 @@
 
 #include "../EG_IntrnlConfig.h"
 #include "../misc/EG_Rect.h"
-#include "EG_DrawContext.h"
+#include "EG_DeviceContext.h"
 
 
-  void Transform(const EGDrawContext *pContext, const EGRect *pRect, const void *SrceBuffer, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight, EG_Coord_t SourceStride,
+  void Transform(const EGDeviceContext *pDC, const EGRect *pRect, const void *SrceBuffer, int32_t SourceWidth, int32_t SourceHeight, int32_t SourceStride,
                        const EGDrawImage *pImage, EG_ImageColorFormat_t ColorFormat, EG_Color_t *pColorBoffer, EG_OPA_t *pOpaBuf);

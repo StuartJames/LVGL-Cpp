@@ -1,24 +1,38 @@
-/**
- * @file lv_freetype.h
+/*
+ *                EGL 2025-2026 HydraSystems.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  Based on a design by LVGL Kft
+ *
+ * =====================================================================
+ *
+ * Edit     Date     Version       Edit Description
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
+
 #pragma once
 
 #include "EGL.h"
+
 #if EG_USE_FREETYPE
 
-/*********************
- *      DEFINES
- *********************/
-
-/**********************
- *      TYPEDEFS
- **********************/
-typedef enum {
+enum EG_FreeTypeFontStyle_e{
     FT_FONT_STYLE_NORMAL = 0,
     FT_FONT_STYLE_ITALIC = 1 << 0,
     FT_FONT_STYLE_BOLD   = 1 << 1
-} LV_FT_FONT_STYLE;
+} ;
 
 typedef struct {
     const char * name;  /* The name of the font file */
@@ -28,10 +42,6 @@ typedef struct {
     uint16_t weight;    /* font size */
     uint16_t style;     /* font style */
 } lv_ft_info_t;
-
-/**********************
- * GLOBAL PROTOTYPES
- **********************/
 
 /**
  * init freetype library
@@ -62,8 +72,6 @@ bool lv_ft_font_init(lv_ft_info_t * info);
  */
 void lv_ft_font_destroy(EG_Font_t * font);
 
-/**********************
- *      MACROS
- **********************/
 
-#endif /*EG_USE_FREETYPE*/
+
+#endif 

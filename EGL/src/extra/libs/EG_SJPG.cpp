@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -121,7 +122,7 @@ EG_Result_t EGDecoderSJPG::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 EG_Result_t ret = EG_RES_OK;
 
 	//  Read the SJPG/JPG header and find `width` and `height` 
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 
 	if(SourceType == EG_IMG_SRC_VARIABLE) {
 		const EGImageBuffer *pImageBuffer = (EGImageBuffer*)pSource;
@@ -533,7 +534,7 @@ end:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGDecoderSJPG::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGDecoderSJPG::ReadLine(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y, int32_t Length, uint8_t *pBuffer)
 {
 	if(pDescriptor->SourceType == EG_IMG_SRC_VARIABLE) {
 		SJPEG_t *pSJPEG = (SJPEG_t *)pDescriptor->pExtParam;

@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -34,7 +35,7 @@ typedef int _keep_pedantic_happy;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef enum {
+enum EG_GridNavControl_e{
     EG_GRIDNAV_CTRL_NONE          = 0x00,
     /* If there is no next/previous object in a direction,
      * the focus goes to the object in the next/previous row (on left/right keys)
@@ -45,10 +46,10 @@ typedef enum {
      * If there is no more room for scrolling the next/previous object will be focused normally */
     EG_GRIDNAV_CTRL_SCROLL_FIRST  = 0x02,
 
-} EG_GridNavControl_e;
+};
 
 
-typedef enum EG_FindMode_e : uint8_t{
+enum EG_FindMode_e : uint8_t{
 	FIND_LEFT,
 	FIND_RIGHT,
 	FIND_TOP,
@@ -57,7 +58,7 @@ typedef enum EG_FindMode_e : uint8_t{
 	FIND_PREV_ROW_LAST_ITEM,
 	FIND_FIRST_ROW,
 	FIND_LAST_ROW,
-} EG_FindMode_e;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +76,8 @@ private:
   EGObject*               FindFirstFocusable(EGObject *pObj);
   EGObject*               FindLastFocusable(EGObject *pObj);
   bool                    IsFocusable(EGObject *pObj);
-  EG_Coord_t              GetCenterX(EGObject *pObj);
-  EG_Coord_t              GetCenterY(EGObject *pObj);
+  int32_t              GetCenterX(EGObject *pObj);
+  int32_t              GetCenterY(EGObject *pObj);
 
   static void             EventCB(EGEvent *pEvent);
 

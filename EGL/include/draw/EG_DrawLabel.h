@@ -1,28 +1,30 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #pragma once
 
+#include "EG_DrawBase.h"
 #include "../misc/lv_bidi.h"
 #include "../misc/EG_Text.h"
 #include "../misc/EG_Color.h"
@@ -32,7 +34,7 @@
 
 #define EG_DRAW_LABEL_NO_TXT_SEL (0xFFFF)
 
-class EGDrawContext;
+class EGDeviceContext;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -51,32 +53,31 @@ typedef struct EG_DrawLabelHint_t {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class EGDrawLabel
+class EGDrawLabel : public EGDrawBase
 {
 public:
                   EGDrawLabel(void);
-  void            Draw(const EGDrawContext  *pDrawContext, const EGRect *pRect, const char *pText, EG_DrawLabelHint_t *pHint);
-  void            DrawChar(const EGDrawContext  *pDrawContext, const EGPoint *pPos, uint32_t Char);
+  void            Draw(EGDeviceContext  *pDC, const EGRect *pRect, const char *pText, EG_DrawLabelHint_t *pHint);
+  void            DrawChar(EGDeviceContext  *pDC, const EGPoint *pPos, uint32_t Char);
   void            Reset(void);
   void            operator = (const EGDrawLabel &rval);
 
-  const EGDrawContext  *m_pContext;        
-  const EG_Font_t  *m_pFont;
-  uint32_t          m_SelectStart;
-  uint32_t          m_SelectEnd;
-  EG_Color_t        m_Color;
-  EG_Color_t        m_SelectColor;
-  EG_Color_t        m_SelectBackColor;
-  EG_Coord_t        m_LineSpace;
-  EG_Coord_t        m_Kerning;
-  EG_Coord_t        m_OffsetX;
-  EG_Coord_t        m_OffsetY;
-  EG_OPA_t          m_OPA;
-  EG_BaseDirection_e     m_BidiDirection;
+  const EG_Font_t     *m_pFont;
+  uint32_t             m_SelectStart;
+  uint32_t             m_SelectEnd;
+  EG_Color_t           m_Color;
+  EG_Color_t           m_SelectColor;
+  EG_Color_t           m_SelectBackColor;
+  int32_t              m_LineSpace;
+  int32_t              m_Kerning;
+  int32_t              m_OffsetX;
+  int32_t              m_OffsetY;
+  EG_OPA_t             m_OPA;
+  EG_BaseDirection_e   m_BidiDirection;
   EG_TextAlignment_t   m_Align;
-  EG_TextFlag_t     m_Flag;
-  EG_TextDecor_e   m_Decoration : 3;
-  EG_BlendMode_e    m_BlendMode: 3;
+  EG_TextFlag_t        m_Flag;
+  EG_TextDecor_e       m_Decoration : 3;
+  EG_BlendMode_e       m_BlendMode : 3;
 
 private:
 

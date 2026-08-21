@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
  
@@ -41,7 +42,7 @@ EGImageBuffer::EGImageBuffer(void) :
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGImageBuffer::EGImageBuffer(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat) :
+EGImageBuffer::EGImageBuffer(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat) :
   m_IsNative(false)
 {
   Allocate(Width, Height, ColorFormat);
@@ -49,7 +50,7 @@ EGImageBuffer::EGImageBuffer(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorF
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGImageBuffer::EGImageBuffer(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat, const uint8_t *pData, uint32_t Size /*= 0*/) :
+EGImageBuffer::EGImageBuffer(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat, const uint8_t *pData, uint32_t Size /*= 0*/) :
   m_IsNative(false)
 {
 	if(Size == 0) m_DataSize = CalculateBufferSize(Width, Height, ColorFormat);	// Get image data size
@@ -71,7 +72,7 @@ EGImageBuffer::~EGImageBuffer(void)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-bool EGImageBuffer::Allocate(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat)
+bool EGImageBuffer::Allocate(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat)
 {
 	m_DataSize = CalculateBufferSize(Width, Height, ColorFormat);	// Get image data size
 	if(m_DataSize == 0) return false;
@@ -89,7 +90,7 @@ bool EGImageBuffer::Allocate(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorF
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EG_Color_t EGImageBuffer::GetPixelColor(EG_Coord_t x, EG_Coord_t y, EG_Color_t color)
+EG_Color_t EGImageBuffer::GetPixelColor(int32_t x, int32_t y, EG_Color_t color)
 {
 	EG_Color_t p_color = EG_ColorBlack();
 	uint8_t *buf_u8 = (uint8_t *)m_pData;
@@ -141,7 +142,7 @@ EG_Color_t EGImageBuffer::GetPixelColor(EG_Coord_t x, EG_Coord_t y, EG_Color_t c
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EG_OPA_t EGImageBuffer::GetPixelAlpha(EG_Coord_t x, EG_Coord_t y)
+EG_OPA_t EGImageBuffer::GetPixelAlpha(int32_t x, int32_t y)
 {
 	uint8_t *buf_u8 = (uint8_t *)m_pData;
 
@@ -185,7 +186,7 @@ EG_OPA_t EGImageBuffer::GetPixelAlpha(EG_Coord_t x, EG_Coord_t y)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGImageBuffer::SetPixelAlpha(EG_Coord_t x, EG_Coord_t y, EG_OPA_t opa)
+void EGImageBuffer::SetPixelAlpha(int32_t x, int32_t y, EG_OPA_t opa)
 {
 	uint8_t *buf_u8 = (uint8_t *)m_pData;
 
@@ -229,7 +230,7 @@ void EGImageBuffer::SetPixelAlpha(EG_Coord_t x, EG_Coord_t y, EG_OPA_t opa)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGImageBuffer::SetPixelColor(EG_Coord_t x, EG_Coord_t y, EG_Color_t c)
+void EGImageBuffer::SetPixelColor(int32_t x, int32_t y, EG_Color_t c)
 {
 uint8_t *buf_u8 = (uint8_t *)m_pData;
 
@@ -283,7 +284,7 @@ void EGImageBuffer::SetPalette(uint8_t id, EG_Color_t c)
 {
 	if((m_Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_1BIT && id > 1) || (m_Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_2BIT && id > 3) ||
 		 (m_Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_4BIT && id > 15) || (m_Header.ColorFormat == EG_COLOR_FORMAT_ALPHA_8BIT)) {
-		EG_LOG_WARN("lv_img_buf_set_px_alpha: invalid 'id'");
+		EG_LOG_WARN("SetPalette: invalid 'id'");
 		return;
 	}
 
@@ -295,7 +296,7 @@ void EGImageBuffer::SetPalette(uint8_t id, EG_Color_t c)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t EGImageBuffer::CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat)
+uint32_t EGImageBuffer::CalculateBufferSize(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat)
 {
 	switch(ColorFormat) {
 		case EG_COLOR_FORMAT_NATIVE:
@@ -328,7 +329,7 @@ uint32_t EGImageBuffer::CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height,
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGImageBuffer::GetTransformedRect(EGRect *pRect, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, EGScale Scale, const EGPoint *pPivot)
+void EGImageBuffer::GetTransformedRect(EGRect *pRect, int32_t Width, int32_t Height, int16_t Angle, EGScale Scale, const EGPoint *pPivot)
 {
 #if EG_DRAW_COMPLEX
 EGPoint Point1(0,0);

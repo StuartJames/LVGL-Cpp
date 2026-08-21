@@ -1,5 +1,24 @@
-/**
- * @file lv_draw_sw_dither.c
+/*
+ *                EGL 2025-2026 HydraSystems.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  Based on a design by LVGL Kft
+ *
+ * =====================================================================
+ *
+ * Edit     Date     Version       Edit Description
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -9,12 +28,12 @@
 
 #if _DITHER_GRADIENT
 
-void EG_ATTRIBUTE_FAST_MEM EG_DitherNone(EG_Gradient_t *grad, EG_Coord_t x, EG_Coord_t y, EG_Coord_t w)
+void EG_ATTRIBUTE_FAST_MEM EG_DitherNone(EG_Gradient_t *grad, int32_t x, int32_t y, int32_t w)
 {
 	EG_UNUSED(x);
 	EG_UNUSED(y);
 	if(grad == nullptr || grad->filled) return;
-	for(EG_Coord_t i = 0; i < w; i++) {
+	for(int32_t i = 0; i < w; i++) {
 		grad->map[i] = EG_ColorHex(grad->hmap[i].full);
 	}
 	grad->filled = 1;
@@ -30,7 +49,7 @@ static const uint8_t dither_ordered_threshold_matrix[8 * 8] = {
 	10, 58, 6, 54, 9, 57, 5, 53,
 	42, 26, 38, 22, 41, 25, 37, 21}; /* Shift by 6 to normalize */
 
-void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(EG_Gradient_t *grad, EG_Coord_t x, EG_Coord_t y, EG_Coord_t w)
+void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(EG_Gradient_t *grad, int32_t x, int32_t y, int32_t w)
 {
 	EG_UNUSED(x);
 	/* For vertical dithering, the error is spread on the next column (and not next line).
@@ -42,7 +61,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(EG_Gradient_t *grad, EG_Co
        Then we compute a complete row of ordered dither and store it in out. */
 
 	/*The apply the algorithm for this patch*/
-	for(EG_Coord_t j = 0; j < w; j++) {
+	for(int32_t j = 0; j < w; j++) {
 		int8_t factor = dither_ordered_threshold_matrix[(y & 7) * 8 + ((j)&7)] - 32;
 		EG_Color32_t tmp = grad->hmap[EG_CLAMP(0, j - 4, grad->size)];
 		EG_Color32_t t;
@@ -54,7 +73,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(EG_Gradient_t *grad, EG_Co
 	}
 }
 
-void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(EG_Gradient_t *grad, EG_Coord_t x, EG_Coord_t y, EG_Coord_t w)
+void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(EG_Gradient_t *grad, int32_t x, int32_t y, int32_t w)
 {
 	/* For vertical dithering, the error is spread on the next column (and not next line).
        Since the renderer is scanline based, it's not obvious what could be used to perform the rendering efficiently.
@@ -68,7 +87,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(EG_Gradient_t *grad, EG_Coor
 	EG_Color32_t tmp = grad->hmap[EG_CLAMP(0, y - 4, grad->size)];
 
 	/*The apply the algorithm for this patch*/
-	for(EG_Coord_t j = 0; j < 8; j++) {
+	for(int32_t j = 0; j < 8; j++) {
 		int8_t factor = dither_ordered_threshold_matrix[(y & 7) * 8 + ((j + x) & 7)] - 32;
 		EG_Color32_t t;
 		t.ch.red = EG_CLAMP(0, tmp.ch.red + factor, 255);
@@ -78,7 +97,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(EG_Gradient_t *grad, EG_Coor
 		grad->map[j] = EG_ColorHex(t.full);
 	}
 	/*Finally fill the line*/
-	EG_Coord_t j = 8;
+	int32_t j = 8;
 	for(; j < w - 8; j += 8) {
 		EG_CopyMem(grad->map + j, grad->map, 8 * sizeof(*grad->map));
 	}
@@ -89,7 +108,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(EG_Gradient_t *grad, EG_Coor
 }
 
 #if EG_DITHER_ERROR_DIFFUSION == 1
-void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(EG_Gradient_t *grad, EG_Coord_t xs, EG_Coord_t y, EG_Coord_t w)
+void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(EG_Gradient_t *grad, int32_t xs, int32_t y, int32_t w)
 {
 	EG_UNUSED(xs);
 	EG_UNUSED(y);
@@ -125,7 +144,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(EG_Gradient_t *grad, EG_
 	EG_SColor24_t next_px_err = {0}, next_l = {0}, error;
 	/*First last pixel are not dithered */
 	grad->map[0] = EG_ColorHex(grad->hmap[0].full);
-	for(EG_Coord_t x = 1; x < grad->size - 1; x++) {
+	for(int32_t x = 1; x < grad->size - 1; x++) {
 		EG_Color32_t t = grad->hmap[x];
 		EG_Color_t q;
 		/*Add error term*/
@@ -159,7 +178,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(EG_Gradient_t *grad, EG_
 	grad->map[grad->size - 1] = EG_ColorHex(grad->hmap[grad->size - 1].full);
 }
 
-void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffVertical(EG_Gradient_t *grad, EG_Coord_t xs, EG_Coord_t y, EG_Coord_t w)
+void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffVertical(EG_Gradient_t *grad, int32_t xs, int32_t y, int32_t w)
 {
 /* Try to implement error diffusion on a vertical gradient and an horizontal map using those tricks:
         Since the given hi-resolution gradient (in src) is vertical, the Floyd Steinberg algorithm pass need to be rotated,
@@ -204,7 +223,7 @@ void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffVertical(EG_Gradient_t *grad, EG_Co
 		grad->map[0] = EG_ColorHex(t.full);
 	}
 
-	for(EG_Coord_t x = 1; x < w; x++) {
+	for(int32_t x = 1; x < w; x++) {
 		EG_Color32_t t = grad->hmap[y];
 		EG_Color_t q;
 		/*Add the current error term*/

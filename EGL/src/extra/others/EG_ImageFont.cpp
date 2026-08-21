@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -44,7 +45,7 @@ EGImageFont::~EGImageFont(void)
 EG_Font_t* EGImageFont::Create(uint16_t Height)
 {
 	m_pFont->pProperties = (void*)this;
-	m_pFont->GetGlyphPropsCB = GetGlyphDiscriptor;
+	m_pFont->GetGlyphPropsCB = GetGlyphDescriptor;
 	m_pFont->GetGlyphBitmapCB = GetGlyphBitmap;
 	m_pFont->SubPixel = EG_FONT_SUBPX_NONE;
 	m_pFont->LineHeight = Height;
@@ -56,7 +57,7 @@ EG_Font_t* EGImageFont::Create(uint16_t Height)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-bool EGImageFont::GetGlyphDiscriptor(const EG_Font_t *pFont, EG_FontGlyphProps_t *pDiscriptor,
+bool EGImageFont::GetGlyphDescriptor(const EG_Font_t *pFont, EG_FontGlyphProps_t *pDescriptor,
 																	uint32_t Unicode, uint32_t UnicodeNext)
 {
 EG_ImageHeader_t Header;
@@ -65,13 +66,13 @@ EG_ImageHeader_t Header;
   EGImageFont *pImageFont = (EGImageFont*)pFont->pProperties;
 	if(!pImageFont->GetPath(pImageFont->m_pFont, pImageFont->m_Path, EG_IMAGEFONT_PATH_MAX_LEN, Unicode, UnicodeNext)) return false;
 	if(EGImageDecoder::GetInfo(pImageFont->m_Path, &Header) != EG_RES_OK) return false;
-	pDiscriptor->IsPlaceholder = 0;
-	pDiscriptor->AdvWidth = Header.Width;
-	pDiscriptor->BoxWidth = Header.Width;
-	pDiscriptor->BoxHeight = Header.Height;
-	pDiscriptor->BitsPerPixel = EG_IMGFONT_BPP; // Is image identifier 
-	pDiscriptor->OffsetX = 0;
-	pDiscriptor->OffsetY = 0;
+	pDescriptor->IsPlaceholder = 0;
+	pDescriptor->AdvWidth = Header.Width;
+	pDescriptor->BoxWidth = Header.Width;
+	pDescriptor->BoxHeight = Header.Height;
+	pDescriptor->BitsPerPixel = EG_IMGFONT_BPP; // Is image identifier 
+	pDescriptor->OffsetX = 0;
+	pDescriptor->OffsetY = 0;
 	return true;
 }
 

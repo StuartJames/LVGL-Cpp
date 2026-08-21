@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -30,8 +31,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "esp_log.h"
-
 #define EG_ANIM_REPEAT_INFINITE      0xFFFF
 #define EG_ANIM_PLAYTIME_INFINITE    0xFFFFFFFF
 
@@ -39,10 +38,10 @@ EG_EXPORT_CONST_INT(EG_ANIM_REPEAT_INFINITE);
 EG_EXPORT_CONST_INT(EG_ANIM_PLAYTIME_INFINITE);
 
 // Can be used to indicate if animations are enabled or disabled in a case
-typedef enum {
+enum EG_AnimateEnable_e{
     EG_ANIM_OFF,
     EG_ANIM_ON,
-} EG_AnimateEnable_e;
+};
 
 class EGAnimate;
 

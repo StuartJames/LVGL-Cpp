@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -50,15 +51,15 @@
 
 static EG_GradCacheItem_t* NextCached(EG_GradCacheItem_t *pItem);
 
-typedef EG_Result_t (*op_cache_t)(EG_GradCacheItem_t *pGradItem, void *pContext);
-static EG_Result_t IterateCache(op_cache_t Func, void *pContext, EG_GradCacheItem_t **ppOut);
+typedef EG_Result_t (*op_cache_t)(EG_GradCacheItem_t *pGradItem, void *pDC);
+static EG_Result_t IterateCache(op_cache_t Func, void *pDC, EG_GradCacheItem_t **ppOut);
 static size_t GetGradientCacheSize(EG_GradCacheItem_t *pGradItem);
-static EG_GradCacheItem_t* AllocateGradient(const EG_GradDescriptor_t *pGradient, EG_Coord_t Width, EG_Coord_t Height);
-static EG_Result_t CompareGradientLife(EG_GradCacheItem_t *pGradItem, void *pContext);
-static EG_Result_t RemoveOldestGradient(EG_GradCacheItem_t *pGradItem, void *pContext);
-static EG_Result_t FindGradient(EG_GradCacheItem_t *pGradItem, void *pContext);
+static EG_GradCacheItem_t* AllocateGradient(const EG_GradDescriptor_t *pGradient, int32_t Width, int32_t Height);
+static EG_Result_t CompareGradientLife(EG_GradCacheItem_t *pGradItem, void *pDC);
+static EG_Result_t RemoveOldestGradient(EG_GradCacheItem_t *pGradItem, void *pDC);
+static EG_Result_t FindGradient(EG_GradCacheItem_t *pGradItem, void *pDC);
 static void FreeGradient(EG_GradCacheItem_t *pGradItem);
-static uint32_t ComputeKey(const EG_GradDescriptor_t *pGradient, EG_Coord_t Width, EG_Coord_t Height);
+static uint32_t ComputeKey(const EG_GradDescriptor_t *pGradient, int32_t Width, int32_t Height);
 
 static size_t CacheSize = 0;
 static uint8_t *pCacheEnd = 0;
@@ -70,7 +71,7 @@ static uint8_t *pCacheEnd = 0;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t ComputeKey(const EG_GradDescriptor_t *pGradient, EG_Coord_t Size, EG_Coord_t Width)
+static uint32_t ComputeKey(const EG_GradDescriptor_t *pGradient, int32_t Size, int32_t Width)
 {
 // union PtrMod v;
 //	v.pPtr = pGradient;
@@ -106,11 +107,11 @@ static EG_GradCacheItem_t* NextCached(EG_GradCacheItem_t *pGradItem)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static EG_Result_t IterateCache(op_cache_t Func, void *pContext, EG_GradCacheItem_t **ppOut)
+static EG_Result_t IterateCache(op_cache_t Func, void *pDC, EG_GradCacheItem_t **ppOut)
 {
 	EG_GradCacheItem_t *pGrad = NextCached(NULL);
 	while(pGrad != nullptr && pGrad->Life) {
-		if((*Func)(pGrad, pContext) == EG_RES_OK) {
+		if((*Func)(pGrad, pDC) == EG_RES_OK) {
 			if(ppOut != NULL) *ppOut = pGrad;
 			return EG_RES_OK;
 		}
@@ -155,9 +156,9 @@ static void FreeGradient(EG_GradCacheItem_t *pGradItem)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static EG_Result_t RemoveOldestGradient(EG_GradCacheItem_t *pGradItem, void *pContext)
+static EG_Result_t RemoveOldestGradient(EG_GradCacheItem_t *pGradItem, void *pDC)
 {
-	uint32_t *min_life = (uint32_t *)pContext;
+	uint32_t *min_life = (uint32_t *)pDC;
 	if(pGradItem->Life == *min_life) {
 		// Found, let's kill it
 		FreeGradient(pGradItem);
@@ -168,20 +169,20 @@ static EG_Result_t RemoveOldestGradient(EG_GradCacheItem_t *pGradItem, void *pCo
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static EG_Result_t FindGradient(EG_GradCacheItem_t *pGradItem, void *pContext)
+static EG_Result_t FindGradient(EG_GradCacheItem_t *pGradItem, void *pDC)
 {
-	uint32_t *k = (uint32_t *)pContext;
+	uint32_t *k = (uint32_t *)pDC;
 	if(pGradItem->Key == *k) return EG_RES_OK;
 	return EG_RES_INVALID;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static EG_GradCacheItem_t* AllocateGradient(const EG_GradDescriptor_t *pGradItem, EG_Coord_t Width, EG_Coord_t Height)
+static EG_GradCacheItem_t* AllocateGradient(const EG_GradDescriptor_t *pGradItem, int32_t Width, int32_t Height)
 {
-	EG_Coord_t Size = pGradItem->dir == EG_GRAD_DIR_HOR ? Width : Height;
+	int32_t Size = pGradItem->dir == EG_GRAD_DIR_HOR ? Width : Height;
  //  The pMap is being used horizontally (width) unless no dithering is selected where it's used vertically 
- 	EG_Coord_t map_size = EG_MAX(Width, Height);
+ 	int32_t map_size = EG_MAX(Width, Height);
 	size_t req_size = ALIGN(sizeof(EG_GradCacheItem_t)) + ALIGN(map_size * sizeof(EG_Color_t));
 #if _DITHER_GRADIENT
 	req_size += ALIGN(Size * sizeof(EG_Color32_t));
@@ -272,7 +273,7 @@ void EG_GradientSetCacheSize(size_t max_bytes)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-EG_GradCacheItem_t* EG_GetGradient(const EG_GradDescriptor_t *pGradient, EG_Coord_t Width, EG_Coord_t Height)
+EG_GradCacheItem_t* EG_GetGradient(const EG_GradDescriptor_t *pGradient, int32_t Width, int32_t Height)
 {
 	//  No gradient, no cache 
 	if(pGradient->dir == EG_GRAD_DIR_NONE) return nullptr;
@@ -283,7 +284,7 @@ EG_GradCacheItem_t* EG_GetGradient(const EG_GradDescriptor_t *pGradient, EG_Coor
 		inited = true;
 	}
 	//  Step 1: Search cache for the given Key 
-	EG_Coord_t Size = pGradient->dir == EG_GRAD_DIR_HOR ? Width : Height;
+	int32_t Size = pGradient->dir == EG_GRAD_DIR_HOR ? Width : Height;
 	uint32_t Key = ComputeKey(pGradient, Size, Width);
 	EG_GradCacheItem_t *pItem = nullptr;
 	if(IterateCache(&FindGradient, &Key, &pItem) == EG_RES_OK) {
@@ -298,14 +299,14 @@ EG_GradCacheItem_t* EG_GetGradient(const EG_GradDescriptor_t *pGradient, EG_Coor
 	}
 //  Step 3: Fill it with the gradient, as expected 
 #if _DITHER_GRADIENT
-	for(EG_Coord_t i = 0; i < pItem->Size; i++) {
+	for(int32_t i = 0; i < pItem->Size; i++) {
 		pItem->hmap[i] = EG_GradientCalculate(g, pItem->Size, i);
 	}
 #if EG_DITHER_ERROR_DIFFUSION == 1
 	EG_ZeroMem(pItem->error_acc, Width * sizeof(EG_SColor24_t));
 #endif
 #else
-	for(EG_Coord_t i = 0; i < pItem->Size; i++) {
+	for(int32_t i = 0; i < pItem->Size; i++) {
 		pItem->pMap[i] = EG_GradientCalculate(pGradient, pItem->Size, i);
 	}
 #endif
@@ -314,7 +315,7 @@ EG_GradCacheItem_t* EG_GetGradient(const EG_GradDescriptor_t *pGradient, EG_Coor
 
 /////////////////////////////////////////////////////////////////////////////////
 
-EG_GradientColor_t EG_ATTRIBUTE_FAST_MEM EG_GradientCalculate(const EG_GradDescriptor_t *dsc, EG_Coord_t range, EG_Coord_t frac)
+EG_GradientColor_t EG_ATTRIBUTE_FAST_MEM EG_GradientCalculate(const EG_GradDescriptor_t *dsc, int32_t range, int32_t frac)
 {
 EG_GradientColor_t tmp;
 EG_Color32_t one, two;
@@ -324,13 +325,13 @@ EG_Color32_t one, two;
 		GRAD_CONV(tmp, dsc->stops[0].color);
 		return tmp;
 	}
-	int32_t max = (dsc->stops[dsc->stops_count - 1].frac * range) >> 8;
+	int32_t max = (dsc->stops[dsc->StopCount - 1].frac * range) >> 8;
 	if(frac >= max) {
-		GRAD_CONV(tmp, dsc->stops[dsc->stops_count - 1].color);
+		GRAD_CONV(tmp, dsc->stops[dsc->StopCount - 1].color);
 		return tmp;
 	}
 	int32_t d = 0;	// Find the 2 closest stop now
-	for(uint8_t i = 1; i < dsc->stops_count; i++) {
+	for(uint8_t i = 1; i < dsc->StopCount; i++) {
 		int32_t cur = (dsc->stops[i].frac * range) >> 8;
 		if(frac <= cur) {
 			one.full = EG_ColorTo32(dsc->stops[i - 1].color);

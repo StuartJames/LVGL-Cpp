@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -29,7 +30,7 @@
 typedef struct {
 	EGAnimate *pAnimation;
 	uint32_t StartTime;
-} EG_TimelineDiscriptor_t;
+} EG_TimelineDescriptor_t;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -51,7 +52,7 @@ public:
   static void                 TimelineCB(EGAnimate *pAnimate, int32_t v);
 
 private:
-  EG_TimelineDiscriptor_t     *m_pTimelines;    // Dynamically allocated anim dsc array
+  EG_TimelineDescriptor_t     *m_pTimelines;    // Dynamically allocated anim dsc array
   uint32_t                    m_TimelineCount;  // The length of anim dsc array
   bool                        m_Reverse;        // Reverse playback
 

@@ -1,23 +1,24 @@
-/* 
- *        Copyright (c) 2025-2026 HydraSystems..
+/*
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -29,7 +30,7 @@
 #include "core/EG_Group.h"
 #include "core/EG_Refresh.h"
 #include "core/EG_InputDevice.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Animate.h"
 #include "misc/EG_Text.h"
 #include "misc/EG_Math.h"
@@ -350,11 +351,11 @@ void EGEdit::SetCursorPosition(int32_t Position)
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
 	GetCharacterPosition(Position, &CursorPoint);
 	// The text area needs to have it's final size to see if the cursor is out of the area or not
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);	// Check the PadTop
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);	// Check the PadTop
 	if(CursorPoint.m_Y < GetScrollTop()) {
 		ScrollToY(CursorPoint.m_Y, EG_ANIM_ON);
 	}
-	EG_Coord_t Height = GetContentHeight();	// Check the PadBottom
+	int32_t Height = GetContentHeight();	// Check the PadBottom
 	if(CursorPoint.m_Y + FontHeight - GetScrollTop() > Height) {
 		ScrollToY(CursorPoint.m_Y - Height + FontHeight, EG_ANIM_ON);
 	}
@@ -362,7 +363,7 @@ void EGEdit::SetCursorPosition(int32_t Position)
 		ScrollToX(CursorPoint.m_X, EG_ANIM_ON);
 	}
 	// Check the PadRight
-	EG_Coord_t w = GetContentWidth();
+	int32_t w = GetContentWidth();
 	if(CursorPoint.m_X + FontHeight - GetScrollLeft() > w) {
 		ScrollToX(CursorPoint.m_X - w + FontHeight, EG_ANIM_ON);
 	}
@@ -428,7 +429,7 @@ void EGEdit::SetPasswordBullet(const char *pBullet)
 		m_pPasswordBullet = (char *)EG_ReallocMem(m_pPasswordBullet, txt_len + 1);
 		EG_ASSERT_MALLOC(m_pPasswordBullet);
 		if(m_pPasswordBullet == nullptr) {
-			EG_LOG_ERROR("lv_textarea_set_password_bullet: couldn't allocate memory for bullet");
+			EG_LOG_ERROR("EGEdit::SetPasswordBullet: couldn't allocate memory for bullet");
 			return;
 		}
 		strcpy(m_pPasswordBullet, pBullet);
@@ -443,9 +444,9 @@ void EGEdit::SetOneLineMode(bool Enable)
 {
 	if(m_OneLineMode == Enable) return;
 	m_OneLineMode = Enable ? 1U : 0U;
-	EG_Coord_t Width = Enable ? EG_SIZE_CONTENT : EG_PCT(100);
+	int32_t Width = Enable ? EG_SIZE_CONTENT : EG_PCT(100);
 	SetWidth(Width);
-//	EG_Coord_t MinimumWidth = Enable ? EG_PCT(100) : 0;
+//	int32_t MinimumWidth = Enable ? EG_PCT(100) : 0;
 //	SetStyleMinWidth(MinimumWidth, 0);    // not shure why you'd want to do this
 	if(Enable) SetHeight(EG_SIZE_CONTENT);
 	else RemoveStyleProperty(EG_STYLE_HEIGHT, EG_PART_MAIN);
@@ -580,14 +581,14 @@ void EGEdit::CursorDown(void)
 {
 	EGPoint Point;
   GetCharacterPosition(m_Cursor.Position, &Point);	// Get the position of the current character
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);	// Increment the y with one line and keep the valid x
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);	// Increment the y with one line and keep the valid x
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);
 	Point.m_Y += FontHeight + LineSpace + 1;
 	Point.m_X = m_Cursor.ValidX;
 	if(Point.m_Y < GetHeight()) {	// Do not go below the last line
 		uint32_t NewPosition = IsCharacterAt(&Point);		// Get the character index on the new cursor position and set it
-		EG_Coord_t cur_valid_x_tmp = m_Cursor.ValidX;  // Cursor position set overwrites the valid position
+		int32_t cur_valid_x_tmp = m_Cursor.ValidX;  // Cursor position set overwrites the valid position
 		SetCursorPosition(NewPosition);
 		m_Cursor.ValidX = cur_valid_x_tmp;
 	}
@@ -599,13 +600,13 @@ void EGEdit::CursorUp(void)
 {
 	EGPoint Point;
 	GetCharacterPosition(m_Cursor.Position, &Point);	// Get the position of the current character
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);	// Decrement the y with one line and keep the valid x
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);	// Decrement the y with one line and keep the valid x
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);
 	Point.m_Y -= FontHeight + LineSpace - 1;
 	Point.m_X = m_Cursor.ValidX;
 	uint32_t NewPosition = GetCharacterAt(&Point);	// Get the character index on the new cursor position and set it
-	EG_Coord_t cur_valid_x_tmp = m_Cursor.ValidX;  // Cursor position set overwrites the valid position
+	int32_t cur_valid_x_tmp = m_Cursor.ValidX;  // Cursor position set overwrites the valid position
 	SetCursorPosition(NewPosition);
 	m_Cursor.ValidX = cur_valid_x_tmp;
 }
@@ -711,7 +712,7 @@ void EGEdit::UpdateCursorPositionOnClick(EGEvent *pEvent)
 	rel_pos.m_X = ActivePoint.m_X - LabelRect.GetX1();
 	rel_pos.m_Y = ActivePoint.m_Y - LabelRect.GetY1();
   EG_EventCode_e Code = pEvent->GetCode();
-	EG_Coord_t LabelWidth = GetWidth();
+	int32_t LabelWidth = GetWidth();
 	uint16_t char_id_at_click = 0;
 #if EG_LABEL_TEXT_SELECTION
 	bool click_outside_label = false;
@@ -785,10 +786,10 @@ void EGEdit::UpdateCursorPositionOnClick(EGEvent *pEvent)
 		char_id_at_click = EG_TEXTAREA_CURSOR_LAST;
 	}
 	else {
-		char_id_at_click = lv_label_get_letter_on(m_pLabel, &rel_pos);
+		char_id_at_click = GetCharacterAt(m_pLabel, &rel_pos);
 	}
 
-	if(code == EG_EVENT_PRESSED) lv_textarea_set_cursor_pos(obj, char_id_at_click);
+	if(code == EG_EVENT_PRESSED) SetCursorPosition(obj, char_id_at_click);
 #endif
 }
 
@@ -890,17 +891,17 @@ EGPoint CharPos;
 	uint32_t BytePosition = EG_TextEncodedGetIndex(m_pText, m_Cursor.Position);
 	uint32_t Char = EG_TextDecodeNext(&m_pText[BytePosition], nullptr);
 	//  Character height and width
-	const EG_Coord_t CharHeight = EG_FontGetLineHeight(pFont);
+	const int32_t CharHeight = EG_FontGetLineHeight(pFont);
 	// Set CharWidth (set not 0 on non printable but valid chars)
 	uint32_t ValidChar = Char;
 	if(IsValidNonPrintable(Char)) ValidChar = ' ';
-	EG_Coord_t CharWidth = EG_FontGetGlyphWidth(pFont, ValidChar, IGNORE_KERNING);
+	int32_t CharWidth = EG_FontGetGlyphWidth(pFont, ValidChar, IGNORE_KERNING);
 	GetCharacterPosition(m_Cursor.Position, &CharPos);
 	EG_TextAlignment_t Alignment = CalculateTextAlignment(EG_PART_MAIN, m_pText);
 	// If the cursor is out of the text (far right) draw it on the next line
 	if(((CharPos.m_X + m_Rect.GetX1()) + CharWidth > m_Rect.GetX2()) &&
    (m_OneLineMode == 0) && (Alignment != EG_TEXT_ALIGN_RIGHT)) {
-	  EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	  int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
 		CharPos.m_X = 0;
 		CharPos.m_Y += CharHeight + LineSpace;
 		if(Char != '\0') {
@@ -912,11 +913,11 @@ EGPoint CharPos;
 		CharWidth = EG_FontGetGlyphWidth(pFont, ValidChar, IGNORE_KERNING);
 	}
 	m_Cursor.Index = BytePosition;	// Save the byte position. It is required to draw `EG_CURSOR_BLOCK`
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_CURSOR);	// Calculate the cursor according to its type
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_CURSOR) + BorderWidth;
-	EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_CURSOR) + BorderWidth;
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_CURSOR) + BorderWidth;
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_CURSOR) + BorderWidth;
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_CURSOR);	// Calculate the cursor according to its type
+	int32_t PadTop = GetStylePadTop(EG_PART_CURSOR) + BorderWidth;
+	int32_t PadBottom = GetStylePadBottom(EG_PART_CURSOR) + BorderWidth;
+	int32_t PadLeft = GetStylePadLeft(EG_PART_CURSOR) + BorderWidth;
+	int32_t PadRight = GetStylePadRight(EG_PART_CURSOR) + BorderWidth;
 	EGRect CursorRect(CharPos.m_X - PadLeft, CharPos.m_Y - PadTop, CharPos.m_X + PadRight + CharWidth - 1, CharPos.m_Y + PadBottom + CharHeight - 1);
 	EGRect Rect(m_Cursor.Rect);	// Get the present poition
 	Rect.Move(m_Rect.GetX1(), m_Rect.GetY1());
@@ -948,7 +949,7 @@ EG_Result_t EGEdit::InsertHandler(const char *pText)
 
 void EGEdit::DrawPromp(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	const char *pText = GetText();
 
 	// Draw the place holder
@@ -956,12 +957,12 @@ void EGEdit::DrawPromp(EGEvent *pEvent)
 		EGDrawLabel DrawLabel;
 		InititialseDrawLabel(EG_PART_TEXTAREA_PLACEHOLDER, &DrawLabel);
 		if(m_OneLineMode) DrawLabel.m_Flag |= EG_TEXT_FLAG_EXPAND;
-		EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-		EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN);
-		EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+		int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+		int32_t PadTop = GetStylePadTop(EG_PART_MAIN);
+		int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 		EGRect LabelRect(m_Rect);
 		LabelRect.Move(PadLeft + BorderWidth, PadTop + BorderWidth);
-		DrawLabel.Draw(pContext, &LabelRect, m_pPromptText, nullptr);
+		DrawLabel.Draw(pDC, &LabelRect, m_pPromptText, nullptr);
 	}
 }
 
@@ -969,17 +970,17 @@ void EGEdit::DrawPromp(EGEvent *pEvent)
 
 void EGEdit::DrawCursor(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	const char *pText = GetText();
 	if(m_Cursor.Show == 0) return;
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
-  EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
+  int32_t PadTop = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
   m_BlinkRect = m_Cursor.Rect;    // Blink rect is used in the cursor blink animation
 	m_BlinkRect.Move(m_Rect.GetX1() + PadLeft, m_Rect.GetY1() + PadTop);
 	EGDrawRect DrawRect;
 	InititialseDrawRect(EG_PART_CURSOR, &DrawRect);
-	DrawRect.Draw(pContext, &m_BlinkRect);
+	DrawRect.Draw(pDC, &m_BlinkRect);
 	BorderWidth = GetStyleBorderWidth(EG_PART_CURSOR);
 	PadLeft = GetStylePadLeft(EG_PART_CURSOR) + BorderWidth;
 	PadTop = GetStylePadTop(EG_PART_CURSOR) + BorderWidth;
@@ -994,7 +995,7 @@ void EGEdit::DrawCursor(EGEvent *pEvent)
 	EGDrawLabel DrawLabel;
 	InititialseDrawLabel(EG_PART_CURSOR, &DrawLabel);
 	if(DrawRect.m_BackgroundOPA > EG_OPA_MIN || DrawLabel.m_Color.full != TextColor.full) {
-		DrawLabel.Draw(pContext, &CharRect, Buffer, nullptr);
+		DrawLabel.Draw(pDC, &CharRect, Buffer, nullptr);
 	}
 }
 

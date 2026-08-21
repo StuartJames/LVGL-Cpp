@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -290,7 +291,7 @@
 #endif
 
 #if !defined EG_SYMBOL_DUMMY
-/** Invalid symbol at (U+F8FF). If written before a string then `lv_img` will show it as a label*/
+/** Invalid symbol at (U+F8FF). If written before a string then `EGImage` will show it as a label*/
 #define EG_SYMBOL_DUMMY           "\xEF\xA3\xBF"
 #endif
 

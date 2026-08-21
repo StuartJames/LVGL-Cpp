@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -30,7 +31,7 @@
 #include "misc/EG_Memory.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Misc.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "font/EG_FontFmtText.h"
 #include "extra/others/EG_Snapshot.h"
 
@@ -82,20 +83,20 @@ void          JoinArea(void);
 void          SyncAreas(void);
 void          InvalidateAreas(void);
 void          RefreshArea(const EGRect *pRect);
-void          RefreshAreaPart(EGDrawContext *pContext);
+void          RefreshAreaPart(EGDeviceContext *pDC);
 EGObject*     GetTopObject(const EGRect *pRect, EGObject *pObj);
-void          ObjectAndChildren(EGDrawContext *pContext, EGObject *pObj);
-uint32_t      GetMaximumRow(EGDisplay *pDisplay, EG_Coord_t area_w, EG_Coord_t area_h);
+void          ObjectAndChildren(EGDeviceContext *pDC, EGObject *pObj);
+uint32_t      GetMaximumRow(EGDisplay *pDisplay, int32_t area_w, int32_t area_h);
 void          RotateDrawBuffer180(EGDisplayDriver *pDriver, EGRect *area, EG_Color_t *color_p);
-void          RotateDrawBuffer90(bool Invert, EG_Coord_t Width, EG_Coord_t Height, EG_Color_t *pColor, EG_Color_t *pBuffer);
+void          RotateDrawBuffer90(bool Invert, int32_t Width, int32_t Height, EG_Color_t *pColor, EG_Color_t *pBuffer);
 void          RotateDrawBuffer4(EG_Color_t *a, EG_Color_t *b, EG_Color_t *c, EG_Color_t *d);
-void          RotateDrawBuffer90Square(bool Is270, EG_Coord_t Width, EG_Color_t *pColor);
+void          RotateDrawBuffer90Square(bool Is270, int32_t Width, EG_Color_t *pColor);
 void          RotateDrawBuffer(EGRect *pRect, EG_Color_t *pColor);
 void          FlushDrawBuffer(EGDisplay *pDisplay);
 void          DoFlushCB(EGDisplayDriver *pDriver, const EGRect *pRect, EG_Color_t *pColor);
-EG_Result_t   GetLayerRect(const EGDrawContext *pContext, EGObject *pObj, EG_LayerType_e LayerType, EGRect *pRect);
-void          LayerAlphaTest(EGObject *pObj, const EGDrawContext *pContext, EGLayerContext *pLayerContext, EGDrawLayerFlags_e flags);
-void          RefreshObject(EGDrawContext *pContext, EGObject *pObj);
+EG_Result_t   GetLayerRect(const EGDeviceContext *pDC, EGObject *pObj, EG_LayerType_e LayerType, EGRect *pRect);
+void          LayerAlphaTest(EGObject *pObj, const EGDeviceContext *pDC, EGLayerContext *pLayerContext, EGDrawLayerFlags_e flags);
+void          RefreshObject(EGDeviceContext *pDC, EGObject *pObj);
 
 static EGDisplay *s_pRefreshDisplay = nullptr;
 static uint32_t   s_PixelCount = 0;
@@ -326,7 +327,7 @@ void SyncAreas(void)
 	void *pOffScreenBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
 	void *pOnScreenBuffer = (s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer == s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer1) ?
        s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer2 : s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pBuffer1;
-	EG_Coord_t Stride = s_pRefreshDisplay->GetHorizontalRes();	// Get Stride for buffer copy
+	int32_t Stride = s_pRefreshDisplay->GetHorizontalRes();	// Get Stride for buffer copy
 //	EG_LOG_WARN("Off Buffer %p", pOffScreenBuffer);
 	int8_t DifCount, j;
 	EGRect *pSyncRect, DifRects[4];
@@ -375,7 +376,7 @@ void InvalidateAreas(void)
 	s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastArea = 0;
 	s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart = 0;
 	s_pRefreshDisplay->m_RenderingInProgress = 1;
-	for(uint32_t i = 0; i < s_pRefreshDisplay->m_InvalidCount; i++) {
+	for(int32_t i = 0; i < s_pRefreshDisplay->m_InvalidCount; i++) {
 		if(s_pRefreshDisplay->m_InvalidAreasJoined[i] == 0) {		// Refresh the unjoined areas
 			if(i == LastInvalid) s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastArea = 1;
 			s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart = 0;
@@ -390,58 +391,58 @@ void InvalidateAreas(void)
 
 void RefreshArea(const EGRect *pRect)
 {
-	EGDrawContext *pContext = s_pRefreshDisplay->m_pDriver->m_pContext;
-	pContext->m_pDrawBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
+	EGDeviceContext *pDC = s_pRefreshDisplay->m_pDriver->m_pContext;
+	pDC->m_pDrawBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
  	// With full refresh just redraw directly into the buffer
 	// In direct mode draw directly on the absolute coordinates of the buffer
 	if(s_pRefreshDisplay->m_pDriver->m_FullRefresh || s_pRefreshDisplay->m_pDriver->m_DirectMode) {
 		EGRect DisplayRect(0, 0, s_pRefreshDisplay->GetHorizontalRes() - 1, s_pRefreshDisplay->GetVerticalRes() - 1);
-		pContext->m_pDrawRect = &DisplayRect;
+		pDC->m_pDrawRect = &DisplayRect;
 		if(s_pRefreshDisplay->m_pDriver->m_FullRefresh) {
 			s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart = 1;
-			pContext->m_pClipRect = &DisplayRect;
-			RefreshAreaPart(pContext);
+			pDC->m_pClipRect = &DisplayRect;
+			RefreshAreaPart(pDC);
 		}
 		else {
 			s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastArea;
-			pContext->m_pClipRect = pRect;
-			RefreshAreaPart(pContext);
+			pDC->m_pClipRect = pRect;
+			RefreshAreaPart(pDC);
 		}
 		return;
 	}
 	// Normal refresh: draw the screen in parts. Calculate the max row num
-	EG_Coord_t Width = pRect->GetWidth();
-	EG_Coord_t Height = pRect->GetHeight();
-	EG_Coord_t MaxRow = (pRect->GetY2() >= s_pRefreshDisplay->GetVerticalRes()) ? s_pRefreshDisplay->GetVerticalRes() - 1 : pRect->GetY2();
+	int32_t Width = pRect->GetWidth();
+	int32_t Height = pRect->GetHeight();
+	int32_t MaxRow = (pRect->GetY2() >= s_pRefreshDisplay->GetVerticalRes()) ? s_pRefreshDisplay->GetVerticalRes() - 1 : pRect->GetY2();
 	int32_t RowIncrement = GetMaximumRow(s_pRefreshDisplay, Width, Height);
-	EG_Coord_t Row, EndRow = 0;
+	int32_t Row, EndRow = 0;
 	EGRect SubRect;
 	for(Row = pRect->GetY1(); Row + RowIncrement - 1 <= MaxRow; Row += RowIncrement) {
 		SubRect.Set(pRect->GetX1(), Row, pRect->GetX2(), Row + RowIncrement - 1);		// Calc. the next y coordinates of draw_buf
-  	pContext->m_pDrawRect = &SubRect;
-		pContext->m_pClipRect = &SubRect;
-	  pContext->m_pDrawBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
+  	pDC->m_pDrawRect = &SubRect;
+		pDC->m_pClipRect = &SubRect;
+	  pDC->m_pDrawBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
 		if(SubRect.GetY2() > MaxRow) SubRect.SetY2(MaxRow);
 		EndRow = SubRect.GetY2();
 		if(EndRow == MaxRow) s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart = 1;
-		RefreshAreaPart(pContext);
+		RefreshAreaPart(pDC);
 	}
 	if(EndRow != MaxRow) {	                                            // If the last y coordinates are not handled yet ...
   	SubRect.Set(pRect->GetX1(), Row, pRect->GetX2(), MaxRow);		      // Calc. the next y coordinates of draw_buf
-		pContext->m_pDrawRect = &SubRect;
-		pContext->m_pClipRect = &SubRect;
-		pContext->m_pDrawBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
+		pDC->m_pDrawRect = &SubRect;
+		pDC->m_pClipRect = &SubRect;
+		pDC->m_pDrawBuffer = s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->pActiveBuffer;
   	s_pRefreshDisplay->m_pDriver->m_pDrawBuffers->LastPart = 1;
-		RefreshAreaPart(pContext);
+		RefreshAreaPart(pDC);
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void RefreshAreaPart(EGDrawContext *pContext)
+void RefreshAreaPart(EGDeviceContext *pDC)
 {
 	EG_DisplayDrawBuffer_t *pDrawBuffer = s_pRefreshDisplay->GetDrawBuffer();
-	if(pContext->InitBuffer) pContext->InitBuffer(pContext);
+	if(pDC->InitBufferProc) pDC->InitBufferProc(pDC);
 	// Below the `pRect` area will be redrawn into the draw buffer. In single buffered mode wait here until the buffer is freed.
   // In full double buffered mode wait here while the buffers are swapped and a buffer becomes available
 	bool FullScreen = (pDrawBuffer->Size == (uint32_t)s_pRefreshDisplay->m_pDriver->m_HorizontalRes * s_pRefreshDisplay->m_pDriver->m_VerticalRes);
@@ -464,20 +465,20 @@ void RefreshAreaPart(EGDrawContext *pContext)
 	EGObject *pTopActiveScreen = nullptr;
 	EGObject *pTopPreviousScreen = nullptr;
 	// Get the most top object which is not covered by others
-	pTopActiveScreen = GetTopObject(pContext->m_pDrawRect, EGDisplay::GetActiveScreen(s_pRefreshDisplay));
+	pTopActiveScreen = GetTopObject(pDC->m_pDrawRect, EGDisplay::GetActiveScreen(s_pRefreshDisplay));
 	if(s_pRefreshDisplay->m_pPrevoiusScreen) {
-		pTopPreviousScreen = GetTopObject(pContext->m_pDrawRect, s_pRefreshDisplay->m_pPrevoiusScreen);
+		pTopPreviousScreen = GetTopObject(pDC->m_pDrawRect, s_pRefreshDisplay->m_pPrevoiusScreen);
 	}
 	// Draw a display background if there is no top object
 	if(pTopActiveScreen == nullptr && pTopPreviousScreen == nullptr) {
 		EGRect Rect(0, 0,	s_pRefreshDisplay->GetHorizontalRes() - 1, s_pRefreshDisplay->GetVerticalRes() - 1);
-		if(pContext->DrawBackgroundProc) {
+		if(pDC->DrawBackgroundProc) {
 			EGDrawRect DrawRect;
 			DrawRect.m_pBackImageSource = s_pRefreshDisplay->m_BackgroundImage;
 			DrawRect.m_BackImageOPA = s_pRefreshDisplay->m_BackgroundOPA;
 			DrawRect.m_BackgroundColor = s_pRefreshDisplay->m_BackgroundColor;
 			DrawRect.m_BackgroundOPA = s_pRefreshDisplay->m_BackgroundOPA;
-			pContext->DrawBackgroundProc(&DrawRect, &Rect);
+			pDC->DrawBackgroundProc(&DrawRect, &Rect);
 		}
 		else if(s_pRefreshDisplay->m_BackgroundImage) {
 			EG_ImageHeader_t header;
@@ -485,7 +486,7 @@ void RefreshAreaPart(EGDrawContext *pContext)
 			if(Result == EG_RES_OK) {
 				EGDrawImage DrawImage;
 				DrawImage.m_OPA = s_pRefreshDisplay->m_BackgroundOPA;
-				DrawImage.Draw(pContext, &Rect, s_pRefreshDisplay->m_BackgroundImage);
+				DrawImage.Draw(pDC, &Rect, s_pRefreshDisplay->m_BackgroundImage);
 			}
 			else EG_LOG_WARN("Can't draw the background image");
 		}
@@ -493,28 +494,28 @@ void RefreshAreaPart(EGDrawContext *pContext)
 			EGDrawRect DrawRect;
 			DrawRect.m_BackgroundColor = s_pRefreshDisplay->m_BackgroundColor;
 			DrawRect.m_BackImageOPA = s_pRefreshDisplay->m_BackgroundOPA;
-			DrawRect.Draw(pContext, pContext->m_pDrawRect);
+			DrawRect.Draw(pDC, pDC->m_pDrawRect);
 		}
 	}
 	if(s_pRefreshDisplay->m_DrawOverActive) {
 		if(pTopActiveScreen == nullptr) pTopActiveScreen = s_pRefreshDisplay->m_pActiveScreen;
-		ObjectAndChildren(pContext, pTopActiveScreen);
+		ObjectAndChildren(pDC, pTopActiveScreen);
 		if(s_pRefreshDisplay->m_pPrevoiusScreen) {		// Refresh the previous screen if any
 			if(pTopPreviousScreen == nullptr) pTopPreviousScreen = s_pRefreshDisplay->m_pPrevoiusScreen;
-			ObjectAndChildren(pContext, pTopPreviousScreen);
+			ObjectAndChildren(pDC, pTopPreviousScreen);
 		}
 	}
 	else {		// Refresh the previous screen if any
 		if(s_pRefreshDisplay->m_pPrevoiusScreen) {
 			if(pTopPreviousScreen == nullptr) pTopPreviousScreen = s_pRefreshDisplay->m_pPrevoiusScreen;
-			ObjectAndChildren(pContext, pTopPreviousScreen);
+			ObjectAndChildren(pDC, pTopPreviousScreen);
 		}
 		if(pTopActiveScreen == nullptr) pTopActiveScreen = s_pRefreshDisplay->m_pActiveScreen;
-		ObjectAndChildren(pContext, pTopActiveScreen);
+		ObjectAndChildren(pDC, pTopActiveScreen);
 	}
 	// Also refresh top and sys layer unconditionally
-	ObjectAndChildren(pContext, EGDisplay::GetTopLayer(s_pRefreshDisplay));
-	ObjectAndChildren(pContext, EGDisplay::GetSystemLayer(s_pRefreshDisplay));
+	ObjectAndChildren(pDC, EGDisplay::GetTopLayer(s_pRefreshDisplay));
+	ObjectAndChildren(pDC, EGDisplay::GetSystemLayer(s_pRefreshDisplay));
 	FlushDrawBuffer(s_pRefreshDisplay);
 }
 
@@ -546,13 +547,13 @@ EGObject *pFound = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void ObjectAndChildren(EGDrawContext *pContext, EGObject *pTopObj)
+void ObjectAndChildren(EGDeviceContext *pDC, EGObject *pTopObj)
 {
 	// Normally always will be a pTopObj (at least the screen) but in special cases 
   // (e.g. if the screen has alpha) it won't. In this case use the screen directly
 	if(pTopObj == nullptr) pTopObj = EGDisplay::GetActiveScreen(s_pRefreshDisplay);
 	if(pTopObj == nullptr) return;      // Shouldn't happen
-	RefreshObject(pContext, pTopObj);	  // Refresh the top object and its children
+	RefreshObject(pDC, pTopObj);	  // Refresh the top object and its children
 	EGObject *pBorder = pTopObj;
 	EGObject *pParent = pTopObj->GetParent(); // Draw the 'younger' sibling objects because they can be on pTopObj
 	while(pParent != nullptr) {	        // Do until we reach the screen
@@ -563,12 +564,12 @@ void ObjectAndChildren(EGDrawContext *pContext, EGObject *pTopObj)
 			if(!Go){
         if(pChild == pBorder) Go = true;
       }
-			else RefreshObject(pContext, pChild);				// Refresh the objects
+			else RefreshObject(pDC, pChild);				// Refresh the objects
 		}
 		// Call the post draw function of the parents of the object
-		EGEvent::EventSend(pParent, EG_EVENT_DRAW_POST_BEGIN, (void *)pContext);
-		EGEvent::EventSend(pParent, EG_EVENT_DRAW_POST, (void *)pContext);
-		EGEvent::EventSend(pParent, EG_EVENT_DRAW_POST_END, (void *)pContext);
+		EGEvent::EventSend(pParent, EG_EVENT_DRAW_POST_BEGIN, (void *)pDC);
+		EGEvent::EventSend(pParent, EG_EVENT_DRAW_POST, (void *)pDC);
+		EGEvent::EventSend(pParent, EG_EVENT_DRAW_POST_END, (void *)pDC);
 		pBorder = pParent;	// The new border will be the last parents, so the 'younger' brothers of pParent will be refreshed
 		pParent = pParent->GetParent();	// Go a level deeper
 	}
@@ -576,17 +577,17 @@ void ObjectAndChildren(EGDrawContext *pContext, EGObject *pTopObj)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void RefreshObject(EGDrawContext *pContext, EGObject *pObj)
+void RefreshObject(EGDeviceContext *pDC, EGObject *pObj)
 {
 	// Do not refresh hidden objects
 	if(pObj->HasFlagSet(EG_OBJ_FLAG_HIDDEN)) return;
 	EG_LayerType_e LayerType = pObj->GetLayerType();
-	if(LayerType == EG_LAYER_TYPE_NONE) RedrawObject(pContext, pObj);
+	if(LayerType == EG_LAYER_TYPE_NONE) RedrawObject(pDC, pObj);
 	else {
 		EG_OPA_t OPA = pObj->GetStyleOPALayered(0);
 		if(OPA < EG_OPA_MIN) return;
 		EGRect LayerFullRect;
-		if(GetLayerRect(pContext, pObj, LayerType, &LayerFullRect) != EG_RES_OK) return;
+		if(GetLayerRect(pDC, pObj, LayerType, &LayerFullRect) != EG_RES_OK) return;
 		EGDrawLayerFlags_e Flags = EG_DRAW_LAYER_FLAG_HAS_ALPHA;
 		if(LayerFullRect.IsInside(&pObj->m_Rect, 0)) {
 			EG_CoverCheckInfo_t Info;
@@ -596,7 +597,7 @@ void RefreshObject(EGDrawContext *pContext, EGObject *pObj)
 			if(Info.Result == EG_COVER_RES_COVER) Flags = (EGDrawLayerFlags_e)(Flags & ~EG_DRAW_LAYER_FLAG_HAS_ALPHA);
 		}
 		if(LayerType == EG_LAYER_TYPE_SIMPLE) Flags = (EGDrawLayerFlags_e)(Flags | EG_DRAW_LAYER_FLAG_CAN_SUBDIVIDE);
-		EGLayerContext *pDrawLayer = EGLayerContext::Create(pContext, &LayerFullRect, Flags);
+		EGLayerContext *pDrawLayer = EGLayerContext::Create(pDC, &LayerFullRect, Flags);
 		if(pDrawLayer == nullptr) {
 			EG_LOG_WARN("Couldn't create a new layer context");
 			return;
@@ -613,7 +614,7 @@ void RefreshObject(EGDrawContext *pContext, EGObject *pObj)
 		DrawImage.m_Angle = pObj->GetStyleTransformAngle(0);
 		if(DrawImage.m_Angle > 3600) DrawImage.m_Angle -= 3600;
 		else if(DrawImage.m_Angle < 0) DrawImage.m_Angle += 3600;
-		EG_Coord_t Zoom = pObj->GetStyleTransformZoom(0);
+		int32_t Zoom = pObj->GetStyleTransformZoom(0);
     DrawImage.m_Scale.Set(Zoom, Zoom);
 		DrawImage.m_BlendMode = pObj->GetStyleBlendMode(0);
 		DrawImage.m_AntiAlias = s_pRefreshDisplay->m_pDriver->m_AntiAliasing;
@@ -624,11 +625,11 @@ void RefreshObject(EGDrawContext *pContext, EGObject *pObj)
 		}
 		while(pDrawLayer->m_ActiveRect.GetY1() <= LayerFullRect.GetY2()) {
 		  if(Flags & EG_DRAW_LAYER_FLAG_CAN_SUBDIVIDE) {
-				LayerAlphaTest(pObj, pContext, pDrawLayer, Flags);
+				LayerAlphaTest(pObj, pDC, pDrawLayer, Flags);
 			}
-			RedrawObject(pContext, pObj);
-			DrawImage.m_Pivot.m_X = pObj->m_Rect.GetX1() + Pivot.m_X - pContext->m_pDrawRect->GetX1();
-			DrawImage.m_Pivot.m_Y = pObj->m_Rect.GetY1() + Pivot.m_Y - pContext->m_pDrawRect->GetY1();
+			RedrawObject(pDC, pObj);
+			DrawImage.m_Pivot.m_X = pObj->m_Rect.GetX1() + Pivot.m_X - pDC->m_pDrawRect->GetX1();
+			DrawImage.m_Pivot.m_Y = pObj->m_Rect.GetY1() + Pivot.m_Y - pDC->m_pDrawRect->GetY1();
 			pDrawLayer->Blend(&DrawImage);	// With EG_DRAW_LAYER_FLAG_CAN_SUBDIVIDE it should also do the next chunk
 			if((Flags & EG_DRAW_LAYER_FLAG_CAN_SUBDIVIDE) == 0) break;
 			pDrawLayer->m_ActiveRect.SetY1(pDrawLayer->m_ActiveRect.GetY2() + 1);
@@ -640,33 +641,32 @@ void RefreshObject(EGDrawContext *pContext, EGObject *pObj)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void RedrawObject(EGDrawContext *pContext, EGObject *pObj)
+void RedrawObject(EGDeviceContext *pDC, EGObject *pObj)
 {
 EGRect ObjClipRect;
 
-	const EGRect *pOriginalClipRect = pContext->m_pClipRect;
+	const EGRect *pOriginalClipRect = pDC->m_pClipRect;
 	EGRect ObjRectExt(pObj->m_Rect);	// Get the object coordinates
-	EG_Coord_t ExtDrawSize = pObj->GetExtDrawSize();// Truncate the clip area to `pObj Size + ext Size`
+	int32_t ExtDrawSize = pObj->GetExtDrawSize();// Truncate the clip area to `pObj Size + ext Size`
 	ObjRectExt.Inflate(ExtDrawSize, ExtDrawSize);
 	bool CommonClip = ObjClipRect.Intersect(pOriginalClipRect, &ObjRectExt);
 	// If the object is visible on the current clip area OR has overflow visible draw it.
-  // With overflow visible drawing should happen to apply the masks which might affect children 
+  // With overflow visible drawing should happen to apply the masks which might affect children
 	bool ShouldDraw = (CommonClip || pObj->HasFlagSet(EG_OBJ_FLAG_OVERFLOW_VISIBLE));
 	if(ShouldDraw) {
-		pContext->m_pClipRect = &ObjClipRect;
-		EGEvent::EventSend(pObj, EG_EVENT_DRAW_MAIN_BEGIN, pContext);
-		EGEvent::EventSend(pObj, EG_EVENT_DRAW_MAIN, pContext);
-		EGEvent::EventSend(pObj, EG_EVENT_DRAW_MAIN_END, pContext);
+		pDC->m_pClipRect = &ObjClipRect;
+		EGEvent::EventSend(pObj, EG_EVENT_DRAW_MAIN_BEGIN, pDC);
+		EGEvent::EventSend(pObj, EG_EVENT_DRAW_MAIN, pDC);
+		EGEvent::EventSend(pObj, EG_EVENT_DRAW_MAIN_END, pDC);
 #if EG_USE_REFR_DEBUG
 		EG_Color_t DebugColor = EG_MixColor(EG_Rand(0, 0xFF), EG_Rand(0, 0xFF), EG_Rand(0, 0xFF));
 		EGDrawRect DrawRect;
-		lv_draw_rect_dsc_init(&DrawRect);
-		DrawRect.bg_color.full = DebugColor.full;
-		DrawRect.bg_opa = EG_OPA_20;
-		DrawRect.border_width = 1;
-		DrawRect.border_opa = EG_OPA_30;
-		DrawRect.border_color = DebugColor;
-		DrawRect.Draw(pContext, &ObjRectExt);
+		DrawRect.m_BackgroundColor.full = DebugColor.full;
+		DrawRect.m_BackgroundOPA = EG_OPA_20;
+		DrawRect.m_BorderWidth = 1;
+		DrawRect.m_BorderOPA = EG_OPA_30;
+		DrawRect.m_BorderColor = DebugColor;
+		DrawRect.Draw(pDC, &ObjRectExt);
 #endif
 	}
 	// With overflow visible keep the previous clip area to let the children visible out of this object too
@@ -680,20 +680,20 @@ EGRect ObjClipRect;
     }
 	}
 	if(RefreshChildren) {
-		pContext->m_pClipRect = &ChildClipRect;
+		pDC->m_pClipRect = &ChildClipRect;
 		uint32_t ChildCount = pObj->GetChildCount();
 		for(uint32_t i = 0; i < ChildCount; i++) {
 			EGObject *pChild = pObj->m_pAttributes->ppChildren[i];
-			RefreshObject(pContext, pChild);
+			RefreshObject(pDC, pChild);
 		}
 	}
 	if(ShouldDraw) {	// If the object was visible on the clip area call the post draw events too
-		pContext->m_pClipRect = &ObjClipRect;
-		EGEvent::EventSend(pObj, EG_EVENT_DRAW_POST_BEGIN, pContext);	// If all the children are redrawn make 'post draw' draw
-		EGEvent::EventSend(pObj, EG_EVENT_DRAW_POST, pContext);
-		EGEvent::EventSend(pObj, EG_EVENT_DRAW_POST_END, pContext);
+		pDC->m_pClipRect = &ObjClipRect;
+		EGEvent::EventSend(pObj, EG_EVENT_DRAW_POST_BEGIN, pDC);	// If all the children are redrawn make 'post draw' draw
+		EGEvent::EventSend(pObj, EG_EVENT_DRAW_POST, pDC);
+		EGEvent::EventSend(pObj, EG_EVENT_DRAW_POST_END, pDC);
 	}
-	pContext->m_pClipRect = pOriginalClipRect;
+	pDC->m_pClipRect = pOriginalClipRect;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -739,9 +739,9 @@ void InvalidateRect(EGDisplay *pDisplay, const EGRect *pRect)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t GetLayerRect(const EGDrawContext *pContext, EGObject *pObj, EG_LayerType_e LayerType, EGRect *pLayerRect)
+EG_Result_t GetLayerRect(const EGDeviceContext *pDC, EGObject *pObj, EG_LayerType_e LayerType, EGRect *pLayerRect)
 {
-	EG_Coord_t ExtDrawSize = pObj->GetExtDrawSize();
+	int32_t ExtDrawSize = pObj->GetExtDrawSize();
 	EGRect ObjRectExt(pObj->m_Rect);
 	ObjRectExt.Inflate(ExtDrawSize, ExtDrawSize);
 	if(LayerType == EG_LAYER_TYPE_TRANSFORM) {
@@ -749,7 +749,7 @@ EG_Result_t GetLayerRect(const EGDrawContext *pContext, EGObject *pObj, EG_Layer
 		EGRect ObjClipRect;
 		EGRect TransformRect(ObjRectExt);
 		pObj->GetTransformedArea(&TransformRect, false, false);
-		if(!ObjClipRect.Intersect(pContext->m_pClipRect, &TransformRect)) return EG_RES_INVALID;
+		if(!ObjClipRect.Intersect(pDC->m_pClipRect, &TransformRect)) return EG_RES_INVALID;
 		// Transform back (inverse) the transformed area. It will tell which area of the non-transformed
     // widget needs to be redrawn in order to cover transformed area after transformation.
 		EGRect InverseObjClipRect;
@@ -759,7 +759,7 @@ EG_Result_t GetLayerRect(const EGDrawContext *pContext, EGObject *pObj, EG_Layer
 	}
 	else if(LayerType == EG_LAYER_TYPE_SIMPLE) {
 		EGRect ObjClipRect2;
-		if(!ObjClipRect2.Intersect(pContext->m_pClipRect, &ObjRectExt)) {		return EG_RES_INVALID;
+		if(!ObjClipRect2.Intersect(pDC->m_pClipRect, &ObjRectExt)) {		return EG_RES_INVALID;
 		}
 		*pLayerRect = ObjClipRect2;
 	}
@@ -772,7 +772,7 @@ EG_Result_t GetLayerRect(const EGDrawContext *pContext, EGObject *pObj, EG_Layer
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void LayerAlphaTest(EGObject *pObj, const EGDrawContext *pContext, EGLayerContext *pDrawLayer, EGDrawLayerFlags_e Flags)
+void LayerAlphaTest(EGObject *pObj, const EGDeviceContext *pDC, EGLayerContext *pDrawLayer, EGDrawLayerFlags_e Flags)
 {
 bool HasAlpha = false;
 
@@ -798,7 +798,7 @@ bool HasAlpha = false;
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t GetMaximumRow(EGDisplay *pDisplay, EG_Coord_t AreaWidth, EG_Coord_t AreaHeight)
+uint32_t GetMaximumRow(EGDisplay *pDisplay, int32_t AreaWidth, int32_t AreaHeight)
 {
 	int32_t RowIncrement = (uint32_t)pDisplay->m_pDriver->m_pDrawBuffers->Size / AreaWidth;
 	if(RowIncrement > AreaHeight) RowIncrement = AreaHeight;
@@ -806,7 +806,7 @@ uint32_t GetMaximumRow(EGDisplay *pDisplay, EG_Coord_t AreaWidth, EG_Coord_t Are
 	// Round down the lines of draw_buf if rounding is added
 	if(s_pRefreshDisplay->m_pDriver->RounderCB) {
 		EGRect Rect;
-		EG_Coord_t TempHeight = RowIncrement;
+		int32_t TempHeight = RowIncrement;
 		do {
 			Rect.SetY2(TempHeight - 1);
 			s_pRefreshDisplay->m_pDriver->RounderCB(s_pRefreshDisplay->m_pDriver, &Rect);
@@ -826,8 +826,8 @@ uint32_t GetMaximumRow(EGDisplay *pDisplay, EG_Coord_t AreaWidth, EG_Coord_t Are
 
 void RotateDrawBuffer180(EGDisplayDriver *pDriver, EGRect *pRect, EG_Color_t *pColor)
 {
-	EG_Coord_t AreaWidth = pRect->GetWidth();
-	EG_Coord_t AreaHeight = pRect->GetHeight();
+	int32_t AreaWidth = pRect->GetWidth();
+	int32_t AreaHeight = pRect->GetHeight();
 	uint32_t total = AreaWidth * AreaHeight;
 	// Swap the beginning and end values
 	EG_Color_t tmp;
@@ -839,7 +839,7 @@ void RotateDrawBuffer180(EGDisplayDriver *pDriver, EGRect *pRect, EG_Color_t *pC
 		i--;
 		j++;
 	}
-	EG_Coord_t tmp_coord;
+	int32_t tmp_coord;
 	tmp_coord = pRect->GetY2();
 	pRect->SetY2(pDriver->m_VerticalRes - pRect->GetY1() - 1);
 	pRect->SetY1(pDriver->m_VerticalRes - tmp_coord - 1);
@@ -850,14 +850,14 @@ void RotateDrawBuffer180(EGDisplayDriver *pDriver, EGRect *pRect, EG_Color_t *pC
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM RotateDrawBuffer90(bool Rotation, EG_Coord_t Width, EG_Coord_t Height, EG_Color_t *pColor, EG_Color_t *pBuffer)
+void EG_ATTRIBUTE_FAST_MEM RotateDrawBuffer90(bool Rotation, int32_t Width, int32_t Height, EG_Color_t *pColor, EG_Color_t *pBuffer)
 {
 	uint32_t Invert = (Width * Height) - 1;
 	uint32_t Initial = ((Width - 1) * Height);
-	for(EG_Coord_t y = 0; y < Height; y++) {
+	for(int32_t y = 0; y < Height; y++) {
 		uint32_t i = Initial + y;
 		if(Rotation) i = Invert - i;
-		for(EG_Coord_t x = 0; x < Width; x++) {
+		for(int32_t x = 0; x < Width; x++) {
 			pBuffer[i] = *(pColor++);
 			if(Rotation) i += Height;
 			else i -= Height;
@@ -867,12 +867,12 @@ void EG_ATTRIBUTE_FAST_MEM RotateDrawBuffer90(bool Rotation, EG_Coord_t Width, E
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-void RotateDrawBuffer90Square(bool Is270, EG_Coord_t Width, EG_Color_t *pColor)
+void RotateDrawBuffer90Square(bool Is270, int32_t Width, EG_Color_t *pColor)
 {
-	for(EG_Coord_t i = 0; i < Width / 2; i++) {
-		for(EG_Coord_t j = 0; j < (Width + 1) / 2; j++) {
-			EG_Coord_t inv_i = (Width - 1) - i;
-			EG_Coord_t inv_j = (Width - 1) - j;
+	for(int32_t i = 0; i < Width / 2; i++) {
+		for(int32_t j = 0; j < (Width + 1) / 2; j++) {
+			int32_t inv_i = (Width - 1) - i;
+			int32_t inv_j = (Width - 1) - j;
 			if(Is270) {
 				RotateDrawBuffer4(&pColor[i * Width + j], &pColor[inv_j * Width + i],
 					&pColor[inv_i * Width + inv_j], &pColor[j * Width + inv_i]);
@@ -890,8 +890,8 @@ void RotateDrawBuffer90Square(bool Is270, EG_Coord_t Width, EG_Color_t *pColor)
 void FlushDrawBuffer(EGDisplay *pDisplay)
 {
 	EG_DisplayDrawBuffer_t *pDrawBuffer = s_pRefreshDisplay->GetDrawBuffer();
-	EGDrawContext *pContext = pDisplay->m_pDriver->m_pContext;	// Flush the rendered content to the display
-  pContext->WaitForFinish();
+	EGDeviceContext *pDC = pDisplay->m_pDriver->m_pContext;	// Flush the rendered content to the display
+  pDC->WaitForFinish();
 	/* In partial double buffered mode wait until the other buffer is freed
      * and driver is ready to receive the new buffer */
 	bool FullScreen = pDrawBuffer->Size == (uint32_t)s_pRefreshDisplay->m_pDriver->m_HorizontalRes * s_pRefreshDisplay->m_pDriver->m_VerticalRes;
@@ -907,9 +907,9 @@ void FlushDrawBuffer(EGDisplay *pDisplay)
 	if(pDisplay->m_pDriver->FlushCB) {
 		// Rotate the buffer to the display's native orientation if necessary
 		if(pDisplay->m_pDriver->m_Rotated != EG_DISP_ROT_NONE && pDisplay->m_pDriver->m_SoftRotate) {
-			RotateDrawBuffer(pContext->m_pDrawRect, (EG_Color_t *)pContext->m_pDrawBuffer);
+			RotateDrawBuffer(pDC->m_pDrawRect, (EG_Color_t *)pDC->m_pDrawBuffer);
 		}
-		else DoFlushCB(pDisplay->m_pDriver, pContext->m_pDrawRect, (EG_Color_t *)pContext->m_pDrawBuffer);
+		else DoFlushCB(pDisplay->m_pDriver, pDC->m_pDrawRect, (EG_Color_t *)pDC->m_pDrawBuffer);
 	}
 	// If there are 2 buffers swap them. With direct mode swap only on the last area
 	if(pDrawBuffer->pBuffer1 && pDrawBuffer->pBuffer2 && (!pDisplay->m_pDriver->m_DirectMode || FlushingLast)) {
@@ -934,11 +934,11 @@ void RotateDrawBuffer(EGRect *pRect, EG_Color_t *pColor)
 		// Allocate a temporary buffer to store rotated image
 		EG_Color_t *pRowBuffer = nullptr;
 		EG_DisplayDrawBuffer_t *pDrawBuffer = s_pRefreshDisplay->GetDrawBuffer();
-		EG_Coord_t AreaWidth = pRect->GetWidth();
-		EG_Coord_t AreaHeight = pRect->GetHeight();
+		int32_t AreaWidth = pRect->GetWidth();
+		int32_t AreaHeight = pRect->GetHeight();
 		// Determine the maximum number of rows that can be rotated at a time
-		EG_Coord_t RowIncrement = EG_MIN((EG_Coord_t)((EG_DISP_ROT_MAX_BUF / sizeof(EG_Color_t)) / AreaWidth), AreaHeight);
-		EG_Coord_t OffsetY = pRect->GetY1();
+		int32_t RowIncrement = EG_MIN((int32_t)((EG_DISP_ROT_MAX_BUF / sizeof(EG_Color_t)) / AreaWidth), AreaHeight);
+		int32_t OffsetY = pRect->GetY1();
 		if(pDriver->m_Rotated == EG_DISP_ROT_90) {
 			pRect->SetY2(pDriver->m_VerticalRes - pRect->GetX1() - 1);
 			pRect->SetY1(pRect->GetY2() - AreaWidth + 1);
@@ -947,9 +947,9 @@ void RotateDrawBuffer(EGRect *pRect, EG_Color_t *pColor)
 			pRect->SetY1(pRect->GetX1());
 			pRect->SetY2(pRect->GetY1() + AreaWidth - 1);
 		}
-		EG_Coord_t Row = 0;		// Rotate the screen in chunks, Flushing after each one
+		int32_t Row = 0;		// Rotate the screen in chunks, Flushing after each one
 		while(Row < AreaHeight) {
-			EG_Coord_t Height = EG_MIN(RowIncrement, AreaHeight - Row);
+			int32_t Height = EG_MIN(RowIncrement, AreaHeight - Row);
 			pDrawBuffer->Flushing = 1;
 			if((Row == 0) && (AreaHeight >= AreaWidth)) {
 				Height = AreaWidth;				// Rotate the initial area as a square

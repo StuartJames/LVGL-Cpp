@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -82,18 +83,18 @@ public:
   POSITION        GetNextPosition(POSITION &rPosition) const;
   POSITION        GetPrevPosition(POSITION &rPosition) const;
 	const void*     GetNext(POSITION& rPosition) const; // return rPosition++
-	const void*     GetNext(void *pElement) const;      
+	const void*     GetNext(void *pElement) const;
 	const void*     GetPrev(POSITION& rPosition) const; // return rPosition--
-	const void*     GetPrev(void *pElement) const;      
+	const void*     GetPrev(void *pElement) const;
 	const void*     GetAt(POSITION Position) const;
 	void            SetAt(POSITION pos, void* pNewElement);
 	void*           RemoveAt(POSITION &rPosition);
 	POSITION        InsertBefore(POSITION Position, void *pNewElement);
 	POSITION        InsertAfter(POSITION Position, void *pNewElement);
 	POSITION        Find(const void* pSearchValue, POSITION StartAfter = 0) const;
-	POSITION        FindIndexed(int nIndex) const;
+	POSITION        FindIndexed(uint32_t nIndex) const;
 
-protected:  
+protected:
 	EG_Node_t*      NewNode(EG_Node_t *m_pPrev, EG_Node_t *m_pNext);
 	void            FreeNode(EG_Node_t *pNode);
 
@@ -114,26 +115,26 @@ inline void EGList::Initialise(void)
 
 inline uint32_t EGList::GetCount(void) const
 {
-  return m_EntryCount; 
+  return m_EntryCount;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 inline uint32_t EGList::GetSize(void) const
-{ 
-  return m_EntryCount; 
+{
+  return m_EntryCount;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 inline bool EGList::IsEmpty(void) const
-{ 
+{
   return (m_EntryCount == 0) ? true : false;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline const void* EGList::GetHead(POSITION *pPosition /*= nullptr*/) 
+inline const void* EGList::GetHead(POSITION *pPosition /*= nullptr*/)
 {
   if(m_pNodeHead == nullptr) return nullptr;
   if(pPosition != nullptr) *pPosition = (POSITION)&m_pNodeHead->m_pNext;
@@ -151,7 +152,7 @@ inline const void* EGList::GetHead(POSITION &rPosition)
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline const void* EGList::GetTail(POSITION *pPosition /*= nullptr*/) 
+inline const void* EGList::GetTail(POSITION *pPosition /*= nullptr*/)
 {
   if(m_pNodeTail == nullptr) return nullptr;
   if(pPosition != nullptr) *pPosition = (POSITION)&m_pNodeTail->m_pPrev;
@@ -160,7 +161,7 @@ inline const void* EGList::GetTail(POSITION *pPosition /*= nullptr*/)
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline const void* EGList::GetTail(POSITION &rPosition) 
+inline const void* EGList::GetTail(POSITION &rPosition)
 {
   if(m_pNodeTail == nullptr) return nullptr;
   rPosition = (POSITION)m_pNodeTail->m_pPrev;
@@ -170,7 +171,7 @@ inline const void* EGList::GetTail(POSITION &rPosition)
 /////////////////////////////////////////////////////////////////////////////
 
 inline POSITION EGList::GetHeadPosition(void) const
-{ 
+{
   if(m_pNodeHead == nullptr) return nullptr;
   return (POSITION)m_pNodeHead;
 }
@@ -178,7 +179,7 @@ inline POSITION EGList::GetHeadPosition(void) const
 /////////////////////////////////////////////////////////////////////////////
 
 inline POSITION EGList::GetTailPosition(void) const
-{ 
+{
   if(m_pNodeTail == nullptr) return nullptr;
   return (POSITION)m_pNodeTail;
 }
@@ -186,7 +187,7 @@ inline POSITION EGList::GetTailPosition(void) const
 /////////////////////////////////////////////////////////////////////////////
 
 inline POSITION EGList::GetNextPosition(POSITION &rPosition) const
-{ 
+{
   EG_Node_t *pNode = (EG_Node_t*)rPosition;
 	if(pNode == nullptr) rPosition = nullptr;
 	else rPosition = (POSITION)pNode->m_pNext;
@@ -196,7 +197,7 @@ inline POSITION EGList::GetNextPosition(POSITION &rPosition) const
 /////////////////////////////////////////////////////////////////////////////
 
 inline POSITION EGList::GetPrevPosition(POSITION &rPosition) const
-{ 
+{
   EG_Node_t *pNode = (EG_Node_t*)rPosition;
 	if(pNode == nullptr) rPosition = nullptr;
 	else rPosition = (POSITION)pNode->m_pPrev;
@@ -224,12 +225,12 @@ inline const void* EGList::GetNext(void *pElement) const
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline const void* EGList::GetPrev(POSITION& rPosition) const 
+inline const void* EGList::GetPrev(POSITION& rPosition) const
 {
   EG_Node_t* pNode = (EG_Node_t*)rPosition;
 	if(pNode == nullptr) return nullptr;
 	rPosition = (POSITION)pNode->m_pPrev;
-	return pNode->m_pData; 
+	return pNode->m_pData;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -244,7 +245,7 @@ inline const void* EGList::GetPrev(void *pElement) const
 /////////////////////////////////////////////////////////////////////////////
 
 inline const void* EGList::GetAt(POSITION Position) const
-{ 
+{
   EG_Node_t* pNode = (EG_Node_t*)Position;
 	if(pNode == nullptr) return nullptr;
 	return pNode->m_pData;
@@ -253,7 +254,7 @@ inline const void* EGList::GetAt(POSITION Position) const
 /////////////////////////////////////////////////////////////////////////////
 
 inline void EGList::SetAt(POSITION Position, void *pElement)
-{ 
+{
   EG_Node_t* pNode = (EG_Node_t*)Position;
 	if(pNode != nullptr) pNode->m_pData = pElement;
 }

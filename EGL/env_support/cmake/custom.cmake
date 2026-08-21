@@ -1,10 +1,11 @@
+message(STATUS "Compiling Custom")
+
 # Option to define EG_EGL_H_INCLUDE_SIMPLE, default: ON
 option(EG_EGL_H_INCLUDE_SIMPLE
        "Use #include \"EGL.h\" instead of #include \"../../EGL.h\"" ON)
 
 # Option to define EG_CONF_INCLUDE_SIMPLE, default: ON
-option(EG_CONF_INCLUDE_SIMPLE
-       "Simple include of \"EG_Config.h\" and \"lv_drv_conf.h\"" ON)
+option(EG_CONF_INCLUDE_SIMPLE "Simple include of \"EG_Config.h\"" ON)
 
 # Option to set EG_CONF_PATH, if set parent path EG_CONF_DIR is added to
 # includes
@@ -29,7 +30,7 @@ target_compile_definitions(
               $<$<BOOL:${EG_CONF_INCLUDE_SIMPLE}>:EG_CONF_INCLUDE_SIMPLE>)
 
 # Include root and optional parent path of EG_CONF_PATH
-target_include_directories(egl SYSTEM PUBLIC ${EGL_ROOT_DIR} ${EG_CONF_DIR})
+target_include_directories(EGL SYSTEM PUBLIC ${EGL_ROOT_DIR} ${EG_CONF_DIR})
 
 # Lbrary and headers can be installed to system using make install
 file(GLOB EGL_PUBLIC_HEADERS "${CMAKE_SOURCE_DIR}/EG_Config.h"

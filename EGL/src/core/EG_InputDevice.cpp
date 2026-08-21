@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -354,7 +355,7 @@ void EGInputDevice::PointerProcess(EG_InputData_t *pInData)
 		pInData->Point.m_Y = m_pDisplay->m_pDriver->m_VerticalRes - pInData->Point.m_Y - 1;
 	}
 	if(m_pDisplay->m_pDriver->m_Rotated == EG_DISP_ROT_90 || m_pDisplay->m_pDriver->m_Rotated == EG_DISP_ROT_270) {
-    EG_Coord_t TempY = pInData->Point.m_Y;
+    int32_t TempY = pInData->Point.m_Y;
 		pInData->Point.m_Y = pInData->Point.m_X;
 		pInData->Point.m_X = m_pDisplay->m_pDriver->m_VerticalRes - TempY - 1;
 	}
@@ -535,7 +536,7 @@ void EGInputDevice::EncoderProcess(EG_InputData_t *pInData)
 	if(pInData->State != EG_INDEV_STATE_RELEASED) {	// Process the steps they are valid only with released button
 		pInData->EncoderSteps = 0;
 	}
-	// Refresh the focused object. It might change due to lv_group_focus_prev/next
+	// Refresh the focused object. It might change due to EGGroup.FocusPrev/FocusNext
 	m_pActiveObj = pGroup->GetFocused();
 	if(m_pActiveObj == nullptr) return;
 	if(pInData->State == EG_INDEV_STATE_PRESSED && LastState == EG_INDEV_STATE_RELEASED) {	// Button press happened
@@ -719,8 +720,8 @@ static EG_InDeviceState_e PrevState = EG_INDEV_STATE_RELEASED;
 		EG_LOG_WARN("btn_points is NULL");
 		return;
 	}
-	EG_Coord_t x = m_pButtonPoints[pInData->ButtonID].m_X;
-	EG_Coord_t y = m_pButtonPoints[pInData->ButtonID].m_Y;
+	int32_t x = m_pButtonPoints[pInData->ButtonID].m_X;
+	int32_t y = m_pButtonPoints[pInData->ButtonID].m_Y;
 	if(PrevState != pInData->State) {
 		if(pInData->State == EG_INDEV_STATE_PRESSED) {
 			EG_LOG_INFO("button %" EG_PRIu32 " is pressed (x:%d y:%d)", pInData->ButtonID, x, y);

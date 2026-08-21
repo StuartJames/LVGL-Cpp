@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -41,16 +42,16 @@ EG_EXPORT_CONST_INT(EG_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 class EGObject; // Can't include EG_Object.h because it includes this header file
 
-typedef enum : uint8_t {
+enum EG_FlexAlign_e : uint8_t {
     EG_FLEX_ALIGN_START,
     EG_FLEX_ALIGN_END,
     EG_FLEX_ALIGN_CENTER,
     EG_FLEX_ALIGN_SPACE_EVENLY,
     EG_FLEX_ALIGN_SPACE_AROUND,
     EG_FLEX_ALIGN_SPACE_BETWEEN,
-} EG_FlexAlign_e;
+};
 
-typedef enum : uint16_t {
+enum EG_FlexFlow_e : uint16_t {
     EG_FLEX_FLOW_ROW                 = 0x00,
     EG_FLEX_FLOW_COLUMN              = _EG_FLEX_COLUMN,
     EG_FLEX_FLOW_ROW_WRAP            = EG_FLEX_FLOW_ROW | _EG_FLEX_WRAP,
@@ -59,21 +60,21 @@ typedef enum : uint16_t {
     EG_FLEX_FLOW_COLUMN_WRAP         = EG_FLEX_FLOW_COLUMN | _EG_FLEX_WRAP,
     EG_FLEX_FLOW_COLUMN_REVERSE      = EG_FLEX_FLOW_COLUMN | _EG_FLEX_REVERSE,
     EG_FLEX_FLOW_COLUMN_WRAP_REVERSE = EG_FLEX_FLOW_COLUMN | _EG_FLEX_WRAP | _EG_FLEX_REVERSE,
-} EG_FlexFlow_e;
+};
 
 typedef struct {
 	EGObject *pItem;
-	EG_Coord_t min_size;
-	EG_Coord_t max_size;
-	EG_Coord_t final_size;
+	int32_t min_size;
+	int32_t max_size;
+	int32_t final_size;
 	uint32_t grow_value;
 	uint32_t clamped : 1;
 } GrowProps_t;
 
 typedef struct {
-	EG_Coord_t track_cross_size;
-	EG_Coord_t track_main_size;     /*For all items*/
-	EG_Coord_t track_fix_main_size; /*For non grow items*/
+	int32_t track_cross_size;
+	int32_t track_main_size;     /*For all items*/
+	int32_t track_fix_main_size; /*For non grow items*/
 	uint32_t item_cnt;
 	GrowProps_t *grow_dsc;
 	uint32_t grow_item_cnt;
@@ -119,12 +120,12 @@ public:
   static uint32_t           m_Reference;
 
 private:
-  int32_t       FindTrackEnd(EGObject *pObject, int32_t item_start_id, EG_Coord_t max_main_size,
-                  EG_Coord_t item_gap, TrackProps_t *t);
-  void          RepositionChildren(EGObject *pObject, int32_t item_first_id, int32_t item_last_id, EG_Coord_t abs_x,
-                  EG_Coord_t abs_y, EG_Coord_t max_main_size, EG_Coord_t item_gap, TrackProps_t *t);
-  void          PlaceContent(EG_FlexAlign_e place, EG_Coord_t max_size, EG_Coord_t content_size, EG_Coord_t item_cnt,
-                  EG_Coord_t *start_pos, EG_Coord_t *gap);
+  int32_t       FindTrackEnd(EGObject *pObject, int32_t item_start_id, int32_t max_main_size,
+                  int32_t item_gap, TrackProps_t *t);
+  void          RepositionChildren(EGObject *pObject, int32_t item_first_id, int32_t item_last_id, int32_t abs_x,
+                  int32_t abs_y, int32_t max_main_size, int32_t item_gap, TrackProps_t *t);
+  void          PlaceContent(EG_FlexAlign_e place, int32_t max_size, int32_t content_size, int32_t item_cnt,
+                  int32_t *start_pos, int32_t *gap);
   EGObject*     GetNextItem(EGObject *cont, bool rev, int32_t *item_id);
 
 	EG_FlexAlign_e            m_MainPlace;

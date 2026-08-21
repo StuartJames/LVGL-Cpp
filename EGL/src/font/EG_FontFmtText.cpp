@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -30,21 +31,21 @@
 #include "misc/EG_Utilities.h"
 #include "misc/EG_Memory.h"
 
-typedef enum {
+enum RLE_State_e{
 	RLE_STATE_SINGLE = 0,
 	RLE_STATE_REPEATE,
 	RLE_STATE_COUNTER,
-} rle_state_t;
+} ;
 
-static uint32_t GetGlyphDiscriptorID(const EG_Font_t *pFont, uint32_t letter);
+static uint32_t GetGlyphDescriptorID(const EG_Font_t *pFont, uint32_t letter);
 static int8_t GetKerningValue(const EG_Font_t *pFont, uint32_t gid_left, uint32_t gid_right);
 static int32_t UnicodeListCompare(const void *ref, const void *element);
 static int32_t KernPair8Compare(const void *ref, const void *element);
 static int32_t KernPair16Compare(const void *ref, const void *element);
 
 #if EG_USE_FONT_COMPRESSED
-static void Decompress(const uint8_t *in, uint8_t *out, EG_Coord_t Width, EG_Coord_t Height, uint8_t BitsPerPixel, bool prefilter);
-static inline void DecompressLine(uint8_t *out, EG_Coord_t Width);
+static void Decompress(const uint8_t *in, uint8_t *out, int32_t Width, int32_t Height, uint8_t BitsPerPixel, bool prefilter);
+static inline void DecompressLine(uint8_t *out, int32_t Width);
 static inline uint8_t GetBits(const uint8_t *in, uint32_t bit_pos, uint8_t len);
 static inline void WriteBits(uint8_t *out, uint32_t bit_pos, uint8_t val, uint8_t len);
 static inline void InitialiseRLE(const uint8_t *in, uint8_t BitsPerPixel);
@@ -70,7 +71,7 @@ const uint8_t* EG_FontGetBitmapFmtText(const EG_Font_t *pFont, uint32_t UnicodeC
 {
 	if(UnicodeChar == '\t') UnicodeChar = ' ';
 	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)pFont->pProperties;
-	uint32_t gid = GetGlyphDiscriptorID(pFont, UnicodeChar);
+	uint32_t gid = GetGlyphDescriptorID(pFont, UnicodeChar);
 	if(!gid) return NULL;
 	const EG_FontFmtTextGlyphProps_t *gdsc = &fdsc->pGlyphProps[gid];
 	if(fdsc->BitmapFormat == EG_FONT_FMT_TXT_PLAIN) {
@@ -141,12 +142,12 @@ bool EG_FontGetGlyphPropsFmtText(const EG_Font_t *pFont, EG_FontGlyphProps_t *ds
 		UnicodeChar = ' ';
 	}
 	EG_FontFmtTextProps_t *fdsc = (EG_FontFmtTextProps_t *)pFont->pProperties;
-	uint32_t gid = GetGlyphDiscriptorID(pFont, UnicodeChar);
+	uint32_t gid = GetGlyphDescriptorID(pFont, UnicodeChar);
 	if(!gid) return false;
 
 	int8_t kvalue = 0;
 	if(fdsc->pKernProps) {
-		uint32_t gid_next = GetGlyphDiscriptorID(pFont, unicode_letter_next);
+		uint32_t gid_next = GetGlyphDescriptorID(pFont, unicode_letter_next);
 		if(gid_next) {
 			kvalue = GetKerningValue(pFont, gid, gid_next);
 		}
@@ -189,7 +190,7 @@ void EG_FontCleanUpFmtText(void)
 #endif
 }
 
-static uint32_t GetGlyphDiscriptorID(const EG_Font_t *pFont, uint32_t letter)
+static uint32_t GetGlyphDescriptorID(const EG_Font_t *pFont, uint32_t letter)
 {
 	if(letter == '\0') return 0;
 
@@ -333,7 +334,7 @@ const uint16_t *element16_p = (uint16_t*)element;
  * @param BitsPerPixel bit per pixel (BitsPerPixel = 3 will be converted to BitsPerPixel = 4)
  * @param prefilter true: the lines are XORed
  */
-static void Decompress(const uint8_t *in, uint8_t *out, EG_Coord_t Width, EG_Coord_t Height, uint8_t BitsPerPixel, bool prefilter)
+static void Decompress(const uint8_t *in, uint8_t *out, int32_t Width, int32_t Height, uint8_t BitsPerPixel, bool prefilter)
 {
 	uint32_t wrp = 0;
 	uint8_t wr_size = BitsPerPixel;
@@ -351,8 +352,8 @@ static void Decompress(const uint8_t *in, uint8_t *out, EG_Coord_t Width, EG_Coo
 
 	DecompressLine(line_buf1, Width);
 
-	EG_Coord_t y;
-	EG_Coord_t x;
+	int32_t y;
+	int32_t x;
 
 	for(x = 0; x < Width; x++) {
 		WriteBits(out, wrp, line_buf1[x], BitsPerPixel);
@@ -388,9 +389,9 @@ static void Decompress(const uint8_t *in, uint8_t *out, EG_Coord_t Width, EG_Coo
  * @param out output buffer
  * @param Width width of the line in pixel count
  */
-static inline void DecompressLine(uint8_t *out, EG_Coord_t Width)
+static inline void DecompressLine(uint8_t *out, int32_t Width)
 {
-	EG_Coord_t i;
+	int32_t i;
 	for(i = 0; i < Width; i++) {
 		out[i] = NextRLE();
 	}

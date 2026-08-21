@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -35,7 +36,7 @@ EGDecoderBMP DecoderBMP;
 
 EG_Result_t EGDecoderBMP::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 {
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 	if(SourceType == EG_IMG_SRC_FILE) {	// If it's a BMP file...
 		const char *pFileName = (char*)pSource;
 		if(strcmp(EGFileSystem::GetExt((const char *)pFileName), "bmp") == 0) { // Check the extension
@@ -121,7 +122,7 @@ EG_Result_t EGDecoderBMP::Open(ImageDecoderDescriptor_t  *pDescriptor)
 ///////////////////////////////////////////////////////////////////////////////
 
 
-EG_Result_t EGDecoderBMP::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGDecoderBMP::ReadLine(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y, int32_t Length, uint8_t *pBuffer)
 {
 	Y = (m_PixelHeight - 1) - Y; // BMP images are stored upside down
 	uint32_t Pos = m_PixelOffset + m_RowByteSize * Y;
@@ -137,7 +138,7 @@ EG_Result_t EGDecoderBMP::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG_Coo
 	}
 #elif EG_COLOR_DEPTH == 32
 	if(m_BitsPerPixel == 32) {
-		for(EG_Coord_t i = 0; i < Length; i++) {
+		for(int32_t i = 0; i < Length; i++) {
 			uint8_t b0 = pBuffer[i * 4];
 			uint8_t b1 = pBuffer[i * 4 + 1];
 			uint8_t b2 = pBuffer[i * 4 + 2];
@@ -150,7 +151,7 @@ EG_Result_t EGDecoderBMP::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG_Coo
 		}
 	}
 	if(m_BitsPerPixel == 24) {
-		for(EG_Coord_t i = Length - 1; i >= 0; i--) {
+		for(int32_t i = Length - 1; i >= 0; i--) {
 			uint8_t *t = &pBuffer[i * 3];
 			EG_Color32_t *pColor = (EG_Color32_t *)&pBuffer[i * 4];
 			pColor->ch.red = t[2];

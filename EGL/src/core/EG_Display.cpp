@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -123,7 +124,7 @@ EGObject *EGDisplay::GetTopLayer(EGDisplay *pDisplay)
 {
   if(!pDisplay) pDisplay = GetDefault();
   if(!pDisplay) {
-    EG_LOG_WARN("lv_layer_top: no display registered to get its top layer");
+    EG_LOG_WARN("GetTopLayer: no display registered to get its top layer");
     return nullptr;
   }
 	return pDisplay->m_pTopLayer;
@@ -135,7 +136,7 @@ EGObject *EGDisplay::GetSystemLayer(EGDisplay *pDisplay)
 {
   if(!pDisplay) pDisplay = GetDefault();
   if(!pDisplay) {
-    EG_LOG_WARN("lv_layer_sys: no display registered to get its sys. layer");
+    EG_LOG_WARN("GetSystemLayer: no display registered to get its sys. layer");
     return nullptr;
   }
 	return pDisplay->m_pSystemLayer;
@@ -216,7 +217,7 @@ EGRect Rect;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::LoadAnimation(EGObject *pScreen, EG_ScreenAnimateType_t AnimateType, uint32_t Time, uint32_t Delay, bool AutoDelete)
+void EGDisplay::LoadAnimation(EGObject *pScreen, EG_ScreenAnimateType_e AnimateType, uint32_t Time, uint32_t Delay, bool AutoDelete)
 {
 	EGDisplay *pDisplay = pScreen->GetDisplay();
 	EGObject *pActiveScreen = EGDisplay::GetActiveScreen(pDisplay);
@@ -465,7 +466,7 @@ void EGDisplay::AnimationEnd(EGAnimate *pAnimate)
 
 /////////////////////////////////////////////////////////////////////////////
 
-bool EGDisplay::IsOutAnimation(EG_ScreenAnimateType_t AnimateType)
+bool EGDisplay::IsOutAnimation(EG_ScreenAnimateType_e AnimateType)
 {
 	return AnimateType == EG_SCR_LOAD_ANIM_FADE_OUT ||
 		AnimateType == EG_SCR_LOAD_ANIM_OUT_LEFT ||

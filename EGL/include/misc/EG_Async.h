@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -33,7 +34,7 @@ class EGTimer;
 class EGAsyncFunc
 {
 public:
-                        EGAsyncFunc(EG_AsyncCB_t AsyncCB, void *pParam); // Call an asynchronous function the next time lv_timer_handler() is run. 
+                        EGAsyncFunc(EG_AsyncCB_t AsyncCB, void *pParam); // Call an asynchronous function the next time the timer handler is run.
   static void           Create(EG_AsyncCB_t AsyncCB, void *pParam);
   static EG_Result_t    Cancel(EG_AsyncCB_t AsyncCB, void *pParam); // Cancel an asynchronous function call
   static void           TimerCB(EGTimer *pTimer);

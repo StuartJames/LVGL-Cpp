@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -104,7 +105,7 @@ uint32_t EG_Bezier3(uint32_t t, uint32_t u0, uint32_t u1, uint32_t u2, uint32_t 
  * If root < 256: mask = 0x800
  * Else: mask = 0x8000
  */
-void EG_ATTRIBUTE_FAST_MEM EG_Sqrt(uint32_t x, lv_sqrt_res_t *q, uint32_t mask)
+void EG_ATTRIBUTE_FAST_MEM EG_Sqrt(uint32_t x, EG_SqrtResult_t *q, uint32_t mask)
 {
 	x = x << 8; /*To get 4 bit precision. (sqrt(256) = 16 = 4 bit)*/
 

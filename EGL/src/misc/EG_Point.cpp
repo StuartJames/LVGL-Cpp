@@ -17,7 +17,7 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
  *
  */
 
@@ -55,7 +55,7 @@ EGPoint::EGPoint(const EGPoint *pInPoint)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EGPoint::EGPoint(EG_Coord_t X, EG_Coord_t Y)
+EGPoint::EGPoint(int32_t X, int32_t Y)
 {
   m_X = X;
 	m_Y = Y;
@@ -63,7 +63,7 @@ EGPoint::EGPoint(EG_Coord_t X, EG_Coord_t Y)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void EGPoint::Set(EG_Coord_t X, EG_Coord_t Y)
+void EGPoint::Set(int32_t X, int32_t Y)
 {
   m_X = X;
 	m_Y = Y;
@@ -111,7 +111,7 @@ void EGPoint::operator-- (void)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EGPoint EGPoint::Add(EG_Coord_t X, EG_Coord_t Y)
+EGPoint EGPoint::Add(int32_t X, int32_t Y)
 {
 EGPoint Add;
 
@@ -122,7 +122,7 @@ EGPoint Add;
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EGPoint EGPoint::Sub(EG_Coord_t X, EG_Coord_t Y)
+EGPoint EGPoint::Sub(int32_t X, int32_t Y)
 {
 EGPoint Sub;
 
@@ -133,7 +133,7 @@ EGPoint Sub;
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void EGPoint::Offset(EG_Coord_t X, EG_Coord_t Y)
+void EGPoint::Offset(int32_t X, int32_t Y)
 {
   m_X += X;
   m_Y += Y;
@@ -151,7 +151,7 @@ void EGPoint::Offset(const EGPoint *pPoint)
 
 void EGPoint::Swap(EGPoint *pPoint)
 {
-  EG_Coord_t Temp = pPoint->m_X;
+  int32_t Temp = pPoint->m_X;
 	pPoint->m_X = m_X;
 	m_X = Temp;
   Temp = pPoint->m_Y;

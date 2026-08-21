@@ -20,25 +20,25 @@ typedef struct {
 } EG_SColor24_t;
 
 struct EG_Gradient_t;
-typedef void (*EG_DitherFunc_t)(struct EG_Gradient_t * grad, EG_Coord_t x, EG_Coord_t y, EG_Coord_t w);
+typedef void (*EG_DitherFunc_t)(struct EG_Gradient_t * grad, int32_t x, int32_t y, int32_t w);
 
 #endif
 
 #if EG_DRAW_COMPLEX
 #if _DITHER_GRADIENT
-void EG_ATTRIBUTE_FAST_MEM EG_DitherNone(struct EG_Gradient_t * grad, EG_Coord_t x, EG_Coord_t y,
-                                                EG_Coord_t w);
+void EG_ATTRIBUTE_FAST_MEM EG_DitherNone(struct EG_Gradient_t * grad, int32_t x, int32_t y,
+                                                int32_t w);
 
-void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(struct EG_Gradient_t * grad, const EG_Coord_t xs,
-                                                       const EG_Coord_t y, const EG_Coord_t w);
-void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(struct EG_Gradient_t * grad, const EG_Coord_t xs,
-                                                       const EG_Coord_t y, const EG_Coord_t w);
+void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedHorizontal(struct EG_Gradient_t * grad, const int32_t xs,
+                                                       const int32_t y, const int32_t w);
+void EG_ATTRIBUTE_FAST_MEM EG_DitherOrderedVertical(struct EG_Gradient_t * grad, const int32_t xs,
+                                                       const int32_t y, const int32_t w);
 
 #if EG_DITHER_ERROR_DIFFUSION == 1
-void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(struct EG_Gradient_t * grad, const EG_Coord_t xs,
-                                                        const EG_Coord_t y, const EG_Coord_t w);
-void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffVertical(struct EG_Gradient_t * grad, const EG_Coord_t xs,
-                                                        const EG_Coord_t y, const EG_Coord_t w);
+void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffHorizontal(struct EG_Gradient_t * grad, const int32_t xs,
+                                                        const int32_t y, const int32_t w);
+void EG_ATTRIBUTE_FAST_MEM EG_DitherErrorDiffVertical(struct EG_Gradient_t * grad, const int32_t xs,
+                                                        const int32_t y, const int32_t w);
 #endif /* EG_DITHER_ERROR_DIFFUSION */
 
 #endif 

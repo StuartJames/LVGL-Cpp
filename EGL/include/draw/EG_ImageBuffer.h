@@ -1,26 +1,27 @@
-/* 
+/*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
- */ 
- 
+ */
+
 #pragma once
 
 #include <stdbool.h>
@@ -64,12 +65,12 @@ typedef struct {
     uint32_t Width : 11;      // Width of the image map
     uint32_t Reserved : 2;    // Reserved to be used later
     uint32_t AlwaysZero : 3;  // It's the upper bits of the first byte. Always zero to look like a non-printable character
-    uint32_t ColorFormat : 5; // Color format: See `lv_img_color_format_t`
+    uint32_t ColorFormat : 5; // Color format: See `EG_ImageColorFormat_t`
 } EG_ImageHeader_t;
 #else
 typedef struct {
 
-    uint32_t ColorFormat : 5; // Color format: See `lv_img_color_format_t`
+    uint32_t ColorFormat : 5; // Color format: See `EG_ImageColorFormat_t`
     uint32_t AlwaysZero : 3;  // It the upper bits of the first byte. Always zero to look like a non-printable character
     uint32_t Reserved : 2;    // Reserved to be used later
     uint32_t Width : 11;      // Width of the image map
@@ -83,18 +84,18 @@ class EGImageBuffer
 {
 public:
                   EGImageBuffer(void);
-                  EGImageBuffer(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat);
-                  EGImageBuffer(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat, const uint8_t *pData, uint32_t Size = 0);
+                  EGImageBuffer(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat);
+                  EGImageBuffer(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat, const uint8_t *pData, uint32_t Size = 0);
                   ~EGImageBuffer(void);
-  bool            Allocate(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat);
-  EG_Color_t      GetPixelColor(EG_Coord_t X, EG_Coord_t Y, EG_Color_t Color);
-  EG_OPA_t        GetPixelAlpha(EG_Coord_t X, EG_Coord_t Y);
-  void            SetPixelColor(EG_Coord_t X, EG_Coord_t Y, EG_Color_t Color);
-  void            SetPixelAlpha(EG_Coord_t X, EG_Coord_t Y, EG_OPA_t OPA);
+  bool            Allocate(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat);
+  EG_Color_t      GetPixelColor(int32_t X, int32_t Y, EG_Color_t Color);
+  EG_OPA_t        GetPixelAlpha(int32_t X, int32_t Y);
+  void            SetPixelColor(int32_t X, int32_t Y, EG_Color_t Color);
+  void            SetPixelAlpha(int32_t X, int32_t Y, EG_OPA_t OPA);
   void            SetPalette(uint8_t ID, EG_Color_t Color);
-  uint32_t        CalculateBufferSize(EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat);
+  uint32_t        CalculateBufferSize(int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat);
 
-  static void     GetTransformedRect(EGRect * res, EG_Coord_t Width, EG_Coord_t Height, int16_t Angle, EGScale Scale, const EGPoint *pPivot);
+  static void     GetTransformedRect(EGRect * res, int32_t Width, int32_t Height, int16_t Angle, EGScale Scale, const EGPoint *pPivot);
 
   EG_ImageHeader_t  m_Header;     // A header describing the basics of the image
   uint32_t          m_DataSize;   // Size of the image in bytes

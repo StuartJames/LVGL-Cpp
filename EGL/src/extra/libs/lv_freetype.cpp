@@ -4,6 +4,7 @@
  */
 
 #include "extra/libs/lv_freetype.h"
+
 #if EG_USE_FREETYPE
 
 #include "ft2build.h"

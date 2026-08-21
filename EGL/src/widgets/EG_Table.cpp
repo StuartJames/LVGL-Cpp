@@ -1,15 +1,38 @@
-
+/*
+ *                EGL 2025-2026 HydraSystems.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  Based on a design by LVGL Kft
+ *
+ * =====================================================================
+ *
+ * Edit     Date     Version       Edit Description
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
+ *
+ */
 
 #include "widgets/EG_Table.h"
+
 #if EG_USE_TABLE != 0
 
 #include "core/EG_InputDevice.h"
 #include "misc/EG_Assert.h"
 #include "misc/EG_Text.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 #include "misc/EG_Math.h"
 #include "misc/lv_printf.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,8 +94,8 @@ void EGTable::Configure(void)
   EGObject::Configure();
 	m_ColumnCount = 1;
 	m_RowCount = 1;
-	m_pColumnWidth = (EG_Coord_t*)EG_AllocMem(m_ColumnCount * sizeof(m_pColumnWidth[0]));
-	m_pRowHeight = (EG_Coord_t*)EG_AllocMem(m_RowCount * sizeof(m_pRowHeight[0]));
+	m_pColumnWidth = (int32_t*)EG_AllocMem(m_ColumnCount * sizeof(m_pColumnWidth[0]));
+	m_pRowHeight = (int32_t*)EG_AllocMem(m_RowCount * sizeof(m_pRowHeight[0]));
 	m_pColumnWidth[0] = EG_DPI_DEF;
 	m_pRowHeight[0] = EG_DPI_DEF;
 	m_ppCellData = (EG_TableCell_t**)EG_ReallocMem(m_ppCellData, m_RowCount * m_ColumnCount * sizeof(EG_TableCell_t *));
@@ -168,7 +191,7 @@ void EGTable::SetRowCount(uint16_t RowCount)
 	if(m_RowCount == RowCount) return;
 	uint16_t old_row_cnt = m_RowCount;
 	m_RowCount = RowCount;
-	m_pRowHeight = (EG_Coord_t*)EG_ReallocMem(m_pRowHeight, m_RowCount * sizeof(m_pRowHeight[0]));
+	m_pRowHeight = (int32_t*)EG_ReallocMem(m_pRowHeight, m_RowCount * sizeof(m_pRowHeight[0]));
 	EG_ASSERT_MALLOC(m_pRowHeight);
 	if(m_pRowHeight == nullptr) return;
 	if(old_row_cnt > RowCount) {	// Free the unused cells
@@ -232,7 +255,7 @@ void EGTable::SetColumnCount(uint16_t ColumnCount)
 	}
 	EG_FreeMem(m_ppCellData);
 	m_ppCellData = new_cell_data;
-	m_pColumnWidth = (EG_Coord_t*)EG_ReallocMem(m_pColumnWidth, ColumnCount * sizeof(m_pColumnWidth[0]));
+	m_pColumnWidth = (int32_t*)EG_ReallocMem(m_pColumnWidth, ColumnCount * sizeof(m_pColumnWidth[0]));
 	EG_ASSERT_MALLOC(m_pColumnWidth);
 	if(m_pColumnWidth == nullptr) return;
 	uint32_t Column;
@@ -244,7 +267,7 @@ void EGTable::SetColumnCount(uint16_t ColumnCount)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGTable::SetColumnWidth( uint16_t ColumnIndex, EG_Coord_t Width)
+void EGTable::SetColumnWidth( uint16_t ColumnIndex, int32_t Width)
 {
 	if(ColumnIndex >= m_ColumnCount) SetColumnCount(ColumnIndex + 1);
 	m_pColumnWidth[ColumnIndex] = Width;
@@ -323,10 +346,10 @@ uint16_t EGTable::GetColumnCount(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGTable::GetColumnWidth(uint16_t Column)
+int32_t EGTable::GetColumnWidth(uint16_t Column)
 {
 	if(Column >= m_ColumnCount) {
-		EG_LOG_WARN("lv_table_set_col_width: too big 'col_id'. Must be < EG_TABLE_COL_MAX.");
+		EG_LOG_WARN("EGTable::GetColumnWidth: too big 'col_id'. Must be < EG_TABLE_COL_MAX.");
 		return 0;
 	}
 	return m_pColumnWidth[Column];
@@ -337,7 +360,7 @@ EG_Coord_t EGTable::GetColumnWidth(uint16_t Column)
 bool EGTable::CellHasControl(uint16_t Row, uint16_t Column, EG_TableCellCtrl_t Control)
 {
 	if(Row >= m_RowCount || Column >= m_ColumnCount) {
-		EG_LOG_WARN("lv_table_get_cell_crop: invalid Row or column");
+		EG_LOG_WARN("EGTable::CellHasControl: invalid Row or column");
 		return false;
 	}
 	uint32_t Cell = Row * m_ColumnCount + Column;
@@ -411,9 +434,9 @@ void EGTable::Event(EGEvent *pEvent)
     case EG_EVENT_GET_SELF_SIZE: {
       EGPoint *pPoint = (EGPoint*)pEvent->GetParam();
       uint32_t i;
-      EG_Coord_t Width = 0;
+      int32_t Width = 0;
       for(i = 0; i < m_ColumnCount; i++) Width += m_pColumnWidth[i];
-      EG_Coord_t Height = 0;
+      int32_t Height = 0;
       for(i = 0; i < m_RowCount; i++) Height += m_pRowHeight[i];
       pPoint->m_X = Width - 1;
       pPoint->m_Y = Height - 1;
@@ -510,18 +533,18 @@ void EGTable::Event(EGEvent *pEvent)
 
 void EGTable::DrawMain(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	EGRect ClipRect;
-	if(!ClipRect.Intersect(&m_Rect, pContext->m_pClipRect)) return;
-	const EGRect *pClipRectOriginal = pContext->m_pClipRect;
-	pContext->m_pClipRect = &ClipRect;
-	EGPoint TextSize;
+	if(!ClipRect.Intersect(&m_Rect, pDC->m_pClipRect)) return;
+	const EGRect *pClipRectOriginal = pDC->m_pClipRect;
+	pDC->m_pClipRect = &ClipRect;
+	EGSize TextSize;
 	EGRect CellRect;
-	EG_Coord_t m_BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t PaddingTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PaddingBottom = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t PaddingLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t PaddingRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t m_BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t PaddingTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t PaddingBottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t PaddingLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t PaddingRight = GetStylePadRight(EG_PART_MAIN);
 	EGState_t OriginalState = m_State;
 	m_State = EG_STATE_DEFAULT;
 	m_SkipTransition = 1;
@@ -537,17 +560,16 @@ void EGTable::DrawMain(EGEvent *pEvent)
 	uint16_t Row;
 	uint16_t Cell = 0;
 	CellRect.SetY2(m_Rect.GetY1() + PaddingTop - 1 - GetScrollY() + m_BorderWidth);
-	EG_Coord_t scroll_x = GetScrollX();
+	int32_t scroll_x = GetScrollX();
 	bool RTL = GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL;
-	EGDrawDiscriptor PartDrawDiscriptor;	// Handle custom drawer
-	InitDrawDescriptor(&PartDrawDiscriptor, pContext);
-	PartDrawDiscriptor.m_Part = EG_PART_ITEMS;
-	PartDrawDiscriptor.m_pClass = m_pClass;
-	PartDrawDiscriptor.m_Type = EG_TABLE_DRAW_PART_CELL;
-	PartDrawDiscriptor.m_pDrawRect = &DrawRectActive;
-	PartDrawDiscriptor.m_pDrawLabel = &DrawLabelActive;
+	EGEventDC PartDrawDescriptor(pDC);	// Handle custom drawer
+	PartDrawDescriptor.m_Part = EG_PART_ITEMS;
+	PartDrawDescriptor.m_pClass = m_pClass;
+	PartDrawDescriptor.m_Type = EG_TABLE_DRAW_PART_CELL;
+	PartDrawDescriptor.m_pDrawRect = &DrawRectActive;
+	PartDrawDescriptor.m_pDrawLabel = &DrawLabelActive;
 	for(Row = 0; Row < m_RowCount; Row++) {
-		EG_Coord_t RowHeight = m_pRowHeight[Row];
+		int32_t RowHeight = m_pRowHeight[Row];
 		CellRect.SetY1(CellRect.GetY2() + 1);
 		CellRect.SetY2(CellRect.GetY1() + RowHeight - 1);
 		if(CellRect.GetY1() > ClipRect.GetY2()) break;
@@ -570,7 +592,7 @@ void EGTable::DrawMain(EGEvent *pEvent)
 				if(IsCellEmpty(next_cell_data)) break;
 				EG_TableCellCtrl_t merge_ctrl = (EG_TableCellCtrl_t)next_cell_data->Control;
 				if(merge_ctrl & EG_TABLE_CELL_CTRL_MERGE_RIGHT) {
-					EG_Coord_t Offset = m_pColumnWidth[Column + col_merge + 1];
+					int32_t Offset = m_pColumnWidth[Column + col_merge + 1];
 					if(RTL)	CellRect.DecX1(Offset);
 					else CellRect.IncX2(Offset);
 				}
@@ -619,15 +641,15 @@ void EGTable::DrawMain(EGEvent *pEvent)
 				m_SkipTransition = 0;
 			}
 
-			PartDrawDiscriptor.m_pRect = &CellBorderRect;
-			PartDrawDiscriptor.m_Index = Row * m_ColumnCount + Column;
-			EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-			DrawRectActive.Draw(pContext, &CellBorderRect);
+			PartDrawDescriptor.m_pRect = &CellBorderRect;
+			PartDrawDescriptor.m_Index = Row * m_ColumnCount + Column;
+			EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+			DrawRectActive.Draw(pDC, &CellBorderRect);
 			if(m_ppCellData[Cell]) {
-				const EG_Coord_t CellLeft = GetStylePadLeft(EG_PART_ITEMS);
-				const EG_Coord_t CellRight = GetStylePadRight(EG_PART_ITEMS);
-				const EG_Coord_t CellTop = GetStylePadTop(EG_PART_ITEMS);
-				const EG_Coord_t CellBottom = GetStylePadBottom(EG_PART_ITEMS);
+				const int32_t CellLeft = GetStylePadLeft(EG_PART_ITEMS);
+				const int32_t CellRight = GetStylePadRight(EG_PART_ITEMS);
+				const int32_t CellTop = GetStylePadTop(EG_PART_ITEMS);
+				const int32_t CellBottom = GetStylePadBottom(EG_PART_ITEMS);
 				EG_TextFlag_t txt_flags = EG_TEXT_FLAG_NONE;
 				EGRect TextRect;
 				TextRect.SetX1(CellRect.GetX1() + CellLeft);
@@ -647,38 +669,38 @@ void EGTable::DrawMain(EGEvent *pEvent)
 				}
 				EGRect LabelClipRect;
 				if(LabelClipRect.Intersect(&ClipRect, &CellRect)) {
-					pContext->m_pClipRect = &LabelClipRect;
-					DrawLabelActive.Draw(pContext, &TextRect, m_ppCellData[Cell]->Text, nullptr);
-					pContext->m_pClipRect = &ClipRect;
+					pDC->m_pClipRect = &LabelClipRect;
+					DrawLabelActive.Draw(pDC, &TextRect, m_ppCellData[Cell]->Text, nullptr);
+					pDC->m_pClipRect = &ClipRect;
 				}
 			}
-			EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+			EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 			Cell += col_merge + 1;
 			Column += col_merge;
 		}
 	}
-	pContext->m_pClipRect = pClipRectOriginal;
+	pDC->m_pClipRect = pClipRectOriginal;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void EGTable::RefreshSizeFormRow(uint32_t StartRow)
 {
-	const EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_ITEMS);
-	const EG_Coord_t PadRight = GetStylePadRight(EG_PART_ITEMS);
-	const EG_Coord_t PadTop = GetStylePadTop(EG_PART_ITEMS);
-	const EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_ITEMS);
+	const int32_t PadLeft = GetStylePadLeft(EG_PART_ITEMS);
+	const int32_t PadRight = GetStylePadRight(EG_PART_ITEMS);
+	const int32_t PadTop = GetStylePadTop(EG_PART_ITEMS);
+	const int32_t PadBottom = GetStylePadBottom(EG_PART_ITEMS);
 
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_ITEMS);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_ITEMS);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_ITEMS);
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_ITEMS);
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_ITEMS);
 
-	const EG_Coord_t minh = GetStyleMinHeight(EG_PART_ITEMS);
-	const EG_Coord_t maxh = GetStyleMaxHeight(EG_PART_ITEMS);
+	const int32_t minh = GetStyleMinHeight(EG_PART_ITEMS);
+	const int32_t maxh = GetStyleMaxHeight(EG_PART_ITEMS);
 
 	uint32_t i;
 	for(i = StartRow; i < m_RowCount; i++) {
-		EG_Coord_t RowHeight = GetRowHeight(i, pFont, Kerning, LineSpace, PadLeft, PadRight, PadTop, PadBottom);
+		int32_t RowHeight = GetRowHeight(i, pFont, Kerning, LineSpace, PadLeft, PadRight, PadTop, PadBottom);
 		m_pRowHeight[i] = EG_CLAMP(minh, RowHeight, maxh);
 	}
 	RefreshSelfSize();
@@ -689,20 +711,20 @@ void EGTable::RefreshSizeFormRow(uint32_t StartRow)
 
 void EGTable::RefreshCellSize(uint32_t Row, uint32_t Column)
 {
-	const EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_ITEMS);
-	const EG_Coord_t PadRight = GetStylePadRight(EG_PART_ITEMS);
-	const EG_Coord_t PadTop = GetStylePadTop(EG_PART_ITEMS);
-	const EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_ITEMS);
+	const int32_t PadLeft = GetStylePadLeft(EG_PART_ITEMS);
+	const int32_t PadRight = GetStylePadRight(EG_PART_ITEMS);
+	const int32_t PadTop = GetStylePadTop(EG_PART_ITEMS);
+	const int32_t PadBottom = GetStylePadBottom(EG_PART_ITEMS);
 
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_ITEMS);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_ITEMS);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_ITEMS);
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_ITEMS);
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_ITEMS);
 
-	const EG_Coord_t minh = GetStyleMinHeight(EG_PART_ITEMS);
-	const EG_Coord_t maxh = GetStyleMaxHeight(EG_PART_ITEMS);
+	const int32_t minh = GetStyleMinHeight(EG_PART_ITEMS);
+	const int32_t maxh = GetStyleMaxHeight(EG_PART_ITEMS);
 
-	EG_Coord_t RowHeight = GetRowHeight(Row, pFont, Kerning, LineSpace, PadLeft, PadRight, PadTop, PadBottom);
-	EG_Coord_t PreviousRowHeight = m_pRowHeight[Row];
+	int32_t RowHeight = GetRowHeight(Row, pFont, Kerning, LineSpace, PadLeft, PadRight, PadTop, PadBottom);
+	int32_t PreviousRowHeight = m_pRowHeight[Row];
 	m_pRowHeight[Row] = EG_CLAMP(minh, RowHeight, maxh);
 
 	// If the Row height havn't changed invalidate only this Cell
@@ -720,10 +742,10 @@ void EGTable::RefreshCellSize(uint32_t Row, uint32_t Column)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGTable::GetRowHeight(uint16_t RowIndex, const EG_Font_t *pFont, EG_Coord_t Kerning, EG_Coord_t LineSpace,
-                    EG_Coord_t CellLeft, EG_Coord_t CellRight, EG_Coord_t CellTop, EG_Coord_t CellBottom)
+int32_t EGTable::GetRowHeight(uint16_t RowIndex, const EG_Font_t *pFont, int32_t Kerning, int32_t LineSpace,
+                    int32_t CellLeft, int32_t CellRight, int32_t CellTop, int32_t CellBottom)
 {
-	EG_Coord_t MaxHeight = EG_FontGetLineHeight(pFont) + CellTop + CellBottom;
+	int32_t MaxHeight = EG_FontGetLineHeight(pFont) + CellTop + CellBottom;
 	uint16_t RowStart = RowIndex * m_ColumnCount;	//  Calculate the cell_data index where to start 
 	uint16_t Cell;	//  Traverse the cells in the RowIndex Row 
 	uint16_t Column;
@@ -732,7 +754,7 @@ EG_Coord_t EGTable::GetRowHeight(uint16_t RowIndex, const EG_Font_t *pFont, EG_C
 		if(IsCellEmpty(cell_data)) {
 			continue;
 		}
-		EG_Coord_t TextWidth = m_pColumnWidth[Column];
+		int32_t TextWidth = m_pColumnWidth[Column];
 		uint16_t col_merge = 0;
 		for(col_merge = 0; col_merge + Column < m_ColumnCount - 1; col_merge++) {
 			EG_TableCell_t *next_cell_data = m_ppCellData[Cell + col_merge];
@@ -747,7 +769,7 @@ EG_Coord_t EGTable::GetRowHeight(uint16_t RowIndex, const EG_Font_t *pFont, EG_C
 			MaxHeight = EG_MAX(EG_FontGetLineHeight(pFont) + CellTop + CellBottom, MaxHeight);
 		}
 		else {		// Else we have to calculate the height of the Cell text
-			EGPoint TextSize;
+			EGSize TextSize;
 			TextWidth -= CellLeft + CellRight;
 			EG_GetTextSize(&TextSize, m_ppCellData[Cell]->Text, pFont,	Kerning, LineSpace, TextWidth, EG_TEXT_FLAG_NONE);
 			MaxHeight = EG_MAX(TextSize.m_Y + CellTop + CellBottom, MaxHeight);
@@ -770,9 +792,9 @@ EG_Result_t EGTable::GetPressedCell(uint16_t *pRow, uint16_t *pColumn)
 	}
 	EGPoint pPoint;
 	EGInputDevice::GetActive()->GetPoint(&pPoint);
-	EG_Coord_t Temp;
+	int32_t Temp;
 	if(pColumn) {
-		EG_Coord_t x = pPoint.m_X + GetScrollX();
+		int32_t x = pPoint.m_X + GetScrollX();
 		if(GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) {
 			x = m_Rect.GetX2() - GetStylePadRight(EG_PART_MAIN) - x;
 		}
@@ -788,7 +810,7 @@ EG_Result_t EGTable::GetPressedCell(uint16_t *pRow, uint16_t *pColumn)
 		}
 	}
 	if(pRow) {
-		EG_Coord_t y = pPoint.m_Y + GetScrollY();
+		int32_t y = pPoint.m_Y + GetScrollY();
 		y -= m_Rect.GetY1();
 		y -= GetStylePadTop(EG_PART_MAIN);
 		*pRow = 0;
@@ -837,7 +859,7 @@ void EGTable::GetCellRect(uint16_t Row, uint16_t Column, EGRect *pRect)
 	bool RTL = GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL;
 	if(RTL) {
 		pRect->IncX1(GetScrollX());
-		EG_Coord_t Width = GetWidth();
+		int32_t Width = GetWidth();
 		pRect->SetX2(Width - pRect->GetX1() - GetStylePadRight(0));
 		pRect->SetX1(pRect->GetX2() - m_pColumnWidth[Column]);
 	}

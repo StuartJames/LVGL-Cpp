@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -59,13 +60,13 @@ void EGMessageExec::Initialise(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SubscribeDiscriptor_t* EGMessageExec::Subsribe(uint32_t MessageID, EG_MessageSubscribeCB_t SubscribeCB, void *pExtData)
+SubscribeDescriptor_t* EGMessageExec::Subsribe(uint32_t MessageID, EG_MessageSubscribeCB_t SubscribeCB, void *pExtData)
 {
-  SubscribeDiscriptor_t *pSubscribe = (SubscribeDiscriptor_t*)EG_AllocMem(sizeof(SubscribeDiscriptor_t));
+  SubscribeDescriptor_t *pSubscribe = (SubscribeDescriptor_t*)EG_AllocMem(sizeof(SubscribeDescriptor_t));
 	EG_ASSERT_MALLOC(pSubscribe);
 	if(pSubscribe == nullptr) return nullptr;
   m_MessageList.AddTail(pSubscribe);
-	EG_ZeroMem(pSubscribe, sizeof(SubscribeDiscriptor_t));
+	EG_ZeroMem(pSubscribe, sizeof(SubscribeDescriptor_t));
 	pSubscribe->MessageID = MessageID;
 	pSubscribe->Callback = SubscribeCB;
 	pSubscribe->pExtData = pExtData;
@@ -74,13 +75,13 @@ SubscribeDiscriptor_t* EGMessageExec::Subsribe(uint32_t MessageID, EG_MessageSub
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SubscribeDiscriptor_t* EGMessageExec::SubsribeObj(uint32_t MessageID, EGObject *pObj, void *pExtData)
+SubscribeDescriptor_t* EGMessageExec::SubsribeObj(uint32_t MessageID, EGObject *pObj, void *pExtData)
 {
-	SubscribeDiscriptor_t *pSubscribe = Subsribe(MessageID, (EG_MessageSubscribeCB_t)NotifyObjCB, pExtData);
+	SubscribeDescriptor_t *pSubscribe = Subsribe(MessageID, (EG_MessageSubscribeCB_t)NotifyObjCB, pExtData);
 	if(pSubscribe == nullptr) return nullptr;
 	pSubscribe->pPrivateData = pObj;
 	// If not added yet, add a delete event cb which automatically unsubcribes the object
-	SubscribeDiscriptor_t *pSubEvent = (SubscribeDiscriptor_t*)EGEvent::GetEventExtParam(pObj, DeleteObjEventCB);
+	SubscribeDescriptor_t *pSubEvent = (SubscribeDescriptor_t*)EGEvent::GetEventExtParam(pObj, DeleteObjEventCB);
 	if(pSubEvent == nullptr) {
 		EGEvent::AddEventCB(pObj, DeleteObjEventCB, EG_EVENT_DELETE, pSubscribe);
 	}
@@ -106,8 +107,8 @@ uint32_t cnt = 0;
 
   POSITION Pos = m_MessageList.GetHeadPosition();
 	while(Pos != nullptr){
-    SubscribeDiscriptor_t *pSub = (SubscribeDiscriptor_t*)m_MessageList.GetNext(Pos);
-		if(pSub->Callback == NotifyObjCB && (pSub->MessageID == LV_MSG_ID_ANY || pSub->MessageID == MessageID) && (pObj == nullptr || pSub->pPrivateData == pObj)) {
+    SubscribeDescriptor_t *pSub = (SubscribeDescriptor_t*)m_MessageList.GetNext(Pos);
+		if(pSub->Callback == NotifyObjCB && (pSub->MessageID == EG_MSG_ID_ANY || pSub->MessageID == MessageID) && (pObj == nullptr || pSub->pPrivateData == pObj)) {
 			Unsubscribe(pSub);
 			cnt++;
 		}
@@ -143,9 +144,9 @@ void EGMessageExec::Notify(uint32_t MessageID, const void *pPayload)
 void EGMessageExec::Distribute(EGMessage *pMessage)  // distribute to all subscribers
 {
 POSITION Pos;
-SubscribeDiscriptor_t *pSub;
+SubscribeDescriptor_t *pSub;
 
-	for(pSub = (SubscribeDiscriptor_t*)m_MessageList.GetHead(Pos); pSub != nullptr; pSub = (SubscribeDiscriptor_t*)m_MessageList.GetNext(Pos)){
+	for(pSub = (SubscribeDescriptor_t*)m_MessageList.GetHead(Pos); pSub != nullptr; pSub = (SubscribeDescriptor_t*)m_MessageList.GetNext(Pos)){
 		if(pSub->MessageID == pMessage->m_ID && pSub->Callback) {
 			pMessage->m_pExtData = pSub->pExtData;
 			pMessage->m_pPrivateData = pSub->pPrivateData;
@@ -167,12 +168,12 @@ EG_UNUSED(pSubscribe);
 
 void EGMessageExec::DeleteObjEventCB(EGEvent *pEvent)
 {
-SubscribeDiscriptor_t *pSub;
+SubscribeDescriptor_t *pSub;
 
 	EGObject *pObj = pEvent->GetTarget();
 	POSITION Pos = m_MessageList.GetHeadPosition();
 	while(Pos) {
-	  pSub = (SubscribeDiscriptor_t*)m_MessageList.GetNext(Pos);
+	  pSub = (SubscribeDescriptor_t*)m_MessageList.GetNext(Pos);
 		if(pSub->pPrivateData == pObj) {
 			Unsubscribe(pSub);
       Pos = m_MessageList.GetHeadPosition();

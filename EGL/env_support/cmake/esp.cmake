@@ -1,3 +1,5 @@
+message(STATUS "Compiling ESP")
+
 file(GLOB_RECURSE SOURCES ${EGL_ROOT_DIR}/src/*.cpp)
 
 idf_component_register(SRCS ${SOURCES} 

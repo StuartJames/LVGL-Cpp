@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -370,15 +371,15 @@ void EGStyle::SetPropertyCore(EGStyleProperty_e PropertyMeta, EG_StyleValue_t Va
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void InitialiseTransitionDiscriptor(EG_StyleTransitionDiscriptor_t *pTransitionDiscriptor, const EGStyleProperty_e Properties[],
+void InitialiseTransitionDescriptor(EG_StyleTransitionDescriptor_t *pTransitionDescriptor, const EGStyleProperty_e Properties[],
 																	EG_AnimatePathCB_t PathCB, uint32_t Time, uint32_t Delay, void *pUserData)
 {
-	EG_ZeroMem(pTransitionDiscriptor, sizeof(EG_StyleTransitionDiscriptor_t));
-	pTransitionDiscriptor->pProperties = Properties;
-	pTransitionDiscriptor->PathCB = PathCB == nullptr ? EGAnimate::PathLinear : PathCB;
-	pTransitionDiscriptor->Time = Time;
-	pTransitionDiscriptor->Delay = Delay;
-	pTransitionDiscriptor->m_pParam = pUserData;
+	EG_ZeroMem(pTransitionDescriptor, sizeof(EG_StyleTransitionDescriptor_t));
+	pTransitionDescriptor->pProperties = Properties;
+	pTransitionDescriptor->PathCB = PathCB == nullptr ? EGAnimate::PathLinear : PathCB;
+	pTransitionDescriptor->Time = Time;
+	pTransitionDescriptor->Delay = Delay;
+	pTransitionDescriptor->m_pParam = pUserData;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

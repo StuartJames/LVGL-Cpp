@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -41,7 +42,7 @@ void _lv_ll_init(lv_ll_t *pList, uint32_t node_size)
 {
 	pList->head = NULL;
 	pList->tail = NULL;
-#ifdef LV_ARCH_64
+#ifdef EG_ARCH_64
 	/*Round the size up to 8*/
 	node_size = (node_size + 7) & (~0x7);
 #else

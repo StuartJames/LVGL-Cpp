@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -25,7 +26,7 @@
 #include "misc/EG_Math.h"
 #include "misc/EG_Log.h"
 #include "misc/EG_Memory.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -37,11 +38,11 @@
 void EGSoftContext::DrawArc(EGDrawArc *pDrawArc, const EGPoint *pCenter, uint16_t Radius,	uint16_t StartAngle, uint16_t EndAngle)
 {
 #if EG_DRAW_COMPLEX
-  const EGDrawContext *pContext = pDrawArc->m_pContext;
+  EGSoftContext *pDC = (EGSoftContext*)pDrawArc->m_pContext;
 	if(pDrawArc->m_OPA <= EG_OPA_MIN) return;
 	if(pDrawArc->m_Width == 0) return;
 	if(StartAngle == EndAngle) return;
-	EG_Coord_t Width = pDrawArc->m_Width;
+	int32_t Width = pDrawArc->m_Width;
 	if(Width > Radius) Width = Radius;
 	EGDrawRect DrawRect;
 	DrawRect.m_BlendMode = pDrawArc->m_BlendMode;
@@ -75,9 +76,9 @@ void EGSoftContext::DrawArc(EGDrawArc *pDrawArc, const EGPoint *pCenter, uint16_
 	int16_t MaskOutsideID = DrawMaskAdd(&MaskOutsideParam, nullptr);
 	if(StartAngle + 360 == EndAngle || StartAngle == EndAngle + 360) {	// Draw a full ring
 		DrawRect.m_Radius = EG_RADIUS_CIRCLE;
-		DrawRect.Draw(pContext, &OutsideArea);
-		DrawMaskRemove(MaskOutsideID);
-		if(MaskInsideID != EG_MASK_ID_INVALID) DrawMaskRemove(MaskInsideID);
+		DrawRect.Draw(pDC, &OutsideArea);
+		DrawMaskRemoveID(MaskOutsideID);
+		if(MaskInsideID != EG_MASK_ID_INVALID) DrawMaskRemoveID(MaskInsideID);
 		DrawMaskFreeParam(&MaskOutsideParam);
 		if(MaskParamIsValid) DrawMaskFreeParam(&MaskInsideParam);
 		return;
@@ -90,10 +91,10 @@ void EGSoftContext::DrawArc(EGDrawArc *pDrawArc, const EGPoint *pCenter, uint16_
 	int32_t AngleGap;
 	if(EndAngle > StartAngle) AngleGap = 360 - (EndAngle - StartAngle);
 	else AngleGap = StartAngle - EndAngle;
-	const EGRect *OriginalClipRect = pContext->m_pClipRect;
+	const EGRect *OriginalClipRect = pDC->m_pClipRect;
 	if(AngleGap > SPLIT_ANGLE_GAP_LIMIT && Radius > SPLIT_RADIUS_LIMIT) {
 		/*Handle each Quadrant individually and skip which is empty*/
-		QuadrantDiscriptor_t QuadrantConfig;
+		QuadrantDescriptor_t QuadrantConfig;
 		QuadrantConfig.pCenter = pCenter;
 		QuadrantConfig.Radius = Radius;
 		QuadrantConfig.StartAngle = StartAngle;
@@ -104,44 +105,44 @@ void EGSoftContext::DrawArc(EGDrawArc *pDrawArc, const EGPoint *pCenter, uint16_
 		QuadrantConfig.pDrawRec = &DrawRect;
 		QuadrantConfig.pDrawRect = &OutsideArea;
 	  QuadrantConfig.pDrawArc = pDrawArc;
-    QuadrantConfig.pContext = pContext;
-		DrawQuadrant0(&QuadrantConfig);
-		DrawQuadrant1(&QuadrantConfig);
-		DrawQuadrant2(&QuadrantConfig);
-		DrawQuadrant3(&QuadrantConfig);
+    QuadrantConfig.pDC = pDC;
+		pDC->DrawQuadrant0(&QuadrantConfig);
+		pDC->DrawQuadrant1(&QuadrantConfig);
+		pDC->DrawQuadrant2(&QuadrantConfig);
+		pDC->DrawQuadrant3(&QuadrantConfig);
 	}
-	else DrawRect.Draw(pContext, &OutsideArea);
+	else DrawRect.Draw(pDC, &OutsideArea);
 	DrawMaskFreeParam(&MaskAngleParam);
 	DrawMaskFreeParam(&MaskOutsideParam);
 	if(MaskParamIsValid) DrawMaskFreeParam(&MaskInsideParam);
-	DrawMaskRemove(MaskAngleID);
-	DrawMaskRemove(MaskOutsideID);
-	if(MaskInsideID != EG_MASK_ID_INVALID) DrawMaskRemove(MaskInsideID);
+	DrawMaskRemoveID(MaskAngleID);
+	DrawMaskRemoveID(MaskOutsideID);
+	if(MaskInsideID != EG_MASK_ID_INVALID) DrawMaskRemoveID(MaskInsideID);
 	if(pDrawArc->m_Rounded) {
 		MaskRadiusParam_t mask_end_param;
 		EGRect RoundArea;
-    GetRoundedArea(StartAngle, Radius, Width, &RoundArea);
+    pDC->GetRoundedArea(StartAngle, Radius, Width, &RoundArea);
 		RoundArea.Move(pCenter->m_X, pCenter->m_Y);
 		EGRect ClipRect;
 		if(ClipRect.Intersect(OriginalClipRect, &RoundArea)) {
 			DrawMaskSetRadius(&mask_end_param, &RoundArea, EG_RADIUS_CIRCLE, false);
 			int16_t mask_end_id = DrawMaskAdd(&mask_end_param, nullptr);
-			pContext->m_pClipRect = &ClipRect;
-			DrawRect.Draw(pContext, &OutsideArea);
-			DrawMaskRemove(mask_end_id);
+			pDC->m_pClipRect = &ClipRect;
+			DrawRect.Draw(pDC, &OutsideArea);
+			DrawMaskRemoveID(mask_end_id);
 			DrawMaskFreeParam(&mask_end_param);
 		}
-		GetRoundedArea(EndAngle, Radius, Width, &RoundArea);
+		pDC->GetRoundedArea(EndAngle, Radius, Width, &RoundArea);
 		RoundArea.Move(pCenter->m_X, pCenter->m_Y);
 		if(ClipRect.Intersect(OriginalClipRect, &RoundArea)) {
 			DrawMaskSetRadius(&mask_end_param, &RoundArea, EG_RADIUS_CIRCLE, false);
 			int16_t mask_end_id = DrawMaskAdd(&mask_end_param, nullptr);
-			pContext->m_pClipRect = &ClipRect;
-			DrawRect.Draw(pContext, &OutsideArea);
-			DrawMaskRemove(mask_end_id);
+			pDC->m_pClipRect = &ClipRect;
+			DrawRect.Draw(pDC, &OutsideArea);
+			DrawMaskRemoveID(mask_end_id);
 			DrawMaskFreeParam(&mask_end_param);
 		}
-		pContext->m_pClipRect = OriginalClipRect;
+		pDC->m_pClipRect = OriginalClipRect;
 	}
 #else
 	EG_LOG_WARN("Can't draw arc with EG_DRAW_COMPLEX == 0");
@@ -157,9 +158,9 @@ void EGSoftContext::DrawArc(EGDrawArc *pDrawArc, const EGPoint *pCenter, uint16_
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if EG_DRAW_COMPLEX
-void EGSoftContext::DrawQuadrant0(QuadrantDiscriptor_t *pQuadrant)
+void EGSoftContext::DrawQuadrant0(QuadrantDescriptor_t *pQuadrant)
 {
-	const EGRect *OriginalClipRect = pQuadrant->pDrawArc->m_pContext->m_pClipRect;
+	const EGRect *OriginalClipRect = m_pClipRect;
 	EGRect QuadrantArea;
 	if(pQuadrant->StartQuarter == 0 && pQuadrant->EndQuarter == 0 && pQuadrant->StartAngle < pQuadrant->EndAngle) {
 		/*Small arc here*/
@@ -168,8 +169,8 @@ void EGSoftContext::DrawQuadrant0(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * pQuadrant->Radius) >> EG_TRIGO_SHIFT));
 		QuadrantArea.SetX1(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
-			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
 	else if(pQuadrant->StartQuarter == 0 || pQuadrant->EndQuarter == 0) {
@@ -180,8 +181,8 @@ void EGSoftContext::DrawQuadrant0(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetY1(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->StartAngle) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetX2(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->StartAngle + 90) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 			if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
-  			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+  			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 		if(pQuadrant->EndQuarter == 0) {
@@ -190,8 +191,8 @@ void EGSoftContext::DrawQuadrant0(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * pQuadrant->Radius) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetX1(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 			if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
-  			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+  			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 	}
@@ -204,18 +205,18 @@ void EGSoftContext::DrawQuadrant0(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetX2(pQuadrant->pCenter->m_X + pQuadrant->Radius);
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + pQuadrant->Radius);
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
-	pQuadrant->pContext->m_pClipRect = OriginalClipRect;
+	m_pClipRect = OriginalClipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGSoftContext::DrawQuadrant1(QuadrantDiscriptor_t *pQuadrant)
+void EGSoftContext::DrawQuadrant1(QuadrantDescriptor_t *pQuadrant)
 {
-	const EGRect *OriginalClipRect = pQuadrant->pContext->m_pClipRect;
+	const EGRect *OriginalClipRect = m_pClipRect;
 	EGRect QuadrantArea;
 	if(pQuadrant->StartQuarter == 1 && pQuadrant->EndQuarter == 1 && pQuadrant->StartAngle < pQuadrant->EndAngle) {	/*Small arc here*/
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->StartAngle) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
@@ -223,8 +224,8 @@ void EGSoftContext::DrawQuadrant1(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetY1(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 		QuadrantArea.SetX1(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
 	else if(pQuadrant->StartQuarter == 1 || pQuadrant->EndQuarter == 1) {
@@ -235,8 +236,8 @@ void EGSoftContext::DrawQuadrant1(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->StartAngle) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetX2(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->StartAngle + 90) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 		  if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			  pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+ 			  pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 		if(pQuadrant->EndQuarter == 1) {
@@ -245,8 +246,8 @@ void EGSoftContext::DrawQuadrant1(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetY1(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetX1(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 		  if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			  pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+ 			  pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 	}
@@ -260,18 +261,18 @@ void EGSoftContext::DrawQuadrant1(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetX2(pQuadrant->pCenter->m_X - 1);
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + pQuadrant->Radius);
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
-	pQuadrant->pContext->m_pClipRect = OriginalClipRect;
+	m_pClipRect = OriginalClipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGSoftContext::DrawQuadrant2(QuadrantDiscriptor_t *pQuadrant)
+void EGSoftContext::DrawQuadrant2(QuadrantDescriptor_t *pQuadrant)
 {
-	const EGRect *OriginalClipRect = pQuadrant->pContext->m_pClipRect;
+	const EGRect *OriginalClipRect = m_pClipRect;
 	EGRect QuadrantArea;
 
 	if(pQuadrant->StartQuarter == 2 && pQuadrant->EndQuarter == 2 && pQuadrant->StartAngle < pQuadrant->EndAngle) {		/*Small arc here*/
@@ -280,8 +281,8 @@ void EGSoftContext::DrawQuadrant2(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetY1(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * pQuadrant->Radius) >> EG_TRIGO_SHIFT));
 		QuadrantArea.SetX2(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
 	else if(pQuadrant->StartQuarter == 2 || pQuadrant->EndQuarter == 2) {		/*Start and/or end arcs here*/
@@ -291,8 +292,8 @@ void EGSoftContext::DrawQuadrant2(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetX1(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->StartAngle + 90) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->StartAngle) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 	  	if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
-   			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+   			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 		if(pQuadrant->EndQuarter == 2) {
@@ -301,8 +302,8 @@ void EGSoftContext::DrawQuadrant2(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetX2(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetY1(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 		  if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			  pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+ 			  pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 	}
@@ -316,18 +317,18 @@ void EGSoftContext::DrawQuadrant2(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetX2(pQuadrant->pCenter->m_X - 1);
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y - 1);
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
-	pQuadrant->pContext->m_pClipRect = OriginalClipRect;
+	m_pClipRect = OriginalClipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGSoftContext::DrawQuadrant3(QuadrantDiscriptor_t *pQuadrant)
+void EGSoftContext::DrawQuadrant3(QuadrantDescriptor_t *pQuadrant)
 {
-	const EGRect *OriginalClipRect = pQuadrant->pContext->m_pClipRect;
+	const EGRect *OriginalClipRect = m_pClipRect;
 	EGRect QuadrantArea;
 
 	if(pQuadrant->StartQuarter == 3 && pQuadrant->EndQuarter == 3 && pQuadrant->StartAngle < pQuadrant->EndAngle) {	// Small arc here
@@ -336,8 +337,8 @@ void EGSoftContext::DrawQuadrant3(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetX2(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
 	else if(pQuadrant->StartQuarter == 3 || pQuadrant->EndQuarter == 3) {
@@ -347,8 +348,8 @@ void EGSoftContext::DrawQuadrant3(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetX1(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->StartAngle + 90) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetY1(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->StartAngle) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 			if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			  pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+ 			  pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 		if(pQuadrant->EndQuarter == 3) {
@@ -357,8 +358,8 @@ void EGSoftContext::DrawQuadrant3(QuadrantDiscriptor_t *pQuadrant)
 			QuadrantArea.SetX2(pQuadrant->pCenter->m_X + ((EG_TrigoSin(pQuadrant->EndAngle + 90) * (pQuadrant->Radius)) >> EG_TRIGO_SHIFT));
 			QuadrantArea.SetY2(pQuadrant->pCenter->m_Y + ((EG_TrigoSin(pQuadrant->EndAngle) * (pQuadrant->Radius - pQuadrant->Width)) >> EG_TRIGO_SHIFT));
 			if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-				pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			  pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+				m_pClipRect = &QuadrantArea;
+ 			  pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 			}
 		}
 	}
@@ -371,16 +372,16 @@ void EGSoftContext::DrawQuadrant3(QuadrantDiscriptor_t *pQuadrant)
 		QuadrantArea.SetX2(pQuadrant->pCenter->m_X + pQuadrant->Radius);
 		QuadrantArea.SetY2(pQuadrant->pCenter->m_Y - 1);
 		if(QuadrantArea.Intersect(&QuadrantArea, OriginalClipRect)){
-			pQuadrant->pContext->m_pClipRect = &QuadrantArea;
- 			pQuadrant->pDrawRec->Draw(pQuadrant->pContext, pQuadrant->pDrawRect);
+			m_pClipRect = &QuadrantArea;
+ 			pQuadrant->pDrawRec->Draw(this, pQuadrant->pDrawRect);
 		}
 	}
-	pQuadrant->pContext->m_pClipRect = OriginalClipRect;
+	m_pClipRect = OriginalClipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGSoftContext::GetRoundedArea(int16_t Angle, EG_Coord_t Radius, uint8_t Thickness, EGRect *pRect)
+void EGSoftContext::GetRoundedArea(int16_t Angle, int32_t Radius, uint8_t Thickness, EGRect *pRect)
 {
 const uint8_t ps = 8;
 const uint8_t pa = 127;

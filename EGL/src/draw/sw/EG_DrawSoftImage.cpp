@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -34,20 +35,20 @@
 
 #define MAX_BUF_SIZE (uint32_t) GetRefreshingDisplay()->GetHorizontalRes()
 
-static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight,
-											 EG_Coord_t SourceStride, const EGDrawImage *pDrawImage, EG_ImageColorFormat_t ColorFormat, EG_Color_t *pColorBuffer, EG_OPA_t *pOpaBuffer);
+static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, int32_t SourceWidth, int32_t SourceHeight,
+											 int32_t SourceStride, const EGDrawImage *pDrawImage, EG_ImageColorFormat_t ColorFormat, EG_Color_t *pColorBuffer, EG_OPA_t *pOpaBuffer);
 
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pDrawImage, const EGRect *pRect, const uint8_t *pSourceBuffer, EG_ImageColorFormat_t ColorFormat)
 {
-  EGSoftContext *pContext = (EGSoftContext*)pDrawImage->m_pContext;
-  const EGRect *pClipRect = pContext->m_pClipRect;	// Use the clip area as draw area
+  EGSoftContext *pDC = (EGSoftContext*)pDrawImage->m_pContext;
+  const EGRect *pClipRect = pDC->m_pClipRect;	// Use the clip area as draw area
 	EGRect DrawRect(pClipRect);
 	bool MaskAny = HasAnyDrawMask(&DrawRect);
 	bool DoTransform = ((pDrawImage->m_Angle != 0) || (pDrawImage->m_Scale.IsScaled())) ? true : false;
 	EGRect BlendRect;
-	EGSoftBlend BlendObj(pContext);
+	EGSoftBlend BlendObj(pDC);
 	BlendObj.m_OPA = pDrawImage->m_OPA;
 	BlendObj.m_BlendMode = pDrawImage->m_BlendMode;
 	BlendObj.m_pRect = &BlendRect;
@@ -70,8 +71,8 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 	}
 #if EG_COLOR_DEPTH == 16
 	else if(!MaskAny && !DoTransform && ColorFormat == EG_COLOR_FORMAT_RGB565A8 && pDrawImage->m_RecolorOPA == EG_OPA_TRANSP) {
-		EG_Coord_t SourceWidth = pRect->GetWidth();
-		EG_Coord_t SourceHeight = pRect->GetHeight();
+		int32_t SourceWidth = pRect->GetWidth();
+		int32_t SourceHeight = pRect->GetHeight();
 		BlendObj.m_pSourceBuffer = (const EG_Color_t *)pSourceBuffer;
 		BlendObj.m_pMaskBuffer = (EG_OPA_t *)pSourceBuffer;
 		BlendObj.m_pMaskBuffer += sizeof(EG_Color_t) * SourceWidth * SourceHeight;
@@ -82,11 +83,11 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 	}
 #endif
 	else {	// In the other cases every pixel need to be checked one-by-one
-		pContext->m_pClipRect->Copy(&BlendRect);
-		EG_Coord_t SourceWidth = pRect->GetWidth();
-		EG_Coord_t SourceHeight = pRect->GetHeight();
-		EG_Coord_t BlendHeight = BlendRect.GetHeight();
-		EG_Coord_t BlendWidth = BlendRect.GetWidth();
+		pDC->m_pClipRect->Copy(&BlendRect);
+		int32_t SourceWidth = pRect->GetWidth();
+		int32_t SourceHeight = pRect->GetHeight();
+		int32_t BlendHeight = BlendRect.GetHeight();
+		int32_t BlendWidth = BlendRect.GetWidth();
 		uint32_t MaxBufferSize = MAX_BUF_SIZE;
 		uint32_t BlendSize = BlendRect.GetSize();
 		uint32_t BufferWidth = BlendWidth;
@@ -100,7 +101,7 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 		BlendObj.m_pMaskRect = &BlendRect;
 		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
 		BlendObj.m_pSourceBuffer = pBufferRGB;
-		EG_Coord_t LastY = BlendRect.GetY2();
+		int32_t LastY = BlendRect.GetY2();
 		BlendRect.SetY2(BlendRect.GetY1() + BufferHeight - 1);
 		DrawMaskRes_t DefMaskResult = (pDrawImage->m_Angle || (ColorFormat != EG_COLOR_FORMAT_NATIVE) || (pDrawImage->m_Scale.IsScaled())) ?
 			                              EG_DRAW_MASK_RESULT_CHANGED : EG_DRAW_MASK_RESULT_FULL_COVER;
@@ -127,7 +128,7 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 #if EG_DRAW_COMPLEX		
 			if(MaskAny) {	// Apply the masks if any
 				EG_OPA_t *TempMaskBuffer = pMaskBuffer;
-				for(EG_Coord_t y = BlendRect.GetY1(); y <= BlendRect.GetY2(); y++) {
+				for(int32_t y = BlendRect.GetY1(); y <= BlendRect.GetY2(); y++) {
 					DrawMaskRes_t LineMaskResult = DrawMaskApply(TempMaskBuffer, BlendRect.GetX1(), y, BlendWidth);
 					if(LineMaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
 						EG_ZeroMem(TempMaskBuffer, BlendWidth);
@@ -153,16 +154,16 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawImageDecoded(const EGDrawImage *pD
 //////////////////////////////////////////////////////////////////////////////////////
 
 //  Separate the image channels to RGB and Alpha to match EG_COLOR_DEPTH settings
-static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, EG_Coord_t SourceWidth, EG_Coord_t SourceHeight,
-											 EG_Coord_t SourceStride, const EGDrawImage *pDrawImage, EG_ImageColorFormat_t ColorFormat, EG_Color_t *pColorBuffer, EG_OPA_t *pOpaBuffer)
+static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, int32_t SourceWidth, int32_t SourceHeight,
+											 int32_t SourceStride, const EGDrawImage *pDrawImage, EG_ImageColorFormat_t ColorFormat, EG_Color_t *pColorBuffer, EG_OPA_t *pOpaBuffer)
 {
 	EG_UNUSED(pDrawImage);
 	EG_UNUSED(SourceHeight);
 	EG_UNUSED(SourceWidth);
 
 	const uint8_t *pTemp8 = (const uint8_t *)pSourceBuffer;
-	EG_Coord_t y;
-	EG_Coord_t x;
+	int32_t y;
+	int32_t x;
 
 	if(ColorFormat == EG_COLOR_FORMAT_NATIVE || ColorFormat == EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED) {
 		uint32_t PixelCount = pDestRect->GetSize();
@@ -171,7 +172,7 @@ static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, EG_Coo
 		uint32_t DestWidth = pDestRect->GetWidth();
 		uint32_t dest_w_byte = DestWidth * sizeof(EG_Color_t);
 
-		EG_Coord_t SourceStrideBytes = SourceStride * sizeof(EG_Color_t);
+		int32_t SourceStrideBytes = SourceStride * sizeof(EG_Color_t);
 		EG_Color_t *pColorBufferTmp = pColorBuffer;
 		for(y = pDestRect->GetY1(); y <= pDestRect->GetY2(); y++) {
 			EG_CopyMem(pColorBufferTmp, pTemp8, dest_w_byte);
@@ -199,11 +200,11 @@ static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, EG_Coo
 	else if(ColorFormat == EG_COLOR_FORMAT_NATIVE_ALPHA) {
 		pTemp8 += (SourceStride * pDestRect->GetY1() * EG_IMG_PX_SIZE_ALPHA_BYTE) + pDestRect->GetX1() * EG_IMG_PX_SIZE_ALPHA_BYTE;
 
-		EG_Coord_t src_new_line_step_px = (SourceStride - pDestRect->GetWidth());
-		EG_Coord_t src_new_line_step_byte = src_new_line_step_px * EG_IMG_PX_SIZE_ALPHA_BYTE;
+		int32_t src_new_line_step_px = (SourceStride - pDestRect->GetWidth());
+		int32_t src_new_line_step_byte = src_new_line_step_px * EG_IMG_PX_SIZE_ALPHA_BYTE;
 
-		EG_Coord_t dest_h = pDestRect->GetHeight();
-		EG_Coord_t DestWidth = pDestRect->GetWidth();
+		int32_t dest_h = pDestRect->GetHeight();
+		int32_t DestWidth = pDestRect->GetWidth();
 		for(y = 0; y < dest_h; y++) {
 			for(x = 0; x < DestWidth; x++) {
 				pOpaBuffer[x] = pTemp8[EG_IMG_PX_SIZE_ALPHA_BYTE - 1];
@@ -225,10 +226,10 @@ static void ConvertCB(const EGRect *pDestRect, const void *pSourceBuffer, EG_Coo
 	else if(ColorFormat == EG_COLOR_FORMAT_RGB565A8) {
 		pTemp8 += (SourceStride * pDestRect->GetY1() * sizeof(EG_Color_t)) + pDestRect->GetX1() * sizeof(EG_Color_t);
 
-		EG_Coord_t SourceStrideBytes = SourceStride * sizeof(EG_Color_t);
+		int32_t SourceStrideBytes = SourceStride * sizeof(EG_Color_t);
 
-		EG_Coord_t dest_h = pDestRect->GetHeight();
-		EG_Coord_t DestWidth = pDestRect->GetWidth();
+		int32_t dest_h = pDestRect->GetHeight();
+		int32_t DestWidth = pDestRect->GetWidth();
 		for(y = 0; y < dest_h; y++) {
 			EG_CopyMem(pColorBuffer, pTemp8, DestWidth * sizeof(EG_Color_t));
 			pColorBuffer += DestWidth;

@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -56,7 +57,7 @@ EGRect::EGRect(const EGRect *pInRect)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EGRect::EGRect(EG_Coord_t X1, EG_Coord_t Y1, EG_Coord_t X2, EG_Coord_t Y2)
+EGRect::EGRect(int32_t X1, int32_t Y1, int32_t X2, int32_t Y2)
 {
   m_X1 = X1;
 	m_Y1 = Y1;
@@ -116,7 +117,7 @@ void EGRect::operator-- (void)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Set(EG_Coord_t X1, EG_Coord_t Y1, EG_Coord_t X2, EG_Coord_t Y2)
+void EGRect::Set(int32_t X1, int32_t Y1, int32_t X2, int32_t Y2)
 {
 	m_X1 = X1;
 	m_Y1 = Y1;
@@ -136,24 +137,24 @@ void EGRect::Zero(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::SetWidth(EG_Coord_t Width)
+void EGRect::SetWidth(int32_t Width)
 {
 	m_X2 = m_X1 + Width - 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::SetHeight(EG_Coord_t Height)
+void EGRect::SetHeight(int32_t Height)
 {
 	m_Y2 = m_Y1 + Height - 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::SetPosition(EG_Coord_t PosX, EG_Coord_t PosY)
+void EGRect::SetPosition(int32_t PosX, int32_t PosY)
 {
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t Height = GetHeight();
+	int32_t Width = GetWidth();
+	int32_t Height = GetHeight();
 	m_X1 = PosX;
 	m_Y1 = PosY;
 	SetWidth(Width);
@@ -169,7 +170,17 @@ uint32_t EGRect::GetSize() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Inflate(EG_Coord_t Width, EG_Coord_t Height)
+void EGRect::Inflate(const EGRect *pInRect)
+{
+	m_X1 -= pInRect->m_X1;
+	m_Y1 -= pInRect->m_Y1;
+	m_X2 += pInRect->m_X2;
+	m_Y2 += pInRect->m_Y2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void EGRect::Inflate(int32_t Width, int32_t Height)
 {
 	m_X1 -= Width;
 	m_X2 += Width;
@@ -179,7 +190,7 @@ void EGRect::Inflate(EG_Coord_t Width, EG_Coord_t Height)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Inflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord_t Bottom)
+void EGRect::Inflate(int32_t Left, int32_t Right, int32_t Top, int32_t Bottom)
 {
 	m_X1 -= Left;
 	m_X2 += Right;
@@ -189,7 +200,7 @@ void EGRect::Inflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Deflate(EG_Coord_t Width, EG_Coord_t Height)
+void EGRect::Deflate(int32_t Width, int32_t Height)
 {
 	m_X1 += Width;
 	m_X2 -= Width;
@@ -199,7 +210,7 @@ void EGRect::Deflate(EG_Coord_t Width, EG_Coord_t Height)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Deflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord_t Bottom)
+void EGRect::Deflate(int32_t Left, int32_t Right, int32_t Top, int32_t Bottom)
 {
 	m_X1 += Left;
 	m_X2 -= Right;
@@ -209,7 +220,7 @@ void EGRect::Deflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY)
+void EGRect::Move(int32_t OffsetX, int32_t OffsetY)
 {
 	m_X1 += OffsetX;
 	m_X2 += OffsetX;
@@ -219,7 +230,7 @@ void EGRect::Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Move(EG_Coord_t OffsetX1, EG_Coord_t OffsetY1, EG_Coord_t OffsetX2, EG_Coord_t OffsetY2)
+void EGRect::Move(int32_t OffsetX1, int32_t OffsetY1, int32_t OffsetX2, int32_t OffsetY2)
 {
 	m_X1 += OffsetX1;
 	m_X2 += OffsetX2;
@@ -232,12 +243,12 @@ void EGRect::Move(EG_Coord_t OffsetX1, EG_Coord_t OffsetY1, EG_Coord_t OffsetX2,
 void EGRect::Normalise(void)
 {
 	if(m_X1 > m_X2){
-    EG_Coord_t Temp = m_X1;
+    int32_t Temp = m_X1;
     m_X1 = m_X2;
     m_X2 = Temp;
   } 
 	if(m_Y1  > m_Y2){
-    EG_Coord_t Temp = m_Y1;
+    int32_t Temp = m_Y1;
     m_Y1 = m_Y2;
     m_Y2 = Temp;
   }
@@ -283,7 +294,7 @@ void EGRect::Join(EGRect *pJoined, const EGRect *pRect)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool EGRect::IsPointIn(const EGPoint *pPoint, EG_Coord_t Radius) const
+bool EGRect::IsPointIn(const EGPoint *pPoint, int32_t Radius) const
 {
 bool IsInRect = false;	
 
@@ -292,9 +303,9 @@ bool IsInRect = false;
 	}
 	if(!IsInRect)	return false;
 	if(Radius <= 0) return true;	// Now handle potential rounded rectangles
-	EG_Coord_t Width = GetWidth() / 2;
-	EG_Coord_t Height = GetHeight() / 2;
-	EG_Coord_t MaxRadius = EG_MIN(Width, Height);
+	int32_t Width = GetWidth() / 2;
+	int32_t Height = GetHeight() / 2;
+	int32_t MaxRadius = EG_MIN(Width, Height);
 	if(Radius > MaxRadius)	Radius = MaxRadius;
 	EGRect CornerArea;	// Check if it's in one of the corners
 	CornerArea.m_X1 = m_X1;	// Top left
@@ -340,7 +351,7 @@ bool EGRect::IsOn(const EGRect *pRect) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool EGRect::IsInside(const EGRect *pRect, EG_Coord_t Radius) const
+bool EGRect::IsInside(const EGRect *pRect, int32_t Radius) const
 {
 EGPoint pPoint;	
 bool IsIn = false;
@@ -365,7 +376,7 @@ bool IsIn = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool EGRect::IsOutside(const EGRect *pRect, EG_Coord_t Radius) const
+bool EGRect::IsOutside(const EGRect *pRect, int32_t Radius) const
 {
 EGPoint pPoint;
 
@@ -386,18 +397,25 @@ EGPoint pPoint;
 	return true;
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+
+bool EGRect::operator==(const EGRect &rval)
+{
+	return m_X1 == rval.m_X1 && m_X2 == rval.m_X2 && m_Y1 == rval.m_Y1 && m_Y2 == rval.m_Y2;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-bool EGRect::IsEqualTo(const EGRect *a, const EGRect *pRect)
+bool EGRect::IsEqualTo(const EGRect *pRect)
 {
 	return m_X1 == pRect->m_X1 && m_X2 == pRect->m_X2 && m_Y1 == pRect->m_Y1 && m_Y2 == pRect->m_Y2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGRect::Align(EGRect *pRectToAlign, EG_AlignType_e AlignType, EG_Coord_t OffsetX, EG_Coord_t OffsetY)
+void EGRect::Align(EGRect *pRectToAlign, EG_AlignType_e AlignType, int32_t OffsetX, int32_t OffsetY) const
 {
-EG_Coord_t x, y;
+int32_t x, y;
 
 	switch(AlignType) {
 		case EG_ALIGN_CENTER:
@@ -509,8 +527,8 @@ EG_Coord_t x, y;
 	}
 	x += m_X1;
 	y += m_Y1;
-	EG_Coord_t Width = pRectToAlign->GetWidth();
-	EG_Coord_t Height = pRectToAlign->GetHeight();
+	int32_t Width = pRectToAlign->GetWidth();
+	int32_t Height = pRectToAlign->GetHeight();
 	pRectToAlign->m_X1 = x + OffsetX;
 	pRectToAlign->m_Y1 = y + OffsetY;
 	pRectToAlign->m_X2 = pRectToAlign->m_X1 + Width - 1;
@@ -529,9 +547,9 @@ int8_t Count = 0;	// Result counter
 
 	if(!IsOn(pRect)) return -1;	// Areas have no common parts
 	if(IsInside(pRect, 0)) return 0;	// No remaining areas after removing common parts
-	EG_Coord_t Width = GetWidth() - 1; // Get required information
-	EG_Coord_t Height = GetHeight() - 1;
-	EG_Coord_t Rect = pRect->m_Y1 - m_Y1;	// Compute top rectangle
+	int32_t Width = GetWidth() - 1; // Get required information
+	int32_t Height = GetHeight() - 1;
+	int32_t Rect = pRect->m_Y1 - m_Y1;	// Compute top rectangle
 	if(Rect > 0) {
 		pResult[Count].m_X1 = m_X1;
 		pResult[Count].m_Y1 = m_Y1;
@@ -545,9 +563,9 @@ int8_t Count = 0;	// Result counter
 		pResult[Count].m_X2 = m_X2;
 		pResult[Count++].m_Y2 = pRect->m_Y2 + Rect;
 	}
-	EG_Coord_t Y1 = pRect->m_Y1 > m_Y1 ? pRect->m_Y1 : m_Y1;	// Compute side height
-	EG_Coord_t Y2 = pRect->m_Y2 < m_Y2 ? pRect->m_Y2 : m_Y2;
-	EG_Coord_t Side = Y2 - Y1;
+	int32_t Y1 = pRect->m_Y1 > m_Y1 ? pRect->m_Y1 : m_Y1;	// Compute side height
+	int32_t Y2 = pRect->m_Y2 < m_Y2 ? pRect->m_Y2 : m_Y2;
+	int32_t Side = Y2 - Y1;
 	Rect = pRect->m_X1 - m_X1;	// Compute the left rectangle
 	if(Rect > 0 && Side > 0) {
 		pResult[Count].m_X1 = m_X1;
@@ -569,11 +587,11 @@ int8_t Count = 0;	// Result counter
 
 bool EGRect::PointWithinCircle(const EGPoint *pPoint)
 {
-	EG_Coord_t Radius = (m_X2 - m_X1) / 2;
-	EG_Coord_t cx = m_X1 + Radius;	// Circle center
-	EG_Coord_t cy = m_Y1 + Radius;
-	EG_Coord_t px = pPoint->m_X - cx;	// Simplify the code by moving everything to (0, 0)
-	EG_Coord_t py = pPoint->m_Y - cy;
+	int32_t Radius = (m_X2 - m_X1) / 2;
+	int32_t cx = m_X1 + Radius;	// Circle center
+	int32_t cy = m_Y1 + Radius;
+	int32_t px = pPoint->m_X - cx;	// Simplify the code by moving everything to (0, 0)
+	int32_t py = pPoint->m_Y - cy;
 	uint32_t RadiusSqrd = Radius * Radius;
 	uint32_t Distance = (px * px) + (py * py);
 	if(Distance <= RadiusSqrd) return true;

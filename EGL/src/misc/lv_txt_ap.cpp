@@ -11,7 +11,7 @@
 #include "misc/EG_Text.h"
 #include "misc/lv_txt_ap.h"
 #include "misc/EG_Memory.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 
 /*********************
  *      DEFINES

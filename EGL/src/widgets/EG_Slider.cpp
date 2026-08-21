@@ -1,23 +1,24 @@
 /*
- *        Copyright (Center) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -27,7 +28,7 @@
 #include "misc/EG_Assert.h"
 #include "core/EG_Group.h"
 #include "core/EG_InputDevice.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Math.h"
 #include "core/EG_Display.h"
 #include "widgets/EG_Image.h"
@@ -98,7 +99,7 @@ void EGSlider::Event(EGEvent *pEvent)
   switch(pEvent->GetCode()){	// Advanced hit testing: react only on dragging the knob(pSize)
     case EG_EVENT_HIT_TEST: {
       EG_HitTestState_t *info = (EG_HitTestState_t*)pEvent->GetParam();
-      EG_Coord_t ExtClickArea = m_pAttributes ? m_pAttributes->ExtendedClickPadding : 0;
+      int32_t ExtClickArea = m_pAttributes ? m_pAttributes->ExtendedClickPadding : 0;
       EGRect HitRect(m_RightKnobRect);		// Ordinary pSlider: was the knob area hit?
       HitRect.Inflate(ExtClickArea, ExtClickArea);
       info->Result = HitRect.IsPointIn(info->pPoint, 0);
@@ -119,7 +120,7 @@ void EGSlider::Event(EGEvent *pEvent)
       else if(SliderMode == EG_SLIDER_MODE_RANGE) {
         EGInputDevice::GetActive()->GetPoint(&Point);
         EG_BaseDirection_e BaseDirection = GetStyleBaseDirection(EG_PART_MAIN);
-        EG_Coord_t LeftDistance, RightDistance;
+        int32_t LeftDistance, RightDistance;
         if(GetWidth() >= GetHeight()) {
           if((BaseDirection != EG_BASE_DIR_RTL && Point.m_X > m_RightKnobRect.GetX2()) ||
             (BaseDirection == EG_BASE_DIR_RTL && Point.m_X < m_RightKnobRect.GetX1())) {
@@ -174,10 +175,10 @@ void EGSlider::Event(EGEvent *pEvent)
         int32_t Value = 0;
         const int32_t Range = m_MaximumValue - m_MinimumValue;
         if(IsHorizontal()) {
-          const EG_Coord_t LeftPadding = GetStylePadLeft(EG_PART_MAIN);
-          const EG_Coord_t RightPadding = GetStylePadRight(EG_PART_MAIN);
-          const EG_Coord_t w = GetWidth();
-          const EG_Coord_t indic_w = w - LeftPadding - RightPadding;
+          const int32_t LeftPadding = GetStylePadLeft(EG_PART_MAIN);
+          const int32_t RightPadding = GetStylePadRight(EG_PART_MAIN);
+          const int32_t w = GetWidth();
+          const int32_t indic_w = w - LeftPadding - RightPadding;
           if(GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) {
             Value = (m_Rect.GetX2() - RightPadding) - Point.m_X;				
           }
@@ -188,9 +189,9 @@ void EGSlider::Event(EGEvent *pEvent)
           Value += m_MinimumValue;
         }
         else {
-          const EG_Coord_t TopPadding = GetStylePadTop(EG_PART_MAIN);
-          const EG_Coord_t BottomPadding = GetStylePadBottom(EG_PART_MAIN);
-          const EG_Coord_t Height = GetHeight() - BottomPadding - TopPadding;
+          const int32_t TopPadding = GetStylePadTop(EG_PART_MAIN);
+          const int32_t BottomPadding = GetStylePadBottom(EG_PART_MAIN);
+          const int32_t Height = GetHeight() - BottomPadding - TopPadding;
 
           // Make the point relative to the indicator
           Value = Point.m_Y - (m_Rect.GetY2() + BottomPadding);
@@ -249,19 +250,19 @@ void EGSlider::Event(EGEvent *pEvent)
       break;
     }
     case EG_EVENT_REFR_EXT_DRAW_SIZE: {
-      EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_KNOB);
-      EG_Coord_t PadRight = GetStylePadRight(EG_PART_KNOB);
-      EG_Coord_t PadTop = GetStylePadTop(EG_PART_KNOB);
-      EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_KNOB);
-      EG_Coord_t Zoom = GetStyleTransformZoom(EG_PART_KNOB);	// The smaller size is the knob diameter
-      EG_Coord_t TransformWidth = GetStyleTransformWidth(EG_PART_KNOB);
-      EG_Coord_t TransformHeight = GetStyleTransformHeight(EG_PART_KNOB);
-      EG_Coord_t KnobSize = EG_MIN(GetWidth() + 2 * TransformWidth, GetHeight() + 2 * TransformHeight) >> 1;
+      int32_t PadLeft = GetStylePadLeft(EG_PART_KNOB);
+      int32_t PadRight = GetStylePadRight(EG_PART_KNOB);
+      int32_t PadTop = GetStylePadTop(EG_PART_KNOB);
+      int32_t PadBottom = GetStylePadBottom(EG_PART_KNOB);
+      int32_t Zoom = GetStyleTransformZoom(EG_PART_KNOB);	// The smaller size is the knob diameter
+      int32_t TransformWidth = GetStyleTransformWidth(EG_PART_KNOB);
+      int32_t TransformHeight = GetStyleTransformHeight(EG_PART_KNOB);
+      int32_t KnobSize = EG_MIN(GetWidth() + 2 * TransformWidth, GetHeight() + 2 * TransformHeight) >> 1;
       KnobSize = (KnobSize * Zoom) >> 8;
       KnobSize += EG_MAX(EG_MAX(PadLeft, PadRight), EG_MAX(PadBottom, PadTop));
       KnobSize += 2;                                      // For rounding error
       KnobSize += CalculateExtDrawSize(EG_PART_KNOB);
-      EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();		// Indic. size is handled by bar
+      int32_t *pSize = (int32_t*)pEvent->GetParam();		// Indic. size is handled by bar
       *pSize = EG_MAX(*pSize, KnobSize);
       break;
     }
@@ -293,12 +294,12 @@ void EGSlider::Event(EGEvent *pEvent)
 
 void EGSlider::DrawKnob(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
  	EG_SliderMode_e SliderMode = GetMode();
 	const bool IsRTL = EG_BASE_DIR_RTL == GetStyleBaseDirection(EG_PART_MAIN);
 	const bool Horizontal = IsHorizontal();
 	EGRect pKnobRect;
-	EG_Coord_t KnobSize;
+	int32_t KnobSize;
 	bool IsSymmetrical = false;
 	if(SliderMode == EG_BAR_MODE_SYMMETRICAL && m_MinimumValue < 0 && m_MaximumValue > 0) IsSymmetrical = true;
 	if(Horizontal) {
@@ -315,43 +316,42 @@ void EGSlider::DrawKnob(EGEvent *pEvent)
 	InititialseDrawRect(EG_PART_KNOB, &DrawRect);
 	PositionKnob(&pKnobRect, KnobSize, Horizontal);	  //  Update knob area with knob style 
 	pKnobRect.Copy(&m_RightKnobRect);	      //  Update right knob area with calculated knob area 
-	EGDrawDiscriptor PartDrawDiscriptor;
-	InitDrawDescriptor(&PartDrawDiscriptor, pContext);
-	PartDrawDiscriptor.m_Part = EG_PART_KNOB;
-	PartDrawDiscriptor.m_pClass = m_pClass;
-	PartDrawDiscriptor.m_Type = EG_SLIDER_DRAW_PART_KNOB;
-	PartDrawDiscriptor.m_Index = 0;
-	PartDrawDiscriptor.m_pRect = &m_RightKnobRect;
-	PartDrawDiscriptor.m_pDrawRect = &DrawRect;
+	EGEventDC PartDrawDescriptor(pDC);
+	PartDrawDescriptor.m_Part = EG_PART_KNOB;
+	PartDrawDescriptor.m_pClass = m_pClass;
+	PartDrawDescriptor.m_Type = EG_SLIDER_DRAW_PART_KNOB;
+	PartDrawDescriptor.m_Index = 0;
+	PartDrawDescriptor.m_pRect = &m_RightKnobRect;
+	PartDrawDescriptor.m_pDrawRect = &DrawRect;
 	if(GetMode() != EG_SLIDER_MODE_RANGE) {
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-		DrawRect.Draw(pContext, &m_RightKnobRect);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+		DrawRect.Draw(pDC, &m_RightKnobRect);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 	}
 	else {
 		EGDrawRect DrawRectTemp;		// Save the draw part_draw_dsc. because it can be modified in the event
     DrawRectTemp = DrawRect;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-		DrawRect.Draw(pContext, &m_RightKnobRect);		//  Draw the right knob 
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+		DrawRect.Draw(pDC, &m_RightKnobRect);		//  Draw the right knob 
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 		if(IsHorizontal()) pKnobRect.SetX1(EG_SLIDER_KNOB_COORD(!IsRTL, m_IndicatorRect));	// Calculate the second knob area	
 		else pKnobRect.SetY1(m_IndicatorRect.GetY2());
 		PositionKnob(&pKnobRect, KnobSize, IsHorizontal());
 		pKnobRect.Copy(&m_LeftKnobRect);
 		DrawRect = DrawRectTemp;
-		PartDrawDiscriptor.m_Type = EG_SLIDER_DRAW_PART_KNOB_LEFT;
-		PartDrawDiscriptor.m_pRect = &m_LeftKnobRect;
-		PartDrawDiscriptor.m_pDrawRect = &DrawRect;
-		PartDrawDiscriptor.m_Index = 1;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-		DrawRect.Draw(pContext, &m_LeftKnobRect);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+		PartDrawDescriptor.m_Type = EG_SLIDER_DRAW_PART_KNOB_LEFT;
+		PartDrawDescriptor.m_pRect = &m_LeftKnobRect;
+		PartDrawDescriptor.m_pDrawRect = &DrawRect;
+		PartDrawDescriptor.m_Index = 1;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+		DrawRect.Draw(pDC, &m_LeftKnobRect);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGSlider::PositionKnob(EGRect *pKnobRect, const EG_Coord_t KnobSize, const bool Horizontal)
+void EGSlider::PositionKnob(EGRect *pKnobRect, const int32_t KnobSize, const bool Horizontal)
 {
 	if(Horizontal) {
 		pKnobRect->DecX1(KnobSize >> 1);
@@ -365,12 +365,12 @@ void EGSlider::PositionKnob(EGRect *pKnobRect, const EG_Coord_t KnobSize, const 
 		pKnobRect->SetX1(m_Rect.GetX1());
 		pKnobRect->SetX2(m_Rect.GetX2());
 	}
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_KNOB);
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_KNOB);
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_KNOB);
-	EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_KNOB);
-	EG_Coord_t TransformWidth = GetStyleTransformWidth(EG_PART_KNOB);
-	EG_Coord_t TransformHeight = GetStyleTransformHeight(EG_PART_KNOB);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_KNOB);
+	int32_t PadRight = GetStylePadRight(EG_PART_KNOB);
+	int32_t PadTop = GetStylePadTop(EG_PART_KNOB);
+	int32_t PadBottom = GetStylePadBottom(EG_PART_KNOB);
+	int32_t TransformWidth = GetStyleTransformWidth(EG_PART_KNOB);
+	int32_t TransformHeight = GetStyleTransformHeight(EG_PART_KNOB);
 	pKnobRect->Inflate((PadLeft + TransformWidth), (PadRight + TransformWidth), (PadTop + TransformHeight), (PadBottom + TransformHeight));	// Apply the paddings on the knob area
 }
 

@@ -37,7 +37,7 @@
     #elif defined(EG_CONF_INCLUDE_SIMPLE)         /*Or simply include EG_Config.h is enabled*/
         #include "EG_Config.h"
     #else
-        #include "../../EG_Config.h"                /*Else assume EG_Config.h is next to the lvgl folder*/
+        #include "../EG_Config.h"                /*Else assume EG_Config.h is next to the EGL folder*/
     #endif
     #if !defined(EG_CONF_H) && !defined(EG_CONF_SUPPRESS_DEFINE_CHECK)
         /* #include will sometimes silently fail when __has_include is used */

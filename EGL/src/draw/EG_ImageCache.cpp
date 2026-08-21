@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -54,7 +55,7 @@ ImageCacheEntry_t* ImageCacheOpen(const void *pSource, EG_Color_t Color, int32_t
 
 #if EG_IMG_CACHE_DEF_SIZE
 	if(EntryCount == 0) {
-		EG_LOG_WARN("lv_img_cache_open: the cache size is 0");
+		EG_LOG_WARN("ImageCacheOpen: the cache size is 0");
 		return nullptr;
 	}
 	ImageCacheEntry_t *pCache = EG_GC_ROOT(ImageCacheArray_t);
@@ -69,9 +70,9 @@ ImageCacheEntry_t* ImageCacheOpen(const void *pSource, EG_Color_t Color, int32_t
 		if(Color.full == pCache[i].DecoderDSC.Color.full &&
 			 FrameID == pCache[i].DecoderDSC.FrameID &&
 			 ImageCacheMatch(pSource, pCache[i].DecoderDSC.pSource)) {
-			// If opened increment its Life.
-             *Image difficult to open should live longer to keep avoid frequent their recaching.
-             *Therefore increase `Life` with `OpenDelay`
+			/* If opened increment its Life.
+        Image difficult to open should live longer to keep avoid frequent their recaching.
+        Therefore increase `Life` with `OpenDelay`*/
 			pCachedSource = &pCache[i];
 			pCachedSource->Life += pCachedSource->DecoderDSC.OpenDelay * EG_IMG_CACHE_LIFE_GAIN;
 			if(pCachedSource->Life > EG_IMG_CACHE_LIFE_LIMIT) pCachedSource->Life = EG_IMG_CACHE_LIFE_LIMIT;
@@ -88,9 +89,9 @@ ImageCacheEntry_t* ImageCacheOpen(const void *pSource, EG_Color_t Color, int32_t
 			pCachedSource = &pCache[i];
 		}
 	}
-	// Close the decoder to reuse if it was opened (has a valid source)
+	// Close the decoder to reuse it if it was opened (has a valid source)
 	if(pCachedSource->DecoderDSC.pSource) {
-		lv_img_decoder_close(&pCachedSource->DecoderDSC);
+		pCachedSource->DecoderDSC.Decoder->Close();
 		EG_LOG_INFO("image draw: cache miss, close and reuse an entry");
 	}
 	else {
@@ -126,7 +127,7 @@ void SetImageCacheSize(uint16_t NewSlotNumber)
 #else
 	if(EG_GC_ROOT(ImageCacheArray_t) != nullptr) {
 		// Clean the cache before free it
-		lv_img_cache_invalidate_src(nullptr);
+		InvalidateImageCacheSource(nullptr);
 		EG_FreeMem(EG_GC_ROOT(ImageCacheArray_t));
 	}
 
@@ -156,9 +157,8 @@ void InvalidateImageCacheSource(const void *pSource)
 	for(i = 0; i < EntryCount; i++) {
 		if(pSource == nullptr || ImageCacheMatch(pSource, pCache[i].DecoderDSC.pSource)) {
 			if(pCache[i].DecoderDSC.pSource != nullptr) {
-				lv_img_decoder_close(&pCache[i].DecoderDSC);
+				pCache[i].DecoderDSC.Decoder->Close();
 			}
-
 			EG_ZeroMem(&pCache[i], sizeof(ImageCacheEntry_t));
 		}
 	}
@@ -168,16 +168,13 @@ void InvalidateImageCacheSource(const void *pSource)
 /////////////////////////////////////////////////////////////////////////////////
 
 #if EG_IMG_CACHE_DEF_SIZE
-static bool ImageCacheMatch(const void *src1, const void *src2)
+static bool ImageCacheMatch(const void *pSourceA, const void *pSourceB)
 {
-	EG_ImageSource_t src_type = lv_img_src_get_type(src1);
-	if(src_type == EG_IMG_SRC_VARIABLE)
-		return src1 == src2;
-	if(src_type != EG_IMG_SRC_FILE)
-		return false;
-	if(lv_img_src_get_type(src2) != EG_IMG_SRC_FILE)
-		return false;
-	return strcmp(src1, src2) == 0;
+	EG_ImageSource_e Type = ((EGDrawImage*)pSourceA)->GetType();
+	if(Type == EG_IMG_SRC_VARIABLE)	return pSourceA == pSourceB;
+	if(Type != EG_IMG_SRC_FILE)	return false;
+	if(((EGDrawImage*)pSourceB)->GetType() != EG_IMG_SRC_FILE) return false;
+	return strcmp(pSourceA, pSourceB) == 0;
 }
 #endif
 //}

@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -135,7 +136,7 @@ uint32_t i;
 
 EG_StyleValue_t EGObject::ApplyColorFilter(uint32_t Part, EG_StyleValue_t Value)
 {
-	const EG_ColorFilterProps_t *pFilter = GetStyleColorFilterDiscriptor(Part);
+	const EG_ColorFilterProps_t *pFilter = GetStyleColorFilterDescriptor(Part);
 	if((pFilter != nullptr) && (pFilter->FilterCB != nullptr)){
 		EG_OPA_t FilterOPA = GetStyleColorFilterOPA(Part);
 		if(FilterOPA != 0) Value.Color = pFilter->FilterCB(pFilter, Value.Color, FilterOPA);
@@ -278,24 +279,24 @@ EG_LayerType_e EGObject::CalculateLayerType(EGObject *pObj)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EGObject::CreateTransition(EGPart_t Part, EGState_t PreviousState, EGState_t NewState, const EG_TransitionDiscriptor_t *pTransitionDiscriptor)
+void EGObject::CreateTransition(EGPart_t Part, EGState_t PreviousState, EGState_t NewState, const EG_TransitionDescriptor_t *pTransitionDescriptor)
 {
 	m_SkipTransition = 1;
 	m_State = PreviousState; 
-	EG_StyleValue_t Value1 = GetProperty(Part, pTransitionDiscriptor->Property);
+	EG_StyleValue_t Value1 = GetProperty(Part, pTransitionDescriptor->Property);
 	m_State = NewState;
-	EG_StyleValue_t Value2 = GetProperty(Part, pTransitionDiscriptor->Property);
+	EG_StyleValue_t Value2 = GetProperty(Part, pTransitionDescriptor->Property);
 	m_SkipTransition = 0;
 	if((Value1.pPtr == Value2.pPtr) && (Value1.Number == Value2.Number) && Value1.Color.full == Value2.Color.full) return;
 	m_State = PreviousState;
-	Value1 = GetProperty(Part, pTransitionDiscriptor->Property);
+	Value1 = GetProperty(Part, pTransitionDescriptor->Property);
 	m_State = NewState;
 	EGStyle *pStyle = GetTransitionStyle(Part);
-	pStyle->SetProperty(pTransitionDiscriptor->Property, Value1); // Be sure `pStyle` has a valid value
-	if(pTransitionDiscriptor->Property == EG_STYLE_RADIUS) {
+	pStyle->SetProperty(pTransitionDescriptor->Property, Value1); // Be sure `pStyle` has a valid value
+	if(pTransitionDescriptor->Property == EG_STYLE_RADIUS) {
 		if(Value1.Number == EG_RADIUS_CIRCLE || Value2.Number == EG_RADIUS_CIRCLE) {
-			EG_Coord_t HalfWidth = GetWidth() / 2;
-			EG_Coord_t HalfHeight = GetHeight() / 2;
+			int32_t HalfWidth = GetWidth() / 2;
+			int32_t HalfHeight = GetHeight() / 2;
 			if(Value1.Number == EG_RADIUS_CIRCLE) Value1.Number = EG_MIN(HalfWidth + 1, HalfHeight + 1);
 			if(Value2.Number == EG_RADIUS_CIRCLE) Value2.Number = EG_MIN(HalfWidth + 1, HalfHeight + 1);
 		}
@@ -307,7 +308,7 @@ void EGObject::CreateTransition(EGPart_t Part, EGState_t PreviousState, EGState_
 	pTransition->StartValue = Value1;
 	pTransition->EndValue = Value2;
 	pTransition->pObj = this;
-	pTransition->Property = pTransitionDiscriptor->Property;
+	pTransition->Property = pTransitionDescriptor->Property;
 	pTransition->SelectFlags = Part;
 	EGAnimate Animation;
 	Animation.SetItem(pTransition);
@@ -315,11 +316,11 @@ void EGObject::CreateTransition(EGPart_t Part, EGState_t PreviousState, EGState_
 	Animation.SetStartCB(TransitionAnimationStartCB);
 	Animation.SetEndCB(TransitionAnimationEndCB);
 	Animation.SetValues(0x00, 0xFF);
-	Animation.SetTime(pTransitionDiscriptor->Time);
-	Animation.SetDelay(pTransitionDiscriptor->Delay);
-	Animation.SetPathCB(pTransitionDiscriptor->PathCB);
+	Animation.SetTime(pTransitionDescriptor->Time);
+	Animation.SetDelay(pTransitionDescriptor->Delay);
+	Animation.SetPathCB(pTransitionDescriptor->PathCB);
 	Animation.SetEarlyApply(false);
-	Animation.m_pParam = pTransitionDiscriptor->m_pParam;
+	Animation.m_pParam = pTransitionDescriptor->m_pParam;
   EGAnimate::Create(&Animation);
 }
 

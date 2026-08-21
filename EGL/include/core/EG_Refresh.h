@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -43,7 +44,7 @@ void            ResetFPSCounter(void);
 uint32_t        GetAverageFPS(void);
 #endif
 
-void            RedrawObject(EGDrawContext *pContext, EGObject *pObj);
+void            RedrawObject(EGDeviceContext *pDC, EGObject *pObj);
 void            InvalidateRect(EGDisplay *pDisplay, const EGRect *pRect);
 EGDisplay*      GetRefreshingDisplay(void);
 void            SetRefreshingDisplay(EGDisplay *pDisplay);

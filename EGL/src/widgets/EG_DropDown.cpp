@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -27,14 +28,14 @@
 #if EG_USE_DROPDOWN != 0
 
 #include "misc/EG_Assert.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "core/EG_Group.h"
 #include "core/EG_InputDevice.h"
 #include "core/EG_Display.h"
 #include "font/EG_SymbolDef.h"
 #include "misc/EG_Animate.h"
 #include "misc/EG_Math.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 #include <string.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -382,14 +383,14 @@ void EGDropDown::Open(void)
 	if((m_pDropList->GetWidth() <= GetWidth()) &&	((m_Direction == EG_DIR_TOP) || (m_Direction == EG_DIR_BOTTOM))) {// Set smaller width to the width of the button
 		m_pDropList->SetWidth(GetWidth());
 	}
-	EG_Coord_t LabelHeight = pLabel->GetHeight();
-	EG_Coord_t BorderWidth = m_pDropList->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t TopPad = m_pDropList->GetStylePadTop(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t BottomPad = m_pDropList->GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t FitHeight = LabelHeight + TopPad + BottomPad;
-	EG_Coord_t ListHeight = FitHeight;
+	int32_t LabelHeight = pLabel->GetHeight();
+	int32_t BorderWidth = m_pDropList->GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t TopPad = m_pDropList->GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+	int32_t BottomPad = m_pDropList->GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
+	int32_t FitHeight = LabelHeight + TopPad + BottomPad;
+	int32_t ListHeight = FitHeight;
 	EG_DirType_e Direction = m_Direction;
-  EG_Coord_t VerticalRes = EGDisplay::GetDefault()->GetVerticalRes();
+  int32_t VerticalRes = EGDisplay::GetDefault()->GetVerticalRes();
 	if(m_Direction == EG_DIR_BOTTOM) {	// No space on the BottomPad? See if TopPad is better.
 		if(m_Rect.GetY2() + ListHeight > VerticalRes) {
 			if(m_Rect.GetY1() > VerticalRes - m_Rect.GetY2()) {
@@ -439,10 +440,10 @@ void EGDropDown::Open(void)
   }
  	m_pDropList->UpdateLayout();
 	if(m_Direction == EG_DIR_LEFT || m_Direction == EG_DIR_RIGHT) {
-		EG_Coord_t y1 = m_pDropList->GetY();
-		EG_Coord_t y2 = m_pDropList->GetY2();
-		if(y2 >= EG_VERT_RES) {
-			m_pDropList->SetY(y1 - (y2 - EG_VERT_RES) - 1);
+		int32_t y1 = m_pDropList->GetY();
+		int32_t y2 = m_pDropList->GetY2();
+		if(y2 >= EG_DISP_VERT_RES) {
+			m_pDropList->SetY(y1 - (y2 - EG_DISP_VERT_RES) - 1);
 		}
 	}
 	EG_TextAlignment_t Align = pLabel->CalculateTextAlignment(EG_PART_MAIN, m_pItems);
@@ -582,11 +583,11 @@ void EGDropDown::Event(EGEvent *pEvent)
 
 void EGDropDown::DrawMain(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t left = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t right = GetStylePadRight(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t TopPad = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t left = GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
+	int32_t right = GetStylePadRight(EG_PART_MAIN) + BorderWidth;
+	int32_t TopPad = GetStylePadTop(EG_PART_MAIN) + BorderWidth;
 	EGDrawLabel DrawSymbol;
 	InititialseDrawLabel(EG_PART_INDICATOR, &DrawSymbol);
 	const char *pItemText;	// If no text specified use the selected item
@@ -601,11 +602,11 @@ void EGDropDown::DrawMain(EGEvent *pEvent)
 	if(m_Direction == EG_DIR_LEFT) SymbolToLeft = true;
 	if(GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) SymbolToLeft = true;
 	if(m_pSymbol) {
-		EG_ImageSource_t SymbolType = EGDrawImage::GetType(m_pSymbol);
-		EG_Coord_t SymbolWidth;
-		EG_Coord_t SymbolHeight;
+		EG_ImageSource_e SymbolType = EGDrawImage::GetType(m_pSymbol);
+		int32_t SymbolWidth;
+		int32_t SymbolHeight;
 		if(SymbolType == EG_IMG_SRC_SYMBOL) {
-			EGPoint TextSize;
+			EGSize TextSize;
 			EG_GetTextSize(&TextSize, (char*)m_pSymbol, DrawSymbol.m_pFont, DrawSymbol.m_Kerning, DrawSymbol.m_LineSpace, EG_COORD_MAX, DrawSymbol.m_Flag);
 			SymbolWidth = TextSize.m_X;
 			SymbolHeight = TextSize.m_Y;
@@ -635,7 +636,7 @@ void EGDropDown::DrawMain(EGEvent *pEvent)
 		if(SymbolType == EG_IMG_SRC_SYMBOL) {
 			SymbolRect.SetY1(m_Rect.GetY1() + TopPad);
 			SymbolRect.SetY2(SymbolRect.GetY1() + SymbolHeight - 1);
-			DrawSymbol.Draw(pContext, &SymbolRect, (char*)m_pSymbol, nullptr);
+			DrawSymbol.Draw(pDC, &SymbolRect, (char*)m_pSymbol, nullptr);
 		}
 		else {
 			SymbolRect.SetY1(m_Rect.GetY1() + (GetHeight() - SymbolHeight) / 2);
@@ -645,12 +646,12 @@ void EGDropDown::DrawMain(EGEvent *pEvent)
 			DrawImage.m_Pivot.m_X = SymbolWidth / 2;
 			DrawImage.m_Pivot.m_Y = SymbolHeight / 2;
 			DrawImage.m_Angle = GetStyleTransformAngle(EG_PART_INDICATOR);
-			DrawImage.Draw(pContext, &SymbolRect, m_pSymbol);
+			DrawImage.Draw(pDC, &SymbolRect, m_pSymbol);
 		}
 	}
 	EGDrawLabel DrawLabel;
 	InititialseDrawLabel(EG_PART_MAIN, &DrawLabel);
-	EGPoint TextSize;
+	EGSize TextSize;
 	EG_GetTextSize(&TextSize, pItemText, DrawLabel.m_pFont, DrawLabel.m_Kerning, DrawLabel.m_LineSpace, EG_COORD_MAX, DrawLabel.m_Flag);
 	EGRect TextRect;
 	TextRect.SetY1(m_Rect.GetY1() + TopPad);
@@ -671,7 +672,7 @@ void EGDropDown::DrawMain(EGEvent *pEvent)
 			TextRect.SetX2(TextRect.GetX1() + TextSize.m_X);
 		}
 	}
-	DrawLabel.Draw(pContext, &TextRect, pItemText, nullptr);
+	DrawLabel.Draw(pDC, &TextRect, pItemText, nullptr);
 	if(m_pText == nullptr) {
 		EG_ReleaseBufferMem((char *)pItemText);
 	}
@@ -679,7 +680,7 @@ void EGDropDown::DrawMain(EGEvent *pEvent)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGDropDown::DrawBox(EGDrawContext *pContext, uint16_t Index, EGState_t State)
+void EGDropDown::DrawBox(EGDeviceContext *pDC, uint16_t Index, EGState_t State)
 {
 	if(Index == EG_DROPDOWN_PR_NONE) return;
 	EGState_t OriginalState = m_pDropList->m_State;
@@ -688,8 +689,8 @@ void EGDropDown::DrawBox(EGDrawContext *pContext, uint16_t Index, EGState_t Stat
 		m_pDropList->m_SkipTransition = 1;
 	}
 	const EG_Font_t *pFont = m_pDropList->GetStyleTextFont(EG_PART_SELECTED);	// Draw a rectangle under the selected item
-	EG_Coord_t LineSpace = m_pDropList->GetStyleTextLineSpace(EG_PART_SELECTED);
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
+	int32_t LineSpace = m_pDropList->GetStyleTextLineSpace(EG_PART_SELECTED);
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);
 	EGObject *pLabel = GetLabel();	// Draw the selected
 	EGRect LabelRect;
 	LabelRect.SetY1(pLabel->m_Rect.GetY1());
@@ -700,14 +701,14 @@ void EGDropDown::DrawBox(EGDrawContext *pContext, uint16_t Index, EGState_t Stat
 	LabelRect.SetX2(m_pDropList->m_Rect.GetX2());
 	EGDrawRect DrawRect;
 	m_pDropList->InititialseDrawRect(EG_PART_SELECTED, &DrawRect);
-	DrawRect.Draw(pContext, &LabelRect);
+	DrawRect.Draw(pDC, &LabelRect);
 	m_pDropList->m_State = OriginalState;
 	m_pDropList->m_SkipTransition = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGDropDown::DrawBoxLabel(EGDrawContext *pContext, uint16_t Index, EGState_t State)
+void EGDropDown::DrawBoxLabel(EGDeviceContext *pDC, uint16_t Index, EGState_t State)
 {
 	if(Index == EG_DROPDOWN_PR_NONE) return;
 	EGState_t OriginalState = m_pDropList->m_State;
@@ -720,7 +721,7 @@ void EGDropDown::DrawBoxLabel(EGDrawContext *pContext, uint16_t Index, EGState_t
 	DrawLabel.m_LineSpace = m_pDropList->GetStyleTextLineSpace(EG_PART_SELECTED); // Line space should come from the list
 	EGLabel *pLabel = GetLabel();
 	if(pLabel == nullptr) return;
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(DrawLabel.m_pFont);
+	int32_t FontHeight = EG_FontGetLineHeight(DrawLabel.m_pFont);
 	EGRect SelectRect;
 	SelectRect.SetY1(pLabel->m_Rect.GetY1());
 	SelectRect.IncY1(Index * (FontHeight + DrawLabel.m_LineSpace));
@@ -729,11 +730,11 @@ void EGDropDown::DrawBoxLabel(EGDrawContext *pContext, uint16_t Index, EGState_t
 	SelectRect.SetX1(m_pDropList->m_Rect.GetX1());
 	SelectRect.SetX2(m_pDropList->m_Rect.GetX2());
 	EGRect MaskRect;
-	if(MaskRect.Intersect(pContext->m_pClipRect, &SelectRect)) {
-		const EGRect *OriginalClipRect = pContext->m_pClipRect;
-		pContext->m_pClipRect = &MaskRect;
-		DrawLabel.Draw(pContext, &pLabel->m_Rect, pLabel->GetText(), nullptr);
-		pContext->m_pClipRect = OriginalClipRect;
+	if(MaskRect.Intersect(pDC->m_pClipRect, &SelectRect)) {
+		const EGRect *OriginalClipRect = pDC->m_pClipRect;
+		pDC->m_pClipRect = &MaskRect;
+		DrawLabel.Draw(pDC, &pLabel->m_Rect, pLabel->GetText(), nullptr);
+		pDC->m_pClipRect = OriginalClipRect;
 	}
 	m_pDropList->m_State = OriginalState;
 	m_pDropList->m_SkipTransition = 0;
@@ -770,16 +771,16 @@ EG_Result_t EGDropDown::ButtonReleaseHandler(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-uint16_t EGDropDown::GetIndexOnPoint(EG_Coord_t Y)
+uint16_t EGDropDown::GetIndexOnPoint(int32_t Y)
 {
 	EGObject *pLabel = GetLabel();
 	if(pLabel == nullptr) return 0;
 	Y -= pLabel->m_Rect.GetY1();
 	const EG_Font_t *pFont = pLabel->GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
-	EG_Coord_t LineSpace = pLabel->GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);
+	int32_t LineSpace = pLabel->GetStyleTextLineSpace(EG_PART_MAIN);
 	Y += LineSpace / 2;
-	EG_Coord_t h = FontHeight + LineSpace;
+	int32_t h = FontHeight + LineSpace;
 	uint16_t Index = Y / h;
 	if(Index >= m_ItemCount) Index = m_ItemCount - 1;
 	return Index;
@@ -793,10 +794,10 @@ void EGDropDown::PositionToSelected(void)
 	if(pLabel == nullptr) return;
 	if(pLabel->GetHeight() <= GetContentHeight()) return;
 	const EG_Font_t *pFont = pLabel->GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
-	EG_Coord_t LineSpace = pLabel->GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t ItemHeight = FontHeight + LineSpace;
-	EG_Coord_t ScrollPoint = m_SelectedIndex * ItemHeight;
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);
+	int32_t LineSpace = pLabel->GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t ItemHeight = FontHeight + LineSpace;
+	int32_t ScrollPoint = m_SelectedIndex * ItemHeight;
 	m_pDropList->ScrollToY(ScrollPoint, EG_ANIM_OFF);	// Scroll to the selected item
 	m_pDropList->Invalidate();
 }
@@ -907,28 +908,28 @@ void EGDropDownList::Event(EGEvent *pEvent)
 
 void EGDropDownList::Draw(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	EGRect ClipRect;	//  Clip area might be too large too to shadow but the selected item can be drawn on only the background
-	if(ClipRect.Intersect(pContext->m_pClipRect, &m_Rect)) {
-		const EGRect *pClipRect = pContext->m_pClipRect;
-		pContext->m_pClipRect = &ClipRect;
+	if(ClipRect.Intersect(pDC->m_pClipRect, &m_Rect)) {
+		const EGRect *pClipRect = pDC->m_pClipRect;
+		pDC->m_pClipRect = &ClipRect;
 		if(m_pDropDown->m_Highlight) {
 			if(m_pDropDown->m_PressedIndex == m_pDropDown->m_SelectedIndex) {
-				m_pDropDown->DrawBox(pContext, m_pDropDown->m_PressedIndex, EG_STATE_CHECKED | EG_STATE_PRESSED);
-				m_pDropDown->DrawBoxLabel(pContext, m_pDropDown->m_PressedIndex, EG_STATE_CHECKED | EG_STATE_PRESSED);
+				m_pDropDown->DrawBox(pDC, m_pDropDown->m_PressedIndex, EG_STATE_CHECKED | EG_STATE_PRESSED);
+				m_pDropDown->DrawBoxLabel(pDC, m_pDropDown->m_PressedIndex, EG_STATE_CHECKED | EG_STATE_PRESSED);
 			}
 			else {
-				m_pDropDown->DrawBox(pContext, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
-				m_pDropDown->DrawBoxLabel(pContext, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
-				m_pDropDown->DrawBox(pContext, m_pDropDown->m_SelectedIndex, EG_STATE_CHECKED);
-				m_pDropDown->DrawBoxLabel(pContext, m_pDropDown->m_SelectedIndex, EG_STATE_CHECKED);
+				m_pDropDown->DrawBox(pDC, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
+				m_pDropDown->DrawBoxLabel(pDC, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
+				m_pDropDown->DrawBox(pDC, m_pDropDown->m_SelectedIndex, EG_STATE_CHECKED);
+				m_pDropDown->DrawBoxLabel(pDC, m_pDropDown->m_SelectedIndex, EG_STATE_CHECKED);
 			}
 		}
 		else {
-			m_pDropDown->DrawBox(pContext, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
-			m_pDropDown->DrawBoxLabel(pContext, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
+			m_pDropDown->DrawBox(pDC, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
+			m_pDropDown->DrawBoxLabel(pDC, m_pDropDown->m_PressedIndex, EG_STATE_PRESSED);
 		}
-		pContext->m_pClipRect = pClipRect;
+		pDC->m_pClipRect = pClipRect;
 	}
 }
 

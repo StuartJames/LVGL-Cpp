@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -58,7 +59,7 @@ bool      _lv_ll_is_empty(lv_ll_t * ll_p);
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-#define _LV_LL_READ(list, i) for(i = _lv_ll_get_head(list); i != nullptr; i = _lv_ll_get_next(list, i))
+#define _EG_LL_READ(list, i) for(i = _lv_ll_get_head(list); i != nullptr; i = _lv_ll_get_next(list, i))
 
-#define _LV_LL_READ_BACK(list, i) for(i = _lv_ll_get_tail(list); i != nullptr; i = _lv_ll_get_prev(list, i))
+#define _EG_LL_READ_BACK(list, i) for(i = _lv_ll_get_tail(list); i != nullptr; i = _lv_ll_get_prev(list, i))
 

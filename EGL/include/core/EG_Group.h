@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -39,8 +40,8 @@ class EGInputDevice;
 
 /////////////////////////////////////////////////////////////////////////////
 
-// Predefined keys to control the focused object via lv_group_send(group, c)
-typedef enum EG_Key_e : uint8_t{
+// Predefined keys to control the focused object via EGGroup.Send(c)
+enum EG_Key_e : uint8_t{
   EG_KEY_UP        = 17,  // 0x11
   EG_KEY_DOWN      = 18,  // 0x12
   EG_KEY_RIGHT     = 19,  // 0x13
@@ -53,16 +54,16 @@ typedef enum EG_Key_e : uint8_t{
   EG_KEY_PREV      = 11,  // 0x0B, '
   EG_KEY_HOME      = 2,   // 0x02, STX
   EG_KEY_END       = 3,   // 0x03, ETX
-} EG_Key_e;
+};
 
 
 typedef void (*EG_GroupFocusCB_t)(EGGroup *pGroup);
 typedef void (*EG_GroupEdgeCB_t)(EGGroup *pGroup, bool);
 
-typedef enum EG_GroupRefocusPolicy_e : uint8_t {
+enum EG_GroupRefocusPolicy_e : uint8_t {
     EG_GROUP_REFOCUS_POLICY_NEXT = 0,
     EG_GROUP_REFOCUS_POLICY_PREV = 1
-} EG_GroupRefocusPolicy_e;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -95,7 +96,7 @@ private:
 
 // Scroll Section //
 public:
-  EG_Coord_t              ScrollThrowPredict(EG_DirType_e Direction); // Predict where would a scroll throw end
+  int32_t                 ScrollThrowPredict(EG_DirType_e Direction); // Predict where would a scroll throw end
 
   static void             ScrollGetSnapDist(EGObject *pObj, EGPoint *pPoint); // Get the distance of the nearest snap point
   static void             ScrollHandler(EG_ProcessedInput_t *pProcess); // Handle scrolling. Called by LVGL during input device processing
@@ -104,11 +105,11 @@ public:
 private:
   static EGObject*        FindScrollObj(EG_ProcessedInput_t *pProcess);
   static void             InitScrollLimits(EG_ProcessedInput_t *pProcess);
-  static EG_Coord_t       FindSnapPointX(EGObject *pObj, EG_Coord_t min, EG_Coord_t max, EG_Coord_t ofs);
-  static EG_Coord_t       FindSnapPointY(EGObject *pObj, EG_Coord_t min, EG_Coord_t max, EG_Coord_t ofs);
-  static void             ScrollLimitDifference(EG_ProcessedInput_t *pProcess, EG_Coord_t * diff_x, EG_Coord_t * diff_y);
-  static EG_Coord_t       ScrollThrowPredictY(EG_ProcessedInput_t *pProcess);
-  static EG_Coord_t       ScrollThrowPredictX(EG_ProcessedInput_t *pProcess);
-  static EG_Coord_t       ElasticDifference(EGObject *pObj, EG_Coord_t diff, EG_Coord_t scroll_start, EG_Coord_t scroll_end, EG_DirType_e dir);
+  static int32_t          FindSnapPointX(EGObject *pObj, int32_t min, int32_t max, int32_t ofs);
+  static int32_t          FindSnapPointY(EGObject *pObj, int32_t min, int32_t max, int32_t ofs);
+  static void             ScrollLimitDifference(EG_ProcessedInput_t *pProcess, int32_t * diff_x, int32_t * diff_y);
+  static int32_t          ScrollThrowPredictY(EG_ProcessedInput_t *pProcess);
+  static int32_t          ScrollThrowPredictX(EG_ProcessedInput_t *pProcess);
+  static int32_t          ElasticDifference(EGObject *pObj, int32_t diff, int32_t scroll_start, int32_t scroll_end, EG_DirType_e dir);
 
 };

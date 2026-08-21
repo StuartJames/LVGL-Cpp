@@ -1,29 +1,30 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #include <stdbool.h>
 #include "draw/sw/EG_SoftContext.h"
-#include "draw/sw/EG_DrawSoftBlend.h"     // lv_draw_sw_blend
+#include "draw/sw/EG_DrawSoftBlend.h"
 #include "misc/EG_Math.h"
 #include "core/EG_Refresh.h"
 
@@ -32,21 +33,21 @@
 
 void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawLine(EGDrawLine *pDrawLine, const EGPoint *pPoint1, const EGPoint *pPoint2)
 {
-const EGDrawContext *pContext = pDrawLine->m_pContext;
+  EGSoftContext *pDC = (EGSoftContext*)pDrawLine->m_pContext;
 
-//  ESP_LOGI("[Line  ]", "Draw Buffer: %p", (void*)pContext->m_pDrawBuffer);
+//  ESP_LOGI("[Line  ]", "Draw Buffer: %p", (void*)pDC->m_pDrawBuffer);
 	if(pPoint1->m_X == pPoint2->m_X && pPoint1->m_Y == pPoint2->m_Y) return;
 	EGRect Clip;
 	Clip.SetX1(EG_MIN(pPoint1->m_X, pPoint2->m_X) - pDrawLine->m_Width / 2);
 	Clip.SetX2(EG_MAX(pPoint1->m_X, pPoint2->m_X) + pDrawLine->m_Width / 2);
 	Clip.SetY1(EG_MIN(pPoint1->m_Y, pPoint2->m_Y) - pDrawLine->m_Width / 2);
 	Clip.SetY2(EG_MAX(pPoint1->m_Y, pPoint2->m_Y) + pDrawLine->m_Width / 2);
-	if(!Clip.Intersect(&Clip, pContext->m_pClipRect)) return;
-	const EGRect *pClipRect = pContext->m_pClipRect;
-	pContext->m_pClipRect = &Clip;
-	if(pPoint1->m_Y == pPoint2->m_Y)	HorizontalLine(pDrawLine, pPoint1, pPoint2);
-	else if(pPoint1->m_X == pPoint2->m_X)	VerticalLine(pDrawLine, pPoint1, pPoint2);
-	else SkewLine(pDrawLine, pPoint1, pPoint2);
+	if(!Clip.Intersect(&Clip, pDC->m_pClipRect)) return;
+	const EGRect *pClipRect = pDC->m_pClipRect;
+	pDC->m_pClipRect = &Clip;
+	if(pPoint1->m_Y == pPoint2->m_Y)	pDC->HorizontalLine(pDrawLine, pPoint1, pPoint2);
+	else if(pPoint1->m_X == pPoint2->m_X)	pDC->VerticalLine(pDrawLine, pPoint1, pPoint2);
+	else pDC->SkewLine(pDrawLine, pPoint1, pPoint2);
 	if(pDrawLine->m_RoundEnd || pDrawLine->m_RoundStart) {
 		EGDrawRect DrawRec;
 		DrawRec.m_BackgroundColor = pDrawLine->m_Color;
@@ -60,17 +61,17 @@ const EGDrawContext *pContext = pDrawLine->m_pContext;
 			CircleArea.SetY1(pPoint1->m_Y - Radius);
 			CircleArea.SetX2(pPoint1->m_X + Radius - RadiusCorrection);
 			CircleArea.SetY2(pPoint1->m_Y + Radius - RadiusCorrection);
-			DrawRec.Draw(pContext, &CircleArea);
+			DrawRec.Draw(pDC, &CircleArea);
 		}
 		if(pDrawLine->m_RoundEnd) {
 			CircleArea.SetX1(pPoint2->m_X - Radius);
 			CircleArea.SetY1(pPoint2->m_Y - Radius);
 			CircleArea.SetX2(pPoint2->m_X + Radius - RadiusCorrection);
 			CircleArea.SetY2(pPoint2->m_Y + Radius - RadiusCorrection);
-			DrawRec.Draw(pContext, &CircleArea);
+			DrawRec.Draw(pDC, &CircleArea);
 		}
 	}
-	pContext->m_pClipRect = pClipRect;
+	pDC->m_pClipRect = pClipRect;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -80,15 +81,14 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::HorizontalLine(EGDrawLine *pDrawLine, 
 int32_t Width = pDrawLine->m_Width - 1;
 int32_t HalfWidthA = Width >> 1;
 int32_t HalfWidthB = HalfWidthA + (Width & 0x1); // Compensate rounding error
-const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 
 	EGRect BlendArea(EG_MIN(pPoint1->m_X, pPoint2->m_X), pPoint1->m_Y - HalfWidthB, EG_MAX(pPoint1->m_X, pPoint2->m_X) - 1, pPoint1->m_Y + HalfWidthA);
-	if(!BlendArea.Intersect(&BlendArea, pContext->m_pClipRect)) return;
+	if(!BlendArea.Intersect(&BlendArea, m_pClipRect)) return;
 	bool DoDash = pDrawLine->m_DashGap && pDrawLine->m_DashWidth ? true : false;
 	bool SimpleMode = true;
 	if(HasAnyDrawMask(&BlendArea))	SimpleMode = false;
 	else if(DoDash)	SimpleMode = false;
-	EGSoftBlend BlendObj(pContext);
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_pRect = &BlendArea;
 	BlendObj.m_Color = pDrawLine->m_Color;
 	BlendObj.m_OPA = pDrawLine->m_OPA;
@@ -97,9 +97,9 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 #if EG_DRAW_COMPLEX
 	else {	// If there other mask apply it
 		int32_t BlendAreaWidth = BlendArea.GetWidth();
-		EG_Coord_t Y2 = BlendArea.GetY2();
+		int32_t Y2 = BlendArea.GetY2();
 		BlendArea.SetY2(BlendArea.GetY1());
-		EG_Coord_t DashStart = 0;
+		int32_t DashStart = 0;
 		if(DoDash) DashStart = (BlendArea.GetX1()) % (pDrawLine->m_DashGap + pDrawLine->m_DashWidth);
 		EG_OPA_t *m_pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(BlendAreaWidth);
 		BlendObj.m_pMaskBuffer = m_pMaskBuffer;
@@ -109,8 +109,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 			BlendObj.m_MaskResult = DrawMaskApply(m_pMaskBuffer, BlendArea.GetX1(), Height, BlendAreaWidth);
 			if(DoDash) {
 				if(BlendObj.m_MaskResult != EG_DRAW_MASK_RESULT_TRANSP) {
-					EG_Coord_t DashCount = DashStart;
-					for(EG_Coord_t i = 0; i < BlendAreaWidth; i++, DashCount++) {
+					int32_t DashCount = DashStart;
+					for(int32_t i = 0; i < BlendAreaWidth; i++, DashCount++) {
 						if(DashCount <= pDrawLine->m_DashWidth) {
 							int16_t diff = pDrawLine->m_DashWidth - DashCount;
 							i += diff;
@@ -137,15 +137,14 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::VerticalLine(EGDrawLine *pDrawLine, co
 int32_t Width = pDrawLine->m_Width - 1;
 int32_t HalfWidthA = Width >> 1;
 int32_t HalfWidthB = HalfWidthA + (Width & 0x1); // Compensate rounding error
-const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 
 	EGRect BlendArea(pPoint1->m_X - HalfWidthB, EG_MIN(pPoint1->m_Y, pPoint2->m_Y), pPoint1->m_X + HalfWidthA, EG_MAX(pPoint1->m_Y, pPoint2->m_Y) - 1);
-	if(!BlendArea.Intersect(&BlendArea, pContext->m_pClipRect)) return;
+	if(!BlendArea.Intersect(&BlendArea, m_pClipRect)) return;
 	bool DoDash = pDrawLine->m_DashGap && pDrawLine->m_DashWidth ? true : false;
 	bool SimpleMode = true;
 	if(HasAnyDrawMask(&BlendArea)) SimpleMode = false;
 	else if(DoDash)	SimpleMode = false;
-	EGSoftBlend BlendObj(pContext);
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_pRect = &BlendArea;
 	BlendObj.m_Color = pDrawLine->m_Color;
 	BlendObj.m_OPA = pDrawLine->m_OPA;
@@ -153,14 +152,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawLine->m_pContext;
 #if EG_DRAW_COMPLEX
 	else {	// If there other mask apply it
 		int32_t DrawWidth = BlendArea.GetWidth();
-		EG_Coord_t Y2 = BlendArea.GetY2();
+		int32_t Y2 = BlendArea.GetY2();
 		BlendArea.SetY2(BlendArea.GetY1());
 		EG_OPA_t *m_pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(DrawWidth);
 		BlendObj.m_pMaskBuffer = m_pMaskBuffer;
 		BlendObj.m_pMaskRect = &BlendArea;
-		EG_Coord_t DashStart = 0;
+		int32_t DashStart = 0;
 		if(DoDash) DashStart = (BlendArea.GetY1()) % (pDrawLine->m_DashGap + pDrawLine->m_DashWidth);
-		EG_Coord_t DashCount = DashStart;
+		int32_t DashCount = DashStart;
 		for(int32_t Height = BlendArea.GetY1(); Height <= Y2; Height++) {
 			EG_SetMemFF(m_pMaskBuffer, DrawWidth);
 			BlendObj.m_MaskResult = DrawMaskApply(m_pMaskBuffer, BlendArea.GetX1(), Height, DrawWidth);
@@ -224,8 +223,8 @@ EGPoint PointA, PointB;
 	BlendArea.SetX2(EG_MAX(PointA.m_X, PointB.m_X) + Width);
 	BlendArea.SetY1(EG_MIN(PointA.m_Y, PointB.m_Y) - Width);
 	BlendArea.SetY2(EG_MAX(PointA.m_Y, PointB.m_Y) + Width);
-	// Get the union of `coords` and `clip`. 'clip` is already truncated to the `draw_buf` size in 'lv_refr_area' function
-	if(!BlendArea.Intersect(&BlendArea, pDrawLine->m_pContext->m_pClipRect)) return;
+	// Get the union of `coords` and `clip`. 'clip` is already truncated to the `draw_buf` size in 'RefreshRect' function
+	if(!BlendArea.Intersect(&BlendArea, m_pClipRect)) return;
 	MaskLineParam_t mask_left_param;
 	MaskLineParam_t mask_right_param;
 	MaskLineParam_t mask_top_param;
@@ -260,11 +259,11 @@ EGPoint PointA, PointB;
 	uint32_t hor_res = (uint32_t)GetRefreshingDisplay()->GetHorizontalRes();	// Draw the background line by line
 	size_t pMaskBufferSize = EG_MIN(BlendArea.GetSize(), hor_res);
 	EG_OPA_t *m_pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(pMaskBufferSize);
-	EG_Coord_t Y2 = BlendArea.GetY2();
+	int32_t Y2 = BlendArea.GetY2();
 	BlendArea.SetY2(BlendArea.GetY1());
 	uint32_t pMask = 0;
 	EG_SetMemFF(m_pMaskBuffer, pMaskBufferSize);
-	EGSoftBlend BlendObj((EGSoftContext*)pDrawLine->m_pContext);
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_pRect = &BlendArea;
 	BlendObj.m_Color = pDrawLine->m_Color;
 	BlendObj.m_OPA = pDrawLine->m_OPA;
@@ -298,10 +297,10 @@ EGPoint PointA, PointB;
 	DrawMaskFreeParam(&mask_right_param);
 	if(mask_top_id != EG_MASK_ID_INVALID) DrawMaskFreeParam(&mask_top_param);
 	if(mask_bottom_id != EG_MASK_ID_INVALID) DrawMaskFreeParam(&mask_bottom_param);
-	DrawMaskRemove(mask_left_id);
-	DrawMaskRemove(mask_right_id);
-	DrawMaskRemove(mask_top_id);
-	DrawMaskRemove(mask_bottom_id);
+	DrawMaskRemoveID(mask_left_id);
+	DrawMaskRemoveID(mask_right_id);
+	DrawMaskRemoveID(mask_top_id);
+	DrawMaskRemoveID(mask_bottom_id);
 #else
 	EG_UNUSED(pPoint1);
 	EG_UNUSED(pPoint2);

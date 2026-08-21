@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -33,8 +34,6 @@
 #include "EG_Types.h"
 #include "EG_Assert.h"
 #include "lv_bidi.h"
-
-#include "esp_log.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,23 +58,23 @@ EG_EXPORT_CONST_INT(EG_SCALE_NONE);
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum : uint8_t {
+enum EG_BlendMode_e{
   EG_BLEND_MODE_NORMAL,     // Simply mix according to the opacity value
   EG_BLEND_MODE_ADDITIVE,   // Add the respective color channels
   EG_BLEND_MODE_SUBTRACTIVE,// Subtract the foreground from the background
   EG_BLEND_MODE_MULTIPLY,   // Multiply the foreground and background
   EG_BLEND_MODE_REPLACE,    // Replace background with foreground in the area
-} EG_BlendMode_e;
+};
 
 
-typedef enum : uint8_t {
+enum EG_TextDecor_e{
   EG_TEXT_DECOR_NONE          = 0x00,
   EG_TEXT_DECOR_UNDERLINE     = 0x01,
   EG_TEXT_DECOR_STRIKETHROUGH = 0x02,
-} EG_TextDecor_e;
+};
 
 
-typedef enum : uint8_t {
+enum EG_BorderSide_e{
   EG_BORDER_SIDE_NONE     = 0x00,
   EG_BORDER_SIDE_BOTTOM   = 0x01,
   EG_BORDER_SIDE_TOP      = 0x02,
@@ -83,28 +82,32 @@ typedef enum : uint8_t {
   EG_BORDER_SIDE_RIGHT    = 0x08,
   EG_BORDER_SIDE_FULL     = 0x0F,
   EG_BORDER_SIDE_INTERNAL = 0x10, // FOR matrix-like objects (e.g. Button matrix)
-}  EG_BorderSide_e;
-
+};
 typedef uint8_t EG_BorderSide_t;
 
+enum EG_BlurQuality_e{
+  EG_BLUR_QUALITY_AUTO = 0,   /**< Set the quality automatically */
+  EG_BLUR_QUALITY_SPEED,      /**< Prefer speed over precision */
+  EG_BLUR_QUALITY_PRECISION,  /**< Prefer precision over speed*/
+};
 
-typedef enum : uint8_t {
+
+enum EG_GradDirection_e{
   EG_GRAD_DIR_NONE, // No gradient (the `grad_color` property is ignored)
   EG_GRAD_DIR_VER,  // Vertical (top to bottom) gradient
   EG_GRAD_DIR_HOR,  // Horizontal (left to right) gradient
-} EG_GradDirection_e;
+};
 
 
-enum {
+enum EG_DitherMode_e{
   EG_DITHER_NONE,     // No dithering, colors are just quantized to the output resolution
   EG_DITHER_ORDERED,  // Ordered dithering. Faster to compute and use less memory but lower quality
   EG_DITHER_ERR_DIFF, // Error diffusion mode. Slower to compute and use more memory but give highest dither quality
 };
-
 typedef uint8_t EG_DitherMode_t;
 
 
-typedef enum EGStyleProperty_e : uint16_t {
+enum EGStyleProperty_e{
   EG_STYLE_PROP_INV               = 0,
 
   // Group 0
@@ -216,15 +219,14 @@ typedef enum EGStyleProperty_e : uint16_t {
 
   EG_STYLE_PROP_ANY               = 0xFFFF,
   _EG_STYLE_PROP_CONST            = 0xFFFF //  magic value for const styles 
-} EGStyleProperty_e;
+};
 
 
-enum {
+enum EG_StyleResult_e{
   EG_STYLE_RES_NOT_FOUND,
   EG_STYLE_RES_FOUND,
   EG_STYLE_RES_INHERIT
 };
-
 typedef uint8_t EG_StyleResult_t;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -237,10 +239,10 @@ typedef struct {
 
 typedef struct {
     EG_GradientStop_t   stops[EG_GRADIENT_MAX_STOPS];   // A gradient stop array 
-    uint8_t              stops_count;                   // The number of used stops in the array 
-    EG_GradDirection_e   dir : 3;                       // The gradient direction.
+    uint8_t             StopCount;                      // The number of used stops in the array 
+    EG_GradDirection_e  dir;                            // The gradient direction.
                                                         // Any of EG_GRAD_DIR_HOR, EG_GRAD_DIR_VER, EG_GRAD_DIR_NONE 
-    EG_DitherMode_t     dither : 3;                     // Whether to dither the gradient or not.
+    EG_DitherMode_t     dither;                         // Whether to dither the gradient or not.
                                                         // Any of EG_DITHER_NONE, EG_DITHER_ORDERED, EG_DITHER_ERR_DIFF 
 } EG_GradDescriptor_t;
 
@@ -258,7 +260,7 @@ typedef struct {
     EG_AnimatePathCB_t    PathCB;         // A path for the animation.
     uint32_t              Time;           // Duration of the transition in [ms]
     uint32_t              Delay;          // Delay before the transition in [ms]
-} EG_StyleTransitionDiscriptor_t;
+} EG_StyleTransitionDescriptor_t;
 
 
 typedef struct {
@@ -271,7 +273,7 @@ typedef struct {
 uint8_t           GetPropertyGroup(EGStyleProperty_e Property);
 void              SetPropertyHelper(EGStyleProperty_e Property, EG_StyleValue_t Value, uint16_t *pPropertyStorage, EG_StyleValue_t *pValueStorage);
 void              SetPropertyMetaHelper(EGStyleProperty_e Property, EG_StyleValue_t Value, uint16_t *pPropertyStorage,	EG_StyleValue_t *pValueStorage);
-void              InitialiseTransitionDiscriptor(EG_StyleTransitionDiscriptor_t *pTransitionDiscriptor, const EGStyleProperty_e Properties[],
+void              InitialiseTransitionDescriptor(EG_StyleTransitionDescriptor_t *pTransitionDescriptor, const EGStyleProperty_e Properties[],
                     EG_AnimatePathCB_t PathCB, uint32_t Time, uint32_t Delay, void *pUserData);
 EG_StyleValue_t   GetDefaultProperty(EGStyleProperty_e Property);
 bool              PropertyHasFlag(EGStyleProperty_e Property, uint8_t Flag);
@@ -294,35 +296,35 @@ public:
   bool              IsEmpty(void);
   void              ConstantStyleInitialise(uint8_t Count, EG_StylePropValue_t *pPropertyArray);
 
-  void              SetWidth(EG_Coord_t value);
-  void              SetMinWidth(EG_Coord_t value);
-  void              SetMaxWidth(EG_Coord_t value);
-  void              SetHeight(EG_Coord_t value);
-  void              SetMinHeight(EG_Coord_t value);
-  void              SetMaxHeight(EG_Coord_t value);
-  void              SetX(EG_Coord_t value);
-  void              SetY(EG_Coord_t value);
+  void              SetWidth(int32_t value);
+  void              SetMinWidth(int32_t value);
+  void              SetMaxWidth(int32_t value);
+  void              SetHeight(int32_t value);
+  void              SetMinHeight(int32_t value);
+  void              SetMaxHeight(int32_t value);
+  void              SetX(int32_t value);
+  void              SetY(int32_t value);
   void              SetAlign(EG_AlignType_e value);
-  void              SetTransformWidth(EG_Coord_t value);
-  void              SetTransformHeight(EG_Coord_t value);
-  void              SetTranslateX(EG_Coord_t value);
-  void              SetTranslateY(EG_Coord_t value);
-  void              SetTransformZoom(EG_Coord_t value);
-  void              SetTransformAngle(EG_Coord_t value);
-  void              SetTransformPivotX(EG_Coord_t value);
-  void              SetTransformPivotY(EG_Coord_t value);
-  void              SetPaddingTop(EG_Coord_t value);
-  void              SetPaddingBottom(EG_Coord_t value);
-  void              SetPaddingLeft(EG_Coord_t value);
-  void              SetPaddingRight(EG_Coord_t value);
-  void              SetPaddingRow(EG_Coord_t value);
-  void              SetPaddingColumn(EG_Coord_t value);
+  void              SetTransformWidth(int32_t value);
+  void              SetTransformHeight(int32_t value);
+  void              SetTranslateX(int32_t value);
+  void              SetTranslateY(int32_t value);
+  void              SetTransformZoom(int32_t value);
+  void              SetTransformAngle(int32_t value);
+  void              SetTransformPivotX(int32_t value);
+  void              SetTransformPivotY(int32_t value);
+  void              SetPaddingTop(int32_t value);
+  void              SetPaddingBottom(int32_t value);
+  void              SetPaddingLeft(int32_t value);
+  void              SetPaddingRight(int32_t value);
+  void              SetPaddingRow(int32_t value);
+  void              SetPaddingColumn(int32_t value);
   void              SetBackColor(EG_Color_t value);
   void              SetBackOPA(EG_OPA_t value);
   void              SetBackGradientColor(EG_Color_t value);
   void              SetBackGradientDirection(EG_GradDirection_e value);
-  void              SetBackMainStop(EG_Coord_t value);
-  void              SetBackGradientStop(EG_Coord_t value);
+  void              SetBackMainStop(int32_t value);
+  void              SetBackGradientStop(int32_t value);
   void              SetBackGradient(const EG_GradDescriptor_t *value);
   void              SetBackDitherMode(EG_DitherMode_t value);
   void              SetBackImageSource(const void *value);
@@ -332,29 +334,29 @@ public:
   void              SetBackImageTiled(bool value);
   void              SetBorderColor(EG_Color_t value);
   void              SetBorderOPA(EG_OPA_t value);
-  void              SetBorderWidth(EG_Coord_t value);
+  void              SetBorderWidth(int32_t value);
   void              SetBorderSide(EG_BorderSide_t value);
   void              SetBorderPost(bool value);
-  void              SetOutlineWidth(EG_Coord_t value);
+  void              SetOutlineWidth(int32_t value);
   void              SetOutlineColor(EG_Color_t value);
   void              SetOutlineOPA(EG_OPA_t value);
-  void              SetOutlinePad(EG_Coord_t value);
-  void              SetShadowWidth(EG_Coord_t value);
-  void              SetShadowOffsetX(EG_Coord_t value);
-  void              SetShadowOffsetY(EG_Coord_t value);
-  void              SetShadowSpread(EG_Coord_t value);
+  void              SetOutlinePad(int32_t value);
+  void              SetShadowWidth(int32_t value);
+  void              SetShadowOffsetX(int32_t value);
+  void              SetShadowOffsetY(int32_t value);
+  void              SetShadowSpread(int32_t value);
   void              SetShadowColor(EG_Color_t value);
   void              SetShadowOPA(EG_OPA_t value);
   void              SetImageOPA(EG_OPA_t value);
   void              SetImageRecolor(EG_Color_t value);
   void              SetimageRecolorOPA(EG_OPA_t value);
-  void              SetLineWidth(EG_Coord_t value);
-  void              SetLineDashWidth(EG_Coord_t value);
-  void              SetLineDashGap(EG_Coord_t value);
+  void              SetLineWidth(int32_t value);
+  void              SetLineDashWidth(int32_t value);
+  void              SetLineDashGap(int32_t value);
   void              SetLineRounded(bool value);
   void              SetLineColor(EG_Color_t value);
   void              SetLineOPA(EG_OPA_t value);
-  void              SetArcWidth(EG_Coord_t value);
+  void              SetArcWidth(int32_t value);
   void              SetArcRounded(bool value);
   void              SetArcColor(EG_Color_t value);
   void              SetArcOPA(EG_OPA_t value);
@@ -362,28 +364,28 @@ public:
   void              SetTextColor(EG_Color_t value);
   void              SetTextOPA(EG_OPA_t value);
   void              SetTextFont(const EG_Font_t *value);
-  void              SetTextKerning(EG_Coord_t value);
-  void              SetTextLineSpace(EG_Coord_t value);
+  void              SetTextKerning(int32_t value);
+  void              SetTextLineSpace(int32_t value);
   void              SetTextDecoration(EG_TextDecor_e value);
   void              SetTextAlign(EG_TextAlignment_t value);
-  void              SetRadius(EG_Coord_t value);
+  void              SetRadius(int32_t value);
   void              SetClipCorner(bool value);
   void              SetOPA(EG_OPA_t value);
   void              SetOPALayered(EG_OPA_t value);
-  void              SetColorFilterDiscriptor(const EG_ColorFilterProps_t *value);
+  void              SetColorFilterDescriptor(const EG_ColorFilterProps_t *value);
   void              SetColorFilterOPA(EG_OPA_t value);
   void              SetAnimate(const EGAnimate *value);
   void              SetAnimateTime(uint32_t value);
   void              SetAnimateSpeed(uint32_t value);
-  void              SetTransition(const EG_StyleTransitionDiscriptor_t *value);
+  void              SetTransition(const EG_StyleTransitionDescriptor_t *value);
   void              SetBlendMode(EG_BlendMode_e value);
   void              SetLayout(uint16_t value);
   void              SetBaseDirection(EG_BaseDirection_e value);
-  void              SetSize(EG_Coord_t Value);
-  void              SetPaddingAll(EG_Coord_t Value);
-  void              SetHorizontalPadding(EG_Coord_t Value);
-  void              SetVerticalPadding(EG_Coord_t Value);
-  void              SetPaddingGap(EG_Coord_t Value);
+  void              SetSize(int32_t Value);
+  void              SetPaddingAll(int32_t Value);
+  void              SetHorizontalPadding(int32_t Value);
+  void              SetVerticalPadding(int32_t Value);
+  void              SetPaddingGap(int32_t Value);
 
   static EGStyleProperty_e RegisterProperty(uint8_t Flag);
 
@@ -475,7 +477,7 @@ inline bool PropertyHasFlag(EGStyleProperty_e Property, uint8_t Flag)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGStyle::SetSize(EG_Coord_t Value)
+inline void EGStyle::SetSize(int32_t Value)
 {
   SetWidth(Value);
   SetHeight(Value);
@@ -483,7 +485,7 @@ inline void EGStyle::SetSize(EG_Coord_t Value)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGStyle::SetPaddingAll(EG_Coord_t Value)
+inline void EGStyle::SetPaddingAll(int32_t Value)
 {
   SetPaddingLeft(Value);
   SetPaddingRight(Value);
@@ -493,7 +495,7 @@ inline void EGStyle::SetPaddingAll(EG_Coord_t Value)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGStyle::SetHorizontalPadding(EG_Coord_t Value)
+inline void EGStyle::SetHorizontalPadding(int32_t Value)
 {
   SetPaddingLeft(Value);
   SetPaddingRight(Value);
@@ -501,7 +503,7 @@ inline void EGStyle::SetHorizontalPadding(EG_Coord_t Value)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGStyle::SetVerticalPadding(EG_Coord_t Value)
+inline void EGStyle::SetVerticalPadding(int32_t Value)
 {
   SetPaddingTop(Value);
   SetPaddingBottom(Value);
@@ -509,7 +511,7 @@ inline void EGStyle::SetVerticalPadding(EG_Coord_t Value)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGStyle::SetPaddingGap(EG_Coord_t Value)
+inline void EGStyle::SetPaddingGap(int32_t Value)
 {
   SetPaddingRow(Value);
   SetPaddingColumn(Value);

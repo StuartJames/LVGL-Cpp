@@ -17,61 +17,62 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #include "misc/EG_Style.h"
 
-void EGStyle::SetWidth(EG_Coord_t Value)
+void EGStyle::SetWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value };
 
   SetProperty(EG_STYLE_WIDTH, StyleValue);
 }
 
-void EGStyle::SetMinWidth(EG_Coord_t Value)
+void EGStyle::SetMinWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = { .Number = (int32_t)Value };
   SetProperty(EG_STYLE_MIN_WIDTH, StyleValue);
 }
 
-void EGStyle::SetMaxWidth(EG_Coord_t Value)
+void EGStyle::SetMaxWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_MAX_WIDTH, StyleValue);
 }
 
-void EGStyle::SetHeight(EG_Coord_t Value)
+void EGStyle::SetHeight(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_HEIGHT, StyleValue);
 }
 
-void EGStyle::SetMinHeight(EG_Coord_t Value)
+void EGStyle::SetMinHeight(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_MIN_HEIGHT, StyleValue);
 }
 
-void EGStyle::SetMaxHeight(EG_Coord_t Value)
+void EGStyle::SetMaxHeight(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_MAX_HEIGHT, StyleValue);
 }
 
-void EGStyle::SetX(EG_Coord_t Value)
+void EGStyle::SetX(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_X, StyleValue);
 }
 
-void EGStyle::SetY(EG_Coord_t Value)
+void EGStyle::SetY(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -85,98 +86,98 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_ALIGN, StyleValue);
 }
 
-void EGStyle::SetTransformWidth(EG_Coord_t Value)
+void EGStyle::SetTransformWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSFORM_WIDTH, StyleValue);
 }
 
-void EGStyle::SetTransformHeight(EG_Coord_t Value)
+void EGStyle::SetTransformHeight(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSFORM_HEIGHT, StyleValue);
 }
 
-void EGStyle::SetTranslateX(EG_Coord_t Value)
+void EGStyle::SetTranslateX(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSLATE_X, StyleValue);
 }
 
-void EGStyle::SetTranslateY(EG_Coord_t Value)
+void EGStyle::SetTranslateY(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSLATE_Y, StyleValue);
 }
 
-void EGStyle::SetTransformZoom(EG_Coord_t Value)
+void EGStyle::SetTransformZoom(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSFORM_ZOOM, StyleValue);
 }
 
-void EGStyle::SetTransformAngle(EG_Coord_t Value)
+void EGStyle::SetTransformAngle(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSFORM_ANGLE, StyleValue);
 }
 
-void EGStyle::SetTransformPivotX(EG_Coord_t Value)
+void EGStyle::SetTransformPivotX(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSFORM_PIVOT_X, StyleValue);
 }
 
-void EGStyle::SetTransformPivotY(EG_Coord_t Value)
+void EGStyle::SetTransformPivotY(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TRANSFORM_PIVOT_Y, StyleValue);
 }
 
-void EGStyle::SetPaddingTop(EG_Coord_t Value)
+void EGStyle::SetPaddingTop(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_PAD_TOP, StyleValue);
 }
 
-void EGStyle::SetPaddingBottom(EG_Coord_t Value)
+void EGStyle::SetPaddingBottom(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_PAD_BOTTOM, StyleValue);
 }
 
-void EGStyle::SetPaddingLeft(EG_Coord_t Value)
+void EGStyle::SetPaddingLeft(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_PAD_LEFT, StyleValue);
 }
 
-void EGStyle::SetPaddingRight(EG_Coord_t Value)
+void EGStyle::SetPaddingRight(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_PAD_RIGHT, StyleValue);
 }
 
-void EGStyle::SetPaddingRow(EG_Coord_t Value)
+void EGStyle::SetPaddingRow(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_PAD_ROW, StyleValue);
 }
 
-void EGStyle::SetPaddingColumn(EG_Coord_t Value)
+void EGStyle::SetPaddingColumn(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -211,14 +212,14 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_BG_GRAD_DIR, StyleValue);
 }
 
-void EGStyle::SetBackMainStop(EG_Coord_t Value)
+void EGStyle::SetBackMainStop(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_BG_MAIN_STOP, StyleValue);
 }
 
-void EGStyle::SetBackGradientStop(EG_Coord_t Value)
+void EGStyle::SetBackGradientStop(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -288,7 +289,7 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_BORDER_OPA, StyleValue);
 }
 
-void EGStyle::SetBorderWidth(EG_Coord_t Value)
+void EGStyle::SetBorderWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -309,7 +310,7 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_BORDER_POST, StyleValue);
 }
 
-void EGStyle::SetOutlineWidth(EG_Coord_t Value)
+void EGStyle::SetOutlineWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -330,35 +331,35 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_OUTLINE_OPA, StyleValue);
 }
 
-void EGStyle::SetOutlinePad(EG_Coord_t Value)
+void EGStyle::SetOutlinePad(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_OUTLINE_PAD, StyleValue);
 }
 
-void EGStyle::SetShadowWidth(EG_Coord_t Value)
+void EGStyle::SetShadowWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_SHADOW_WIDTH, StyleValue);
 }
 
-void EGStyle::SetShadowOffsetX(EG_Coord_t Value)
+void EGStyle::SetShadowOffsetX(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_SHADOW_OFS_X, StyleValue);
 }
 
-void EGStyle::SetShadowOffsetY(EG_Coord_t Value)
+void EGStyle::SetShadowOffsetY(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_SHADOW_OFS_Y, StyleValue);
 }
 
-void EGStyle::SetShadowSpread(EG_Coord_t Value)
+void EGStyle::SetShadowSpread(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -400,21 +401,21 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_IMG_RECOLOR_OPA, StyleValue);
 }
 
-void EGStyle::SetLineWidth(EG_Coord_t Value)
+void EGStyle::SetLineWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_LINE_WIDTH, StyleValue);
 }
 
-void EGStyle::SetLineDashWidth(EG_Coord_t Value)
+void EGStyle::SetLineDashWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_LINE_DASH_WIDTH, StyleValue);
 }
 
-void EGStyle::SetLineDashGap(EG_Coord_t Value)
+void EGStyle::SetLineDashGap(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -442,7 +443,7 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_LINE_OPA, StyleValue);
 }
 
-void EGStyle::SetArcWidth(EG_Coord_t Value)
+void EGStyle::SetArcWidth(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -498,14 +499,14 @@ EG_StyleValue_t StyleValue = {.pPtr = Value};
   SetProperty(EG_STYLE_TEXT_FONT, StyleValue);
 }
 
-void EGStyle::SetTextKerning(EG_Coord_t Value)
+void EGStyle::SetTextKerning(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
   SetProperty(EG_STYLE_TEXT_LETTER_SPACE, StyleValue);
 }
 
-void EGStyle::SetTextLineSpace(EG_Coord_t Value)
+void EGStyle::SetTextLineSpace(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -526,7 +527,7 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_TEXT_ALIGN, StyleValue);
 }
 
-void EGStyle::SetRadius(EG_Coord_t Value)
+void EGStyle::SetRadius(int32_t Value)
 {
 EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
 
@@ -554,7 +555,7 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_OPA_LAYERED, StyleValue);
 }
 
-void EGStyle::SetColorFilterDiscriptor(const EG_ColorFilterProps_t *pValue)
+void EGStyle::SetColorFilterDescriptor(const EG_ColorFilterProps_t *pValue)
 {
 EG_StyleValue_t StyleValue = {.pPtr = pValue};
 
@@ -589,7 +590,7 @@ EG_StyleValue_t StyleValue = {.Number = (int32_t)Value};
   SetProperty(EG_STYLE_ANIM_SPEED, StyleValue);
 }
 
-void EGStyle::SetTransition(const EG_StyleTransitionDiscriptor_t * Value)
+void EGStyle::SetTransition(const EG_StyleTransitionDescriptor_t * Value)
 {
 EG_StyleValue_t StyleValue = {.pPtr = Value};
 

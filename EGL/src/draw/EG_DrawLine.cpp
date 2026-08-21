@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -29,8 +30,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawLine::EGDrawLine(void) :
-  m_pContext(nullptr),
+EGDrawLine::EGDrawLine(void) : EGDrawBase(),
   m_Color(EG_ColorBlack()),
   m_Width(1),
   m_DashWidth(0),
@@ -45,11 +45,11 @@ EGDrawLine::EGDrawLine(void) :
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EGDrawLine::Draw(const EGDrawContext  *pDrawContext, const EGPoint *pPoint1, const EGPoint *pPoint2)
+void EG_ATTRIBUTE_FAST_MEM EGDrawLine::Draw(EGDeviceContext  *pDC, const EGPoint *pPoint1, const EGPoint *pPoint2)
 {
   if(m_Width == 0) return;
   if(m_OPA <= EG_OPA_MIN) return;
-  m_pContext = pDrawContext;
-  pDrawContext->DrawLineProc(this, pPoint1, pPoint2);
+  m_pContext = pDC;
+  pDC->DrawLineProc(this, pPoint1, pPoint2);
 }
 

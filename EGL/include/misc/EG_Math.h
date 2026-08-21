@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -42,7 +43,7 @@
 typedef struct {
     uint16_t i;
     uint16_t f;
-} lv_sqrt_res_t;
+} EG_SqrtResult_t;
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -53,9 +54,9 @@ typedef struct {
  */
 int16_t /* EG_ATTRIBUTE_FAST_MEM */ EG_TrigoSin(int16_t angle);
 
-static inline int16_t EG_ATTRIBUTE_FAST_MEM lv_trigo_cos(int16_t angle)
+static inline int16_t EG_ATTRIBUTE_FAST_MEM EG_TrigoCos(int16_t angle)
 {
-    return EG_TrigoSin(angle + 90);
+  return EG_TrigoSin(angle + 90);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +93,7 @@ uint16_t EG_Atan2(int x, int y);
  * If root < 256: mask = 0x800
  * Else: mask = 0x8000
  */
-void /* EG_ATTRIBUTE_FAST_MEM */ EG_Sqrt(uint32_t x, lv_sqrt_res_t * q, uint32_t mask);
+void /* EG_ATTRIBUTE_FAST_MEM */ EG_Sqrt(uint32_t x, EG_SqrtResult_t * q, uint32_t mask);
 
 //! @endcond
 

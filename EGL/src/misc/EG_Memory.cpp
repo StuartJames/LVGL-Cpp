@@ -1,23 +1,24 @@
-/* 
+/*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -53,7 +54,7 @@
 #define ZERO_MEM_SENTINEL 0xa1b2c3d4
 
 #if EG_MEM_CUSTOM == 0
-static void lv_mem_walker(void *ptr, size_t size, int used, void *user);
+static void EG_MemWalker(void *ptr, size_t size, int used, void *user);
 #endif
 
 
@@ -127,7 +128,7 @@ void EG_DeinitMem(void)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void *EG_AllocMem(size_t size)
+void* EG_AllocMem(size_t size)
 {
 	MEM_TRACE("allocating %lu bytes", (unsigned long)size);
 	if(size == 0) {
@@ -192,7 +193,7 @@ void EG_FreeMem(void *data)
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // Reallocate a memory with a new size. The old content will be kept.
-void *EG_ReallocMem(void *data_p, size_t new_size)
+void* EG_ReallocMem(void *data_p, size_t new_size)
 {
 	MEM_TRACE("reallocating %p with %lu size", data_p, (unsigned long)new_size);
 	if(new_size == 0) {
@@ -251,7 +252,7 @@ void EG_MonitorMem(EG_MonitorMem_t *mon_p)
 #if EG_MEM_CUSTOM == 0
 	MEM_TRACE("begin");
 
-	lv_tlsf_walk_pool(lv_tlsf_get_pool(tlsf), lv_mem_walker, mon_p);
+	lv_tlsf_walk_pool(lv_tlsf_get_pool(tlsf), EG_MemWalker, mon_p);
 
 	mon_p->total_size = EG_MEM_SIZE;
 	mon_p->used_pct = 100 - (100U * mon_p->free_size) / mon_p->total_size;
@@ -272,7 +273,7 @@ void EG_MonitorMem(EG_MonitorMem_t *mon_p)
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // Get a tempory buffer with the given size.
-void *EG_GetBufferMem(uint32_t size)
+void* EG_GetBufferMem(uint32_t size)
 {
 	if(size == 0) return NULL;
 
@@ -356,7 +357,7 @@ void EG_FreeAllBuffers(void)
 
 #if EG_MEMCPY_MEMSET_STD == 0
 
-void *EG_ATTRIBUTE_FAST_MEM EG_CopyMem(void *dst, const void *src, size_t len)
+void* EG_ATTRIBUTE_FAST_MEM EG_CopyMem(void *dst, const void *src, size_t len)
 {
 	uint8_t *d8 = (uint8_t *)dst;
 	const uint8_t *s8 = (uint8_t *)src;
@@ -418,9 +419,7 @@ void *EG_ATTRIBUTE_FAST_MEM EG_CopyMem(void *dst, const void *src, size_t len)
 void EG_ATTRIBUTE_FAST_MEM EG_SetMem(void *dst, uint8_t v, size_t len)
 {
 	uint8_t *d8 = (uint8_t *)dst;
-
 	uintptr_t d_align = (eg_uintptr_t)d8 & ALIGN_MASK;
-
 	// Make the address aligned*/
 	if(d_align) {
 		d_align = ALIGN_MASK + 1 - d_align;
@@ -430,21 +429,16 @@ void EG_ATTRIBUTE_FAST_MEM EG_SetMem(void *dst, uint8_t v, size_t len)
 			d_align--;
 		}
 	}
-
 	uint32_t v32 = (uint32_t)v + ((uint32_t)v << 8) + ((uint32_t)v << 16) + ((uint32_t)v << 24);
-
 	uint32_t *d32 = (uint32_t *)d8;
-
 	while(len > 32) {
 		REPEAT8(SET32(v32));
 		len -= 32;
 	}
-
 	while(len > 4) {
 		SET32(v32);
 		len -= 4;
 	}
-
 	d8 = (uint8_t *)d32;
 	while(len) {
 		SET8(v);
@@ -459,7 +453,6 @@ void EG_ATTRIBUTE_FAST_MEM EG_ZeroMem(void *dst, size_t len)
 {
 	uint8_t *d8 = (uint8_t *)dst;
 	uintptr_t d_align = (eg_uintptr_t)d8 & ALIGN_MASK;
-
 	// Make the address aligned*/
 	if(d_align) {
 		d_align = ALIGN_MASK + 1 - d_align;
@@ -469,18 +462,15 @@ void EG_ATTRIBUTE_FAST_MEM EG_ZeroMem(void *dst, size_t len)
 			d_align--;
 		}
 	}
-
 	uint32_t *d32 = (uint32_t *)d8;
 	while(len > 32) {
 		REPEAT8(SET32(0));
 		len -= 32;
 	}
-
 	while(len > 4) {
 		SET32(0);
 		len -= 4;
 	}
-
 	d8 = (uint8_t *)d32;
 	while(len) {
 		SET8(0);
@@ -495,7 +485,6 @@ void EG_ATTRIBUTE_FAST_MEM EG_SetMemFF(void *dst, size_t len)
 {
 	uint8_t *d8 = (uint8_t *)dst;
 	uintptr_t d_align = (eg_uintptr_t)d8 & ALIGN_MASK;
-
 	// Make the address aligned*/
 	if(d_align) {
 		d_align = ALIGN_MASK + 1 - d_align;
@@ -505,18 +494,15 @@ void EG_ATTRIBUTE_FAST_MEM EG_SetMemFF(void *dst, size_t len)
 			d_align--;
 		}
 	}
-
 	uint32_t *d32 = (uint32_t *)d8;
 	while(len > 32) {
 		REPEAT8(SET32(0xFFFFFFFF));
 		len -= 32;
 	}
-
 	while(len > 4) {
 		SET32(0xFFFFFFFF);
 		len -= 4;
 	}
-
 	d8 = (uint8_t *)d32;
 	while(len) {
 		SET8(0xFF);
@@ -528,8 +514,32 @@ void EG_ATTRIBUTE_FAST_MEM EG_SetMemFF(void *dst, size_t len)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
+void* EG_ATTRIBUTE_FAST_MEM EG_MoveMem(void *dst, const void *src, size_t len)
+{
+	if(dst < src || (char *)dst > ((char *)src + len)) {
+		return EG_CopyMem(dst, src, len);
+	}
+	if(dst > src) {
+		char *tmp = (char *)dst + len - 1;
+		char *s = (char *)src + len - 1;
+		while(len--) {
+			*tmp-- = *s--;
+		}
+	}
+	else {
+		char *tmp = (char *)dst;
+		char *s = (char *)src;
+		while(len--) {
+			*tmp++ = *s++;
+		}
+	}
+	return dst;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
 #if EG_MEM_CUSTOM == 0
-static void lv_mem_walker(void *ptr, size_t size, int used, void *user)
+static void EG_MemWalker(void *ptr, size_t size, int used, void *user)
 {
 	EG_UNUSED(ptr);
 

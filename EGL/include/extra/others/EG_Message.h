@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -27,8 +28,8 @@
 #include "core/EG_Object.h"
 #if EG_USE_MSG
 
-#define LV_MSG_ID_ANY UINT32_MAX
-EG_EXPORT_CONST_INT(LV_MSG_ID_ANY);
+#define EG_MSG_ID_ANY UINT32_MAX
+EG_EXPORT_CONST_INT(EG_MSG_ID_ANY);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -37,12 +38,12 @@ class EGMessage;
 typedef void (*EG_MessageSubscribeCB_t)(void *pSubscribe, EGMessage *pMessage);
 typedef void (*EG_MessageRequestCB_t)(void *pRequest, uint32_t MessageID);
 
-typedef struct SubscribeDiscriptor_t{
+typedef struct SubscribeDescriptor_t{
 	uint32_t              MessageID;
 	EG_MessageSubscribeCB_t Callback;
 	void                  *pExtData;
-	void                  *pPrivateData; // Internal: used only store 'obj' in lv_obj_subscribe
-} SubscribeDiscriptor_t;
+	void                  *pPrivateData; // Internal: used only 
+} SubscribeDescriptor_t;
 
 extern EG_EventCode_e EG_EVENT_MSG_RECEIVED;
 
@@ -57,7 +58,7 @@ public:
   void*         GetExtData(void){ return m_pExtData; };
 
   uint32_t       m_ID;            // Identifier of the message
-  void          *m_pExtData;      // Set the the user_data set in `lv_msg_subscribe`
+  void          *m_pExtData;      // Set the the extended_data
   void          *m_pPrivateData;  // Used internally
   const void    *m_pPayload;      // Pointer to the data of the message
 };
@@ -71,8 +72,8 @@ public:
                           ~EGMessageExec(void);
 
   static void             Initialise(void);
-  static SubscribeDiscriptor_t*  Subsribe(uint32_t MessageID, EG_MessageSubscribeCB_t SubscribeCB, void *pExtData);
-  static SubscribeDiscriptor_t*  SubsribeObj(uint32_t MessageID, EGObject *pObj, void *pExtData);
+  static SubscribeDescriptor_t*  Subsribe(uint32_t MessageID, EG_MessageSubscribeCB_t SubscribeCB, void *pExtData);
+  static SubscribeDescriptor_t*  SubsribeObj(uint32_t MessageID, EGObject *pObj, void *pExtData);
   static void             Unsubscribe(void *pSubscribe);
   static uint32_t         UnsubscribeObj(uint32_t MessageID, EGObject *pObj);
   static void             Notify(uint32_t MessageID, const void *pPayload);

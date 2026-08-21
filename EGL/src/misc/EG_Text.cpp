@@ -17,14 +17,15 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 
 #include <stdarg.h>
 #include "misc/EG_Text.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Log.h"
 #include "misc/EG_Memory.h"
@@ -75,16 +76,16 @@ uint32_t (*EG_TextEncodedGetLength)(const char *) = lv_txt_iso8859_1_get_length;
 
 #endif
 
-#define LV_IS_ASCII(value) ((value & 0x80U) == 0x00U)
-#define LV_IS_2BYTES_UTF8_CODE(value) ((value & 0xE0U) == 0xC0U)
-#define LV_IS_3BYTES_UTF8_CODE(value) ((value & 0xF0U) == 0xE0U)
-#define LV_IS_4BYTES_UTF8_CODE(value) ((value & 0xF8U) == 0xF0U)
-#define LV_IS_INVALID_UTF8_CODE(value) ((value & 0xC0U) != 0x80U)
+#define EG_IS_ASCII(value) ((value & 0x80U) == 0x00U)
+#define EG_IS_2BYTES_UTF8_CODE(value) ((value & 0xE0U) == 0xC0U)
+#define EG_IS_3BYTES_UTF8_CODE(value) ((value & 0xF0U) == 0xE0U)
+#define EG_IS_4BYTES_UTF8_CODE(value) ((value & 0xF8U) == 0xF0U)
+#define EG_IS_INVALID_UTF8_CODE(value) ((value & 0xC0U) != 0x80U)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EG_GetTextSize(EGPoint *pSize, const char *pText, const EG_Font_t *pFont, EG_Coord_t Kerning,
-										 EG_Coord_t LineSpace, EG_Coord_t MaxWidth, EG_TextFlag_t Flag)
+void EG_GetTextSize(EGSize *pSize, const char *pText, const EG_Font_t *pFont, int32_t Kerning,
+										 int32_t LineSpace, int32_t MaxWidth, EG_TextFlag_t Flag)
 {
 	if((pText == nullptr) || (pFont == nullptr)) return;
 	pSize->m_X = 0;
@@ -95,7 +96,7 @@ void EG_GetTextSize(EGPoint *pSize, const char *pText, const EG_Font_t *pFont, E
 	uint16_t LineHeight = EG_FontGetLineHeight(pFont);
 	while(pText[LineStart] != '\0') {	// Calc. the height and longest line
 		NewLineStart += EG_GetNextTextLine(&pText[LineStart], pFont, Kerning, MaxWidth, NULL, Flag);
-		if((unsigned long)pSize->m_Y + (unsigned long)LineHeight + (unsigned long)LineSpace > EG_MAX_OF(EG_Coord_t)) {
+		if((unsigned long)pSize->m_Y + (unsigned long)LineHeight + (unsigned long)LineSpace > EG_MAX_OF(int32_t)) {
 			EG_LOG_WARN("EG_GetTextSize: integer overflow while calculating pText height");
 			return;
 		}
@@ -104,7 +105,7 @@ void EG_GetTextSize(EGPoint *pSize, const char *pText, const EG_Font_t *pFont, E
 			pSize->m_Y += LineSpace;
 		}
 		// Calculate the longest line
-		EG_Coord_t act_line_length = EG_GetTextWidth(&pText[LineStart], NewLineStart - LineStart, pFont, Kerning,	Flag);
+		int32_t act_line_length = EG_GetTextWidth(&pText[LineStart], NewLineStart - LineStart, pFont, Kerning,	Flag);
 		pSize->m_X = EG_MAX(act_line_length, pSize->m_X);
 		LineStart = NewLineStart;
 	}
@@ -152,7 +153,7 @@ void EG_GetTextSize(EGPoint *pSize, const char *pText, const EG_Font_t *pFont, E
  * @return the index of the first char of the next word (in byte index not letter index. With UTF-8 they are different)
  */
 static uint32_t lv_txt_get_next_word(const char *txt, const EG_Font_t *pFont,
-																		 EG_Coord_t Kerning, EG_Coord_t MaxWidth,
+																		 int32_t Kerning, int32_t MaxWidth,
 																		 EG_TextFlag_t Flag, uint32_t *word_w_ptr, EG_TextCommandState_t *cmd_state, bool force)
 {
 	if(txt == NULL || txt[0] == '\0') return 0;
@@ -163,8 +164,8 @@ static uint32_t lv_txt_get_next_word(const char *txt, const EG_Font_t *pFont,
 	uint32_t i = 0, i_next = 0, i_next_next = 0; /*Iterating index into txt*/
 	uint32_t letter = 0;                         /*Letter at i*/
 	uint32_t letter_next = 0;                    /*Letter at i_next*/
-	EG_Coord_t letter_w;
-	EG_Coord_t cur_w = 0;                  /*Pixel Width of transversed string*/
+	int32_t letter_w;
+	int32_t cur_w = 0;                  /*Pixel Width of transversed string*/
 	uint32_t word_len = 0;                 /*Number of characters in the transversed word*/
 	uint32_t break_index = NO_BREAK_FOUND; /*only used for "long" words*/
 	uint32_t break_letter_count = 0;       /*Number of characters up to the long word break point*/
@@ -262,8 +263,8 @@ static uint32_t lv_txt_get_next_word(const char *txt, const EG_Font_t *pFont,
 /////////////////////////////////////////////////////////////////////////////
 
 uint32_t EG_GetNextTextLine(const char *txt, const EG_Font_t *pFont,
-															 EG_Coord_t Kerning, EG_Coord_t MaxWidth,
-															 EG_Coord_t *used_width, EG_TextFlag_t Flag)
+															 int32_t Kerning, int32_t MaxWidth,
+															 int32_t *used_width, EG_TextFlag_t Flag)
 {
 	if(used_width) *used_width = 0;
 
@@ -271,7 +272,7 @@ uint32_t EG_GetNextTextLine(const char *txt, const EG_Font_t *pFont,
 	if(txt[0] == '\0') return 0;
 	if(pFont == NULL) return 0;
 
-	EG_Coord_t line_w = 0;
+	int32_t line_w = 0;
 
 	/*If MaxWidth doesn't mater simply find the new line character
      *without thinking about word wrapping*/
@@ -326,11 +327,11 @@ uint32_t EG_GetNextTextLine(const char *txt, const EG_Font_t *pFont,
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EG_GetTextWidth(const char *pText, uint32_t Length, const EG_Font_t *pFont, EG_Coord_t Kerning,
+int32_t EG_GetTextWidth(const char *pText, uint32_t Length, const EG_Font_t *pFont, int32_t Kerning,
 														EG_TextFlag_t Flag)
 {
 uint32_t i = 0;
-EG_Coord_t Width = 0;
+int32_t Width = 0;
 EG_TextCommandState_t cmd_state = EG_TEXT_CMD_STATE_WAIT;
 
 	if((pText == nullptr) || (pFont == nullptr) || (pText[0] == '\0')) return 0;
@@ -342,7 +343,7 @@ EG_TextCommandState_t cmd_state = EG_TEXT_CMD_STATE_WAIT;
 			if((Flag & EG_TEXT_FLAG_RECOLOR) != 0) {
 				if(EG_TextIsCommand(&cmd_state, Char) != false) continue;
 			}
-			EG_Coord_t char_width = EG_FontGetGlyphWidth(pFont, Char, NextChar);
+			int32_t char_width = EG_FontGetGlyphWidth(pFont, Char, NextChar);
 			if(char_width > 0) {
 				Width += char_width;
 				Width += Kerning;
@@ -491,10 +492,10 @@ void EG_TextDecode2(const char *txt, uint32_t *letter, uint32_t *letter_next, ui
  */
 static uint8_t lv_txt_utf8_size(const char *str)
 {
-	if(LV_IS_ASCII(str[0]))	return 1;
-	else if(LV_IS_2BYTES_UTF8_CODE(str[0]))	return 2;
-	else if(LV_IS_3BYTES_UTF8_CODE(str[0]))	return 3;
-	else if(LV_IS_4BYTES_UTF8_CODE(str[0]))	return 4;
+	if(EG_IS_ASCII(str[0]))	return 1;
+	else if(EG_IS_2BYTES_UTF8_CODE(str[0]))	return 2;
+	else if(EG_IS_3BYTES_UTF8_CODE(str[0]))	return 3;
+	else if(EG_IS_4BYTES_UTF8_CODE(str[0]))	return 4;
 	return 0;
 }
 
@@ -589,47 +590,47 @@ static uint32_t lv_txt_utf8_next(const char *txt, uint32_t *i)
 	if(i == NULL) i = &i_tmp;
 
 	/*Normal ASCII*/
-	if(LV_IS_ASCII(txt[*i])) {
+	if(EG_IS_ASCII(txt[*i])) {
 		result = txt[*i];
 		(*i)++;
 	}
 	/*Real UTF-8 decode*/
 	else {
 		/*2 bytes UTF-8 code*/
-		if(LV_IS_2BYTES_UTF8_CODE(txt[*i])) {
+		if(EG_IS_2BYTES_UTF8_CODE(txt[*i])) {
 			result = (uint32_t)(txt[*i] & 0x1F) << 6;
 			(*i)++;
-			if(LV_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
+			if(EG_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
 			result += (txt[*i] & 0x3F);
 			(*i)++;
 		}
 		/*3 bytes UTF-8 code*/
-		else if(LV_IS_3BYTES_UTF8_CODE(txt[*i])) {
+		else if(EG_IS_3BYTES_UTF8_CODE(txt[*i])) {
 			result = (uint32_t)(txt[*i] & 0x0F) << 12;
 			(*i)++;
 
-			if(LV_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
+			if(EG_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
 			result += (uint32_t)(txt[*i] & 0x3F) << 6;
 			(*i)++;
 
-			if(LV_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
+			if(EG_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
 			result += (txt[*i] & 0x3F);
 			(*i)++;
 		}
 		/*4 bytes UTF-8 code*/
-		else if(LV_IS_4BYTES_UTF8_CODE(txt[*i])) {
+		else if(EG_IS_4BYTES_UTF8_CODE(txt[*i])) {
 			result = (uint32_t)(txt[*i] & 0x07) << 18;
 			(*i)++;
 
-			if(LV_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
+			if(EG_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
 			result += (uint32_t)(txt[*i] & 0x3F) << 12;
 			(*i)++;
 
-			if(LV_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
+			if(EG_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
 			result += (uint32_t)(txt[*i] & 0x3F) << 6;
 			(*i)++;
 
-			if(LV_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
+			if(EG_IS_INVALID_UTF8_CODE(txt[*i])) return 0;
 			result += txt[*i] & 0x3F;
 			(*i)++;
 		}

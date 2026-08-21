@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -56,7 +57,7 @@ void EGAnimationTimeline::Delete(EGAnimationTimeline *pTimeLine)
 void EGAnimationTimeline::Add(uint32_t StartTime, EGAnimate *pAnimation)
 {
 	m_TimelineCount++;
-	m_pTimelines = (EG_TimelineDiscriptor_t *)EG_ReallocMem(m_pTimelines, m_TimelineCount * sizeof(EG_TimelineDiscriptor_t));
+	m_pTimelines = (EG_TimelineDescriptor_t *)EG_ReallocMem(m_pTimelines, m_TimelineCount * sizeof(EG_TimelineDescriptor_t));
 	EG_ASSERT_MALLOC(m_pTimelines);
 	m_pTimelines[m_TimelineCount - 1].pAnimation = pAnimation;
 	m_pTimelines[m_TimelineCount - 1].StartTime = StartTime;

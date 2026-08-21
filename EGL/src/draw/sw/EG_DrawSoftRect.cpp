@@ -1,31 +1,31 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
- 
 
 #include "draw/sw/EG_SoftContext.h"
-#include "draw/sw/EG_DrawSoftBlend.h"     // lv_draw_sw_blend
+#include "draw/sw/EG_DrawSoftBlend.h"
 #include "misc/EG_Math.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 #include "core/EG_Refresh.h"
 #include "misc/EG_Assert.h"
 #include "draw/sw/EG_DrawSoftDither.h"
@@ -46,14 +46,15 @@ static int32_t sh_cache_r = -1;
 
 void EGSoftContext::DrawRect(const EGDrawRect *pDrawRect, const EGRect *pRect)
 {
-#if EG_DRAW_COMPLEX
-	DrawShadow(pDrawRect, pRect);
-#endif
 
-	DrawRectBackground(pDrawRect, pRect);
-	DrawBackgroundImage(pDrawRect, pRect);
-	DrawBorder(pDrawRect, pRect);
-	DrawOutline(pDrawRect, pRect);
+  EGSoftContext *pDC = (EGSoftContext*)pDrawRect->m_pContext;
+#if EG_DRAW_COMPLEX
+  pDC->DrawShadow(pDrawRect, pRect);
+#endif
+  pDC->DrawRectBackground(pDrawRect, pRect);
+	pDC->DrawBackgroundImage(pDrawRect, pRect);
+	pDC->DrawBorder(pDrawRect, pRect);
+	pDC->DrawOutline(pDrawRect, pRect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -64,8 +65,9 @@ void EGSoftContext::DrawBackground(const EGDrawRect *pDrawRect, const EGRect *pR
 	EG_ZeroMem(pDrawRect->buf, EG_Rect_get_size(pDrawRect->buf_area) * sizeof(EG_Color_t));
 #endif
 
-	DrawRectBackground(pDrawRect, pRect);
-	DrawBackgroundImage(pDrawRect, pRect);
+  EGSoftContext *pDC = (EGSoftContext*)pDrawRect->m_pContext;
+  pDC->DrawRectBackground(pDrawRect, pRect);
+	pDC->DrawBackgroundImage(pDrawRect, pRect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +75,6 @@ void EGSoftContext::DrawBackground(const EGDrawRect *pDrawRect, const EGRect *pR
 void EGSoftContext::DrawRectBackground(const EGDrawRect *pDrawRect, const EGRect *pRect)
 {
 bool MaskAnyCenter;
-const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 
 	if(pDrawRect->m_BackgroundOPA <= EG_OPA_MIN) return;
 	EGRect BackgroundRect(pRect);
@@ -85,12 +86,12 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		                      ((pDrawRect->m_BorderSide & EG_BORDER_SIDE_BOTTOM) ? 1 : 0));
 	}
 	EGRect ClippedArea;
-	if(!ClippedArea.Intersect(&BackgroundRect, pContext->m_pClipRect)) return;
+	if(!ClippedArea.Intersect(&BackgroundRect, m_pClipRect)) return;
 	EG_GradDirection_e GradDir = pDrawRect->m_BackgroundGrad.dir;
 	EG_Color_t BackgroundColor = (GradDir == EG_GRAD_DIR_NONE) ? pDrawRect->m_BackgroundColor : pDrawRect->m_BackgroundGrad.stops[0].color;
 	if(BackgroundColor.full == pDrawRect->m_BackgroundGrad.stops[1].color.full) GradDir = EG_GRAD_DIR_NONE;
 	bool MaskAny = HasAnyDrawMask(&BackgroundRect);
- 	EGSoftBlend BlendObj(pContext);
+ 	EGSoftBlend BlendObj(this);
 	BlendObj.m_BlendMode = pDrawRect->m_BlendMode;
 	BlendObj.m_Color = BackgroundColor;
  	if(!MaskAny && pDrawRect->m_Radius == 0 && (GradDir == EG_GRAD_DIR_NONE)) {	// Most Simple case: just a plain rectangle
@@ -103,19 +104,19 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	EG_LOG_WARN("Can't draw complex rectangle because EG_DRAW_COMPLEX = 0");
 #else
 	EG_OPA_t BackOPA = pDrawRect->m_BackgroundOPA >= (EG_OPA_t)EG_OPA_MAX ? (EG_OPA_t)EG_OPA_COVER : pDrawRect->m_BackgroundOPA;
-	// Get the real m_Radius. Can't be larger than the half of the shortest side 
-	EG_Coord_t BackWidth = BackgroundRect.GetWidth();
-	EG_Coord_t BackHeight = BackgroundRect.GetHeight();
+	// Get the real m_Radius. Can't be larger than the half of the shortest side
+	int32_t BackWidth = BackgroundRect.GetWidth();
+	int32_t BackHeight = BackgroundRect.GetHeight();
 	int32_t ShortSide = EG_MIN(BackWidth, BackHeight);
 	int32_t OutsideRadius = EG_MIN(pDrawRect->m_Radius, ShortSide >> 1);
 	int32_t ClippedWidth = ClippedArea.GetWidth();	// Add a m_Radius mask if there is m_Radius
 	int16_t MaskOutsideRadiusID = EG_MASK_ID_INVALID;
-	EG_OPA_t *pMaskBuffer = NULL;
+	EG_OPA_t *pMaskBuffer = nullptr;
 	MaskRadiusParam_t MaskRadiusOuterParam;
 	if(OutsideRadius > 0 || MaskAny) {
 		pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(ClippedWidth);
 		DrawMaskSetRadius(&MaskRadiusOuterParam, &BackgroundRect, OutsideRadius, false);
-		MaskOutsideRadiusID = DrawMaskAdd(&MaskRadiusOuterParam, NULL);
+		MaskOutsideRadiusID = DrawMaskAdd(&MaskRadiusOuterParam, nullptr);
 	}
 	int32_t Height;
 	EGRect BlendRect;
@@ -132,7 +133,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 #if _DITHER_GRADIENT
 	EG_DitherMode_t dither_mode = pDrawRect->m_BackgroundGrad.dither;
 	EG_DitherFunc_t dither_func = &EG_DitherNone;
-	EG_Coord_t grad_size = BackWidth;
+	int32_t grad_size = BackWidth;
 	if(GradDir == EG_GRAD_DIR_VER && dither_mode != EG_DITHER_NONE) {
 		//  When dithering, we are still using a map that's changing from line to line
 		BlendObj.src_buf = pGrad->pMap;
@@ -155,7 +156,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 				dither_func = EG_DitherOrderedVertical;
 				break;
 			default:
-				dither_func = NULL;
+				dither_func = nullptr;
 		}
 
 #if EG_DITHER_ERROR_DIFFUSION
@@ -168,15 +169,15 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 				dither_func = EG_DitherErrorDiffVertical;
 				break;
 			default:
-				dither_func = NULL;
+				dither_func = nullptr;
 		}
 #endif
 #endif
-	if(MaskAny) {	// There is another mask too. Draw line by line. 
+	if(MaskAny) {	// There is another mask too. Draw line by line.
 		for(Height = ClippedArea.GetY1(); Height <= ClippedArea.GetY2(); Height++) {
 			BlendRect.SetY1(Height);
 			BlendRect.SetY2(Height);
-			// Initialize the mask to BackOPA instead of 0xFF and blend with EG_OPA_COVER. It saves calculating the final BackOPA in lv_draw_sw_blend
+			// Initialize the mask to BackOPA instead of 0xFF and blend with EG_OPA_COVER. It saves calculating the final BackOPA
 			EG_SetMem(pMaskBuffer, BackOPA, ClippedWidth);
 			BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, ClippedArea.GetX1(), Height, ClippedWidth);
 			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
@@ -189,11 +190,11 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		}
 	}
   else{
-    for(Height = 0; Height < OutsideRadius; Height++) {	// Draw the top of the rectangle line by line and mirror it to the bottom. 
-      EG_Coord_t TopY = BackgroundRect.GetY1() + Height;
-      EG_Coord_t BottomY = BackgroundRect.GetY2() - Height;
+    for(Height = 0; Height < OutsideRadius; Height++) {	// Draw the top of the rectangle line by line and mirror it to the bottom.
+      int32_t TopY = BackgroundRect.GetY1() + Height;
+      int32_t BottomY = BackgroundRect.GetY2() - Height;
       if((TopY < ClippedArea.GetY1()) && (BottomY > ClippedArea.GetY2())) continue; // This line is clipped now
-      // Initialize the mask to BackOPA instead of 0xFF and blend with EG_OPA_COVER. It saves calculating the final BackOPA in lv_draw_sw_blend
+      // Initialize the mask to BackOPA instead of 0xFF and blend with EG_OPA_COVER. It saves calculating the final BackOPA
       EG_SetMem(pMaskBuffer, BackOPA, ClippedWidth);
       BlendObj.m_MaskResult = DrawMaskApply(pMaskBuffer, BlendRect.GetX1(), TopY, ClippedWidth);
       if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_FULL_COVER) BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
@@ -224,7 +225,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
       BlendRect.SetY1(BackgroundRect.GetY1() + OutsideRadius);
       BlendRect.SetY2(BackgroundRect.GetY2() - OutsideRadius);
       BlendObj.m_OPA = BackOPA;
-      BlendObj.m_pMaskBuffer = NULL;
+      BlendObj.m_pMaskBuffer = nullptr;
       BlendObj.DoBlend();
     }
     else {	// With gradient and/or mask draw line by line
@@ -250,7 +251,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
   }
   if(pMaskBuffer) EG_ReleaseBufferMem(pMaskBuffer);
   if(MaskOutsideRadiusID != EG_MASK_ID_INVALID){
-    DrawMaskRemove(MaskOutsideRadiusID);
+    DrawMaskRemoveID(MaskOutsideRadiusID);
     DrawMaskFreeParam(&MaskRadiusOuterParam);
   }
   if(pGrad){
@@ -263,28 +264,26 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 
 void EGSoftContext::DrawBackgroundImage(const EGDrawRect *pDrawRect, const EGRect *pRect)
 {
-const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
-
 	if(pDrawRect->m_pBackImageSource == nullptr) return;
 	if(pDrawRect->m_BackImageOPA <= EG_OPA_MIN) return;
 	EGRect ClipRect;
-	if(!ClipRect.Intersect(pRect, pContext->m_pClipRect)) return;
-	const EGRect *OriginalClipRect = pContext->m_pClipRect;
-	pContext->m_pClipRect = &ClipRect;
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pDrawRect->m_pBackImageSource);
+	if(!ClipRect.Intersect(pRect, m_pClipRect)) return;
+	const EGRect *OriginalClipRect = m_pClipRect;
+	m_pClipRect = &ClipRect;
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pDrawRect->m_pBackImageSource);
 	if(SourceType == EG_IMG_SRC_SYMBOL) {
-		EGPoint size;
-		EG_GetTextSize(&size, (char*)pDrawRect->m_pBackImageSource, (EG_Font_t*)pDrawRect->m_pBackImageSymbolFont, 0, 0, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
+		EGSize Size;
+		EG_GetTextSize(&Size, (char*)pDrawRect->m_pBackImageSource, (EG_Font_t*)pDrawRect->m_pBackImageSymbolFont, 0, 0, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
 		EGRect LabelArea;
-		LabelArea.SetX1(pRect->GetX1() + pRect->GetWidth() / 2 - size.m_X / 2);
-		LabelArea.SetX2(LabelArea.GetX1() + size.m_X - 1);
-		LabelArea.SetY1(pRect->GetY1() + pRect->GetHeight() / 2 - size.m_Y / 2);
-		LabelArea.SetY2(LabelArea.GetY1() + size.m_Y - 1);
+		LabelArea.SetX1(pRect->GetX1() + pRect->GetWidth() / 2 - Size.m_X / 2);
+		LabelArea.SetX2(LabelArea.GetX1() + Size.m_X - 1);
+		LabelArea.SetY1(pRect->GetY1() + pRect->GetHeight() / 2 - Size.m_Y / 2);
+		LabelArea.SetY2(LabelArea.GetY1() + Size.m_Y - 1);
 		EGDrawLabel Label;
 		Label.m_pFont = (EG_Font_t*)pDrawRect->m_pBackImageSymbolFont;
 		Label.m_Color = pDrawRect->m_BackImageRecolor;
 		Label.m_OPA = pDrawRect->m_BackImageOPA;
-		Label.Draw(pContext, &LabelArea, (char*)pDrawRect->m_pBackImageSource, NULL);
+		Label.Draw(this, &LabelArea, (char*)pDrawRect->m_pBackImageSource, nullptr);
 	}
 	else {
 		EG_ImageHeader_t header;
@@ -301,7 +300,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 				ImageArea.SetY1(pRect->GetY1() + pRect->GetHeight() / 2 - header.Height / 2);
 				ImageArea.SetX2(ImageArea.GetX1() + header.Width - 1);
 				ImageArea.SetY2(ImageArea.GetY1() + header.Height - 1);
-				Image.Draw(pContext, &ImageArea, pDrawRect->m_pBackImageSource);
+				Image.Draw(this, &ImageArea, pDrawRect->m_pBackImageSource);
 			}
 			else {
 				ImageArea.SetY1(pRect->GetY1());
@@ -310,7 +309,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 					ImageArea.SetX1(pRect->GetX1());
 					ImageArea.SetX2(ImageArea.GetX1() + header.Width - 1);
 					for(; ImageArea.GetX1() <= pRect->GetX2(); ImageArea.IncX1(header.Width), ImageArea.IncX2(header.Width)) {
-						Image.Draw(pContext, &ImageArea, pDrawRect->m_pBackImageSource);
+						Image.Draw(this, &ImageArea, pDrawRect->m_pBackImageSource);
 					}
 				}
 			}
@@ -319,7 +318,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 			EG_LOG_WARN("Couldn't read the background image");
 		}
 	}
-	pContext->m_pClipRect = OriginalClipRect;
+	m_pClipRect = OriginalClipRect;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +339,7 @@ void EGSoftContext::DrawBorder(const EGDrawRect *pDrawRect, const EGRect *pRect)
 	                  ((pDrawRect->m_BorderSide & EG_BORDER_SIDE_RIGHT) ? pDrawRect->m_BorderWidth : -(pDrawRect->m_BorderWidth + OutsideRadius)),
 	                  ((pDrawRect->m_BorderSide & EG_BORDER_SIDE_TOP) ? pDrawRect->m_BorderWidth : -(pDrawRect->m_BorderWidth + OutsideRadius)),
 	                  ((pDrawRect->m_BorderSide & EG_BORDER_SIDE_BOTTOM) ? pDrawRect->m_BorderWidth : -(pDrawRect->m_BorderWidth + OutsideRadius)));
-	EG_Coord_t InsideRadius = OutsideRadius - pDrawRect->m_BorderWidth;
+	int32_t InsideRadius = OutsideRadius - pDrawRect->m_BorderWidth;
 	if(InsideRadius < 0) InsideRadius = 0;
 	DrawBorderGeneric(pDrawRect, pRect, &InnerArea, OutsideRadius, InsideRadius, pDrawRect->m_BorderColor, pDrawRect->m_BorderOPA, pDrawRect->m_BlendMode);
 }
@@ -350,8 +349,6 @@ void EGSoftContext::DrawBorder(const EGDrawRect *pDrawRect, const EGRect *pRect)
 #if EG_DRAW_COMPLEX
 void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawShadow(const EGDrawRect *pDrawRect, const EGRect *pRect)
 {
-const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
-
 	if(pDrawRect->m_ShadowWidth == 0) return;	// Check whether the shadow is visible
 	if(pDrawRect->m_ShadowOPA <= EG_OPA_MIN) return;
 
@@ -372,11 +369,11 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	EG_OPA_t BackOPA = pDrawRect->m_ShadowOPA;
 	if(BackOPA > EG_OPA_MAX) BackOPA = EG_OPA_COVER;
 	EGRect DrawArea;	// Get clipped draw area which is the real draw area. It is always the same or inside `ShadowArea`
-	if(!DrawArea.Intersect(&ShadowArea, pContext->m_pClipRect)) return;
+	if(!DrawArea.Intersect(&ShadowArea, m_pClipRect)) return;
 	EGRect BackArea(pRect);	// Consider 1 px smaller bg to be sure the edge will be covered by the shadow
 	BackArea.Deflate(1, 1);
 	int32_t BackRadius = pDrawRect->m_Radius;	// Get the clamped m_Radius
-	EG_Coord_t ShortSide = EG_MIN(BackArea.GetWidth(), BackArea.GetHeight());
+	int32_t ShortSide = EG_MIN(BackArea.GetWidth(), BackArea.GetHeight());
 	if(BackRadius > ShortSide >> 1) BackRadius = ShortSide >> 1;
 	int32_t ShadowRadius = pDrawRect->m_Radius;	// Get the clamped m_Radius
 	ShortSide = EG_MIN(CoreArea.GetWidth(), CoreArea.GetHeight());
@@ -417,22 +414,22 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	int16_t MaskOutsideRadiusID = EG_MASK_ID_INVALID;
 	if(!Simple) {
 		DrawMaskSetRadius(&MaskRadiusOuterParam, &BackArea, BackRadius, true);
-		MaskOutsideRadiusID = DrawMaskAdd(&MaskRadiusOuterParam, NULL);
+		MaskOutsideRadiusID = DrawMaskAdd(&MaskRadiusOuterParam, nullptr);
 	}
 	EG_OPA_t *pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(ShadowArea.GetWidth());
 	EGRect BlendRect;
 	EG_OPA_t *ShadowBufferTmp;
-	EG_Coord_t y;
+	int32_t y;
 	bool SimpleSub;
-	EGSoftBlend BlendObj(pContext);
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_pRect = &BlendRect;
 	BlendObj.m_pMaskRect = &BlendRect;
 	BlendObj.m_pMaskBuffer = pMaskBuffer;
 	BlendObj.m_Color = pDrawRect->m_ShadowColor;
 	BlendObj.m_OPA = pDrawRect->m_ShadowOPA;
 	BlendObj.m_BlendMode = pDrawRect->m_BlendMode;
-	EG_Coord_t HalfWidth = ShadowArea.GetX1() + ShadowArea.GetWidth() / 2;
-	EG_Coord_t HalfHeight = ShadowArea.GetY1() + ShadowArea.GetHeight() / 2;
+	int32_t HalfWidth = ShadowArea.GetX1() + ShadowArea.GetWidth() / 2;
+	int32_t HalfHeight = ShadowArea.GetY1() + ShadowArea.GetHeight() / 2;
 	// Draw the corners if they are on the current clip area and not fully covered by the bg
 	// Top right corner
 	BlendRect.SetX2(ShadowArea.GetX2());
@@ -442,8 +439,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetX1(EG_MAX(BlendRect.GetX1(), HalfWidth));	// Do not overdraw the other top corners
 	BlendRect.SetY2(EG_MIN(BlendRect.GetY2(), HalfHeight));
 	EGRect ClipRectSub;
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (ClipRectSub.GetY1() - ShadowArea.GetY1()) * CornerSize;
 		ShadowBufferTmp += ClipRectSub.GetX1() - (ShadowArea.GetX2() - CornerSize + 1);
@@ -477,8 +474,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY2(ShadowArea.GetY2());
 	BlendRect.SetX1(EG_MAX(BlendRect.GetX1(), HalfWidth));	// Do not overdraw the other corners
 	BlendRect.SetY1(EG_MAX(BlendRect.GetY1(), HalfHeight + 1));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (BlendRect.GetY2() - ClipRectSub.GetY2()) * CornerSize;
 		ShadowBufferTmp += ClipRectSub.GetX1() - (ShadowArea.GetX2() - CornerSize + 1);
@@ -512,15 +509,15 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY1(ShadowArea.GetY1());
 	BlendRect.SetY2(ShadowArea.GetY1() + CornerSize - 1);
 	BlendRect.SetY2(EG_MIN(BlendRect.GetY2(), HalfHeight));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (ClipRectSub.GetY1() - BlendRect.GetY1()) * CornerSize;
 		if(Simple && ClipRectSub.IsOutside(&BackArea, BackRadius)) SimpleSub = true;	// Do not mask if out of the bg
 		else SimpleSub = Simple;
 		if(Width > 0) {
 			if(!SimpleSub) BlendObj.m_pMaskBuffer = pMaskBuffer;
-			else BlendObj.m_pMaskBuffer = NULL;
+			else BlendObj.m_pMaskBuffer = nullptr;
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
 			for(y = ClipRectSub.GetY1(); y <= ClipRectSub.GetY2(); y++) {
@@ -547,8 +544,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY1(ShadowArea.GetY2() - CornerSize + 1);
 	BlendRect.SetY2(ShadowArea.GetY2());
 	BlendRect.SetY1(EG_MAX(BlendRect.GetY1(), HalfHeight + 1));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (BlendRect.GetY2() - ClipRectSub.GetY2()) * CornerSize;
 		if(Width > 0) {
@@ -556,7 +553,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 			if(Simple && ClipRectSub.IsOutside(&BackArea, BackRadius)) SimpleSub = true;
 			else SimpleSub = Simple;
 			if(!SimpleSub) BlendObj.m_pMaskBuffer = pMaskBuffer;
-			else BlendObj.m_pMaskBuffer = NULL;
+			else BlendObj.m_pMaskBuffer = nullptr;
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
 			for(y = ClipRectSub.GetY2(); y >= ClipRectSub.GetY1(); y--) {
@@ -587,8 +584,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY1(EG_MIN(BlendRect.GetY1(), HalfHeight + 1));	// Do not overdraw the other corners
 	BlendRect.SetY2(EG_MAX(BlendRect.GetY2(), HalfHeight));
 	BlendRect.SetX1(EG_MAX(BlendRect.GetX1(), HalfWidth));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (CornerSize - 1) * CornerSize;
 		ShadowBufferTmp += ClipRectSub.GetX1() - (ShadowArea.GetX2() - CornerSize + 1);
@@ -635,8 +632,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY1(EG_MIN(BlendRect.GetY1(), HalfHeight + 1));
 	BlendRect.SetY2(EG_MAX(BlendRect.GetY2(), HalfHeight));
 	BlendRect.SetX2(EG_MIN(BlendRect.GetX2(), HalfWidth - 1));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (CornerSize - 1) * CornerSize;
 		ShadowBufferTmp += ClipRectSub.GetX1() - BlendRect.GetX1();
@@ -666,8 +663,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY2(ShadowArea.GetY1() + CornerSize - 1);
 	BlendRect.SetX2(EG_MIN(BlendRect.GetX2(), HalfWidth - 1));	// Do not overdraw the other corners
 	BlendRect.SetY2(EG_MIN(BlendRect.GetY2(), HalfHeight));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (ClipRectSub.GetY1() - BlendRect.GetY1()) * CornerSize;
 		ShadowBufferTmp += ClipRectSub.GetX1() - BlendRect.GetX1();
@@ -700,8 +697,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	// Do not overdraw the other corners
 	BlendRect.SetY1(EG_MAX(BlendRect.GetY1(), HalfHeight + 1));
 	BlendRect.SetX2(EG_MIN(BlendRect.GetX2(), HalfWidth - 1));
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		ShadowBufferTmp = pShadowBuffer;
 		ShadowBufferTmp += (BlendRect.GetY2() - ClipRectSub.GetY2()) * CornerSize;
 		ShadowBufferTmp += ClipRectSub.GetX1() - BlendRect.GetX1();
@@ -732,8 +729,8 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	BlendRect.SetY1(ShadowArea.GetY1() + CornerSize);
 	BlendRect.SetY2(ShadowArea.GetY2() - CornerSize);
 	BlendObj.m_pMaskBuffer = pMaskBuffer;
-	if(ClipRectSub.Intersect(&BlendRect, pContext->m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
-		EG_Coord_t Width = ClipRectSub.GetWidth();
+	if(ClipRectSub.Intersect(&BlendRect, m_pClipRect) && !ClipRectSub.IsInside(&BackArea, BackRadius)) {
+		int32_t Width = ClipRectSub.GetWidth();
 		if(Width > 0) {
 			BlendRect.SetX1(ClipRectSub.GetX1());
 			BlendRect.SetX2(ClipRectSub.GetX2());
@@ -748,7 +745,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	}
 	if(!Simple) {
 		DrawMaskFreeParam(&MaskRadiusOuterParam);
-		DrawMaskRemove(MaskOutsideRadiusID);
+		DrawMaskRemoveID(MaskOutsideRadiusID);
 	}
 	EG_ReleaseBufferMem(pShadowBuffer);
 	EG_ReleaseBufferMem(pMaskBuffer);
@@ -756,7 +753,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EGSoftContext::ShadowCornerDrawBuffer(const EGRect *pRect, uint16_t *pShadowBuffer, EG_Coord_t ShadowWidth, EG_Coord_t Radius)
+void EG_ATTRIBUTE_FAST_MEM EGSoftContext::ShadowCornerDrawBuffer(const EGRect *pRect, uint16_t *pShadowBuffer, int32_t ShadowWidth, int32_t Radius)
 {
 int32_t sw_ori = ShadowWidth;
 int32_t size = sw_ori + Radius;
@@ -836,7 +833,7 @@ int32_t size = sw_ori + Radius;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EG_ATTRIBUTE_FAST_MEM EGSoftContext::BlurShadowCorner(EG_Coord_t size, EG_Coord_t ShadowWidth, uint16_t *sh_ups_buf)
+void EG_ATTRIBUTE_FAST_MEM EGSoftContext::BlurShadowCorner(int32_t size, int32_t ShadowWidth, uint16_t *sh_ups_buf)
 {
 	int32_t s_left = ShadowWidth >> 1;
 	int32_t s_right = (ShadowWidth >> 1);
@@ -928,7 +925,7 @@ void EGSoftContext::DrawOutline(const EGDrawRect *pDrawRect, const EGRect *pRect
 	EG_OPA_t OutlineOPA = pDrawRect->m_OutlineOPA;
 	if(OutlineOPA > EG_OPA_MAX) OutlineOPA = EG_OPA_COVER;
 	EGRect InnerArea(pRect);	// Get the inner m_Radius
-	EG_Coord_t Padding = pDrawRect->m_OutlinePadding - 1;	// Bring the outline closer to make sure there is no color bleeding when Padding=0
+	int32_t Padding = pDrawRect->m_OutlinePadding - 1;	// Bring the outline closer to make sure there is no color bleeding when Padding=0
 	InnerArea.Inflate(Padding, Padding);
 	EGRect OuterArea(InnerArea);
 	OuterArea.Inflate(pDrawRect->m_OutlineWidth, pDrawRect->m_OutlineWidth);
@@ -937,16 +934,14 @@ void EGSoftContext::DrawOutline(const EGDrawRect *pDrawRect, const EGRect *pRect
 	int32_t InsideRadius = pDrawRect->m_Radius;
 	int32_t ShortSide = EG_MIN(inner_w, inner_h);
 	if(InsideRadius > (ShortSide >> 1)) InsideRadius = ShortSide >> 1;
-	EG_Coord_t OutsideRadius = InsideRadius + pDrawRect->m_OutlineWidth;
+	int32_t OutsideRadius = InsideRadius + pDrawRect->m_OutlineWidth;
 	DrawBorderGeneric(pDrawRect, &OuterArea, &InnerArea, OutsideRadius, InsideRadius, pDrawRect->m_OutlineColor, pDrawRect->m_OutlineOPA,	pDrawRect->m_BlendMode);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGSoftContext::DrawBorderGeneric(const EGDrawRect *pDrawRect, const EGRect *pOuterArea, const EGRect *pInnerArea, EG_Coord_t OutsideRadius, EG_Coord_t InsideRadius, EG_Color_t Color, EG_OPA_t BackOPA, EG_BlendMode_e BlendMode)
+void EGSoftContext::DrawBorderGeneric(const EGDrawRect *pDrawRect, const EGRect *pOuterArea, const EGRect *pInnerArea, int32_t OutsideRadius, int32_t InsideRadius, EG_Color_t Color, EG_OPA_t BackOPA, EG_BlendMode_e BlendMode)
 {
-const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
-
 	BackOPA = BackOPA >= (EG_OPA_t)EG_OPA_COVER ? (EG_OPA_t)EG_OPA_COVER : BackOPA;
 	bool MaskAny = HasAnyDrawMask(pOuterArea);
 #if EG_DRAW_COMPLEX
@@ -955,19 +950,19 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		return;
 	}
 	EGRect DrawArea;	// Get clipped draw area which is the real draw area. It is always the same or inside `coords`
-	if(!DrawArea.Intersect(pOuterArea, pContext->m_pClipRect)) return;
+	if(!DrawArea.Intersect(pOuterArea, m_pClipRect)) return;
 	int32_t DrawWidth = DrawArea.GetWidth();
-	EGSoftBlend BlendObj(pContext);
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_pMaskBuffer = (EG_OPA_t*)EG_GetBufferMem(DrawWidth);
 	int16_t MaskOutsideRadiusID = EG_MASK_ID_INVALID;	// Create mask for the outer area
 	MaskRadiusParam_t MaskRadiusOuterParam;
 	if(OutsideRadius > 0) {
 		DrawMaskSetRadius(&MaskRadiusOuterParam, pOuterArea, OutsideRadius, false);
-		MaskOutsideRadiusID = DrawMaskAdd(&MaskRadiusOuterParam, NULL);
+		MaskOutsideRadiusID = DrawMaskAdd(&MaskRadiusOuterParam, nullptr);
 	}
 	MaskRadiusParam_t MaskRadiusInnerParam;	// Create mask for the inner mask
 	DrawMaskSetRadius(&MaskRadiusInnerParam, pInnerArea, InsideRadius, true);
-	int16_t mask_rin_id = DrawMaskAdd(&MaskRadiusInnerParam, NULL);
+	int16_t mask_rin_id = DrawMaskAdd(&MaskRadiusInnerParam, nullptr);
 	int32_t Height;
 	EGRect BlendRect;
 	BlendObj.m_pRect = &BlendRect;
@@ -980,7 +975,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 	CoreArea.SetX2(EG_MIN(pOuterArea->GetX2() - OutsideRadius, pInnerArea->GetX2()));
 	CoreArea.SetY1(EG_MAX(pOuterArea->GetY1() + OutsideRadius, pInnerArea->GetY1()));
 	CoreArea.SetY2(EG_MIN(pOuterArea->GetY2() - OutsideRadius, pInnerArea->GetY2()));
-	EG_Coord_t core_w = CoreArea.GetWidth();
+	int32_t core_w = CoreArea.GetWidth();
 	bool top_side = (pOuterArea->GetY1() <= pInnerArea->GetY1()) ? true : false;
 	bool bottom_side = (pOuterArea->GetY2() >= pInnerArea->GetY2()) ? true : false;
 	if(MaskAny) {	// If there is other masks, need to draw line by line
@@ -996,10 +991,10 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 			BlendObj.DoBlend();
 		}
 		DrawMaskFreeParam(&MaskRadiusInnerParam);
-		DrawMaskRemove(mask_rin_id);
+		DrawMaskRemoveID(mask_rin_id);
 		if(MaskOutsideRadiusID != EG_MASK_ID_INVALID) {
 			DrawMaskFreeParam(&MaskRadiusOuterParam);
-			DrawMaskRemove(MaskOutsideRadiusID);
+			DrawMaskRemoveID(MaskOutsideRadiusID);
 		}
 		EG_ReleaseBufferMem(BlendObj.m_pMaskBuffer);
 		return;
@@ -1041,14 +1036,14 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		BlendObj.DoBlend();
 	}
 	// Draw the corners
-	EG_Coord_t blend_w;
+	int32_t blend_w;
 	if(!HorizontalSplit) {	// Left and right corner together if they are close to each other
 		BlendRect.SetX1(DrawArea.GetX1());		// Calculate the top corner and mirror it to the bottom
 		BlendRect.SetX2(DrawArea.GetX2());
-		EG_Coord_t max_h = EG_MAX(OutsideRadius, pInnerArea->GetY1() - pOuterArea->GetY1());
+		int32_t max_h = EG_MAX(OutsideRadius, pInnerArea->GetY1() - pOuterArea->GetY1());
 		for(Height = 0; Height < max_h; Height++) {
-			EG_Coord_t TopY = pOuterArea->GetY1() + Height;
-			EG_Coord_t BottomY = pOuterArea->GetY2() - Height;
+			int32_t TopY = pOuterArea->GetY1() + Height;
+			int32_t BottomY = pOuterArea->GetY2() - Height;
 			if(TopY < DrawArea.GetY1() && BottomY > DrawArea.GetY2()) continue; // This line is clipped now
 			EG_SetMemFF(BlendObj.m_pMaskBuffer, DrawWidth);
 			BlendObj.m_MaskResult = DrawMaskApply(BlendObj.m_pMaskBuffer, BlendRect.GetX1(), TopY, DrawWidth);
@@ -1115,9 +1110,9 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 		}
 	}
 	DrawMaskFreeParam(&MaskRadiusInnerParam);
-	DrawMaskRemove(mask_rin_id);
+	DrawMaskRemoveID(mask_rin_id);
 	DrawMaskFreeParam(&MaskRadiusOuterParam);
-	DrawMaskRemove(MaskOutsideRadiusID);
+	DrawMaskRemoveID(MaskOutsideRadiusID);
 	EG_ReleaseBufferMem(BlendObj.m_pMaskBuffer);
 #else 
 	EG_UNUSED(BlendMode);
@@ -1135,7 +1130,7 @@ const EGSoftContext *pContext = (EGSoftContext*)pDrawRect->m_pContext;
 void EGSoftContext::DrawBorderSimple(const EGDrawRect *pDrawRect, const EGRect *pOuterArea, const EGRect *pInnerArea, EG_Color_t Color, EG_OPA_t BackOPA)
 {
 	EGRect BlendRect;
-	EGSoftBlend BlendObj((EGSoftContext*)pDrawRect->m_pContext);
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_pRect = &BlendRect;
 	BlendObj.m_Color = Color;
 	BlendObj.m_OPA = BackOPA;

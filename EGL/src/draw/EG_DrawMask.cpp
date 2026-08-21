@@ -1,27 +1,28 @@
 /*
- *        Copyright (pCircle) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #if EG_DRAW_COMPLEX
 #include "misc/EG_Math.h"
 #include "misc/EG_Log.h"
@@ -36,19 +37,19 @@
 #define CIRCLE_CACHE_LIFE_MAX 1000
 #define CIRCLE_CACHE_AGING(life, r) life = EG_MIN(life + (r < 16 ? 1 : (r >> 4)), 1000)
 
-static DrawMaskRes_t   DrawMaskLine(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskLineParam_t *pMask);
-static DrawMaskRes_t   DrawMaskRadius(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskRadiusParam_t *pMask);
-static DrawMaskRes_t   DrawMaskAngle(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskAngleParam_t *pMask);
-static DrawMaskRes_t   DrawMaskFade(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskFadeParam_t *pMask);
-static DrawMaskRes_t   DrawMaskMap(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskMapParam_t *pMask);
-static DrawMaskRes_t   DrawMaskPolygon(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskPolygonParam_t *pMask);
-static DrawMaskRes_t   DrawMaskFlat(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskLineParam_t *pMask);
-static DrawMaskRes_t   DrawMaskSteep(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskLineParam_t *pMask);
-static void            CircleInitialise(EGPoint *pCircle, EG_Coord_t *pTemp, EG_Coord_t radius);
+static DrawMaskRes_t   DrawMaskLine(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskLineParam_t *pMask);
+static DrawMaskRes_t   DrawMaskRadius(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskRadiusParam_t *pMask);
+static DrawMaskRes_t   DrawMaskAngle(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskAngleParam_t *pMask);
+static DrawMaskRes_t   DrawMaskFade(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskFadeParam_t *pMask);
+static DrawMaskRes_t   DrawMaskMap(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskMapParam_t *pMask);
+static DrawMaskRes_t   DrawMaskPolygon(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskPolygonParam_t *pMask);
+static DrawMaskRes_t   DrawMaskFlat(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskLineParam_t *pMask);
+static DrawMaskRes_t   DrawMaskSteep(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskLineParam_t *pMask);
+static void            CircleInitialise(EGPoint *pCircle, int32_t *pTemp, int32_t radius);
 static bool            CircleContinue(EGPoint *pCircle);
-static void            CircleNext(EGPoint *pCircle, EG_Coord_t *pTemp);
-static void            CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t radius);
-static EG_OPA_t *      GetNextLine(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t y, EG_Coord_t *len, EG_Coord_t *x_start);
+static void            CircleNext(EGPoint *pCircle, int32_t *pTemp);
+static void            CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, int32_t radius);
+static EG_OPA_t *      GetNextLine(MaskRadiusCircleDiscrpt_t *pCircle, int32_t y, int32_t *len, int32_t *x_start);
 static EG_OPA_t        MaskMix(EG_OPA_t mask_act, EG_OPA_t mask_new);
 
   /////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +62,7 @@ uint8_t Index;
 		if(EG_GC_ROOT(EG_DrawMaskArray[Index]).pMask == nullptr) break;
 	}
 	if(Index >= _EG_MASK_MAX_NUM) {
-		EG_LOG_WARN("lv_mask_add: no free slots availabe for mask");
+		EG_LOG_WARN("DrawMaskAdd: no free slots availabe for mask");
 		return EG_MASK_ID_INVALID;
 	}
 	EG_GC_ROOT(EG_DrawMaskArray[Index]).pMask = pMask;
@@ -71,7 +72,7 @@ uint8_t Index;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskApply(EG_OPA_t *pMaskBuffer, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length)
+DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskApply(EG_OPA_t *pMaskBuffer, int32_t AbsX, int32_t AbsY, int32_t Length)
 {
 bool changed = false;
 MaskCommonDiscrpt_t *pDiscripter;
@@ -90,7 +91,7 @@ MaskCommonDiscrpt_t *pDiscripter;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskApplyIDs(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, const int16_t *pIndexes, int16_t Count)
+DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskApplyIDs(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, const int16_t *pIndexes, int16_t Count)
 {
 bool changed = false;
 MaskCommonDiscrpt_t *pDiscripter;
@@ -110,7 +111,7 @@ MaskCommonDiscrpt_t *pDiscripter;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-void* DrawMaskRemove(int16_t Index)
+void* DrawMaskRemoveID(int16_t Index)
 {
 	MaskCommonDiscrpt_t *pDiscripter = nullptr;
 
@@ -130,7 +131,7 @@ void* DrawMaskRemoveReferenced(void *pReference)
 	for(uint8_t i = 0; i < _EG_MASK_MAX_NUM; i++) {
 		if(EG_GC_ROOT(EG_DrawMaskArray[i]).pReference == pReference) {
 			pDiscripter = (MaskCommonDiscrpt_t *)EG_GC_ROOT(EG_DrawMaskArray[i]).pMask;
-			DrawMaskRemove(i);
+			DrawMaskRemoveID(i);
 		}
 	}
 	return pDiscripter;
@@ -270,7 +271,7 @@ void DrawMaskSetLineAngle(MaskLineParam_t *pMask, EGPoint Point1, int16_t Angle,
 
 /////////////////////////////////////////////////////////////////////////////////
 
-void DrawMaskSetAngle(MaskAngleParam_t *pMask, EGPoint Vertex, EG_Coord_t StartAngle, EG_Coord_t EndAngle)
+void DrawMaskSetAngle(MaskAngleParam_t *pMask, EGPoint Vertex, int32_t StartAngle, int32_t EndAngle)
 {
 MaskLineSide_t start_side = EG_DRAW_MASK_LINE_SIDE_RIGHT;
 MaskLineSide_t end_side = EG_DRAW_MASK_LINE_SIDE_RIGHT;
@@ -308,12 +309,12 @@ MaskLineSide_t end_side = EG_DRAW_MASK_LINE_SIDE_RIGHT;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-void DrawMaskSetRadius(MaskRadiusParam_t *pMask, const EGRect *pRect, EG_Coord_t Radius, bool Invert)
+void DrawMaskSetRadius(MaskRadiusParam_t *pMask, const EGRect *pRect, int32_t Radius, bool Invert)
 {
 uint32_t i;
 
-	EG_Coord_t Width = pRect->GetWidth();
-	EG_Coord_t Height = pRect->GetHeight();
+	int32_t Width = pRect->GetWidth();
+	int32_t Height = pRect->GetHeight();
 	int32_t ShortSide = EG_MIN(Width, Height);
 	if(Radius > ShortSide >> 1) Radius = ShortSide >> 1;
 	if(Radius < 0) Radius = 0;
@@ -359,8 +360,8 @@ uint32_t i;
 /////////////////////////////////////////////////////////////////////////////////
 
 void DrawMaskSetFade(MaskFadeParam_t *pMask, const EGRect *pRect, EG_OPA_t TopOPA,
-														EG_Coord_t TopY,
-														EG_OPA_t BottomOPA, EG_Coord_t BottomY)
+														int32_t TopY,
+														EG_OPA_t BottomOPA, int32_t BottomY)
 {
 	pRect->Copy(&pMask->Fade.Area);
 	pMask->Fade.TopOPA = TopOPA;
@@ -408,7 +409,7 @@ void DrawMaskSetPolygon(MaskPolygonParam_t *pMask, const EGPoint *pVertices, uin
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskLine(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskLineParam_t *pMask)
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskLine(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskLineParam_t *pMask)
 {
 	AbsY -= pMask->Origin.m_Y;	// Make to points relative to the vertex
 	AbsX -= pMask->Origin.m_X;
@@ -453,7 +454,7 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskLine(EG_OPA_t *pMaskArray, EG
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskFlat(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskLineParam_t *pMask)
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskFlat(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskLineParam_t *pMask)
 {
 	int32_t y_at_x;
 	y_at_x = (int32_t)((int32_t)pMask->SteepYX * AbsX) >> 10;
@@ -558,8 +559,8 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskFlat(EG_OPA_t *pMaskArray, EG
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskSteep(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY,
-																																EG_Coord_t Length,
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskSteep(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY,
+																																int32_t Length,
 																																MaskLineParam_t *pMask)
 {
 int32_t k, XatY;
@@ -675,8 +676,8 @@ int32_t k, XatY;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskAngle(EG_OPA_t *pMaskArray, EG_Coord_t AbsX,
-																																	 EG_Coord_t AbsY, EG_Coord_t Length,
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskAngle(EG_OPA_t *pMaskArray, int32_t AbsX,
+																																	 int32_t AbsY, int32_t Length,
 																																	 MaskAngleParam_t *pMask)
 {
 	int32_t rel_y = AbsY - pMask->Angle.Vertex.m_Y;
@@ -791,7 +792,7 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskAngle(EG_OPA_t *pMaskArray, E
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, EG_Coord_t AbsX,	EG_Coord_t AbsY, EG_Coord_t Length,	MaskRadiusParam_t *pMask)
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, int32_t AbsX,	int32_t AbsY, int32_t Length,	MaskRadiusParam_t *pMask)
 {
 	bool Outer = pMask->Radius.Outer;
 	int32_t Radius = pMask->Radius.Radius;
@@ -854,15 +855,15 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, 
 	AbsX -= Area.GetX1();
 	AbsY -= Area.GetY1();
 
-	EG_Coord_t aa_len;
-	EG_Coord_t x_start;
-	EG_Coord_t cir_y;
+	int32_t aa_len;
+	int32_t x_start;
+	int32_t cir_y;
 	if(AbsY < Radius) cir_y = Radius - AbsY - 1;
 	else cir_y = AbsY - (Height - Radius);
 	EG_OPA_t *aa_opa = GetNextLine(pMask->pCircle, cir_y, &aa_len, &x_start);
-	EG_Coord_t cir_x_right = k + Width - Radius + x_start;
-	EG_Coord_t cir_x_left = k + Radius - x_start - 1;
-	EG_Coord_t i;
+	int32_t cir_x_right = k + Width - Radius + x_start;
+	int32_t cir_x_left = k + Radius - x_start - 1;
+	int32_t i;
 	if(Outer == false) {
 		for(i = 0; i < aa_len; i++) {
 			EG_OPA_t opa = aa_opa[aa_len - i - 1];
@@ -890,8 +891,8 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, 
 				pMaskArray[cir_x_left - i] = MaskMix(opa, pMaskArray[cir_x_left - i]);
 			}
 		}
-		EG_Coord_t clr_start = EG_CLAMP(0, cir_x_left + 1, Length);
-		EG_Coord_t clr_len = EG_CLAMP(0, cir_x_right - clr_start, Length - clr_start);
+		int32_t clr_start = EG_CLAMP(0, cir_x_left + 1, Length);
+		int32_t clr_len = EG_CLAMP(0, cir_x_right - clr_start, Length - clr_start);
 		EG_ZeroMem(&pMaskArray[clr_start], clr_len);
 	}
 
@@ -900,7 +901,7 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskRadius(EG_OPA_t *pMaskArray, 
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskFade(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskFadeParam_t *pMask)
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskFade(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskFadeParam_t *pMask)
 {
 	if(AbsY < pMask->Fade.Area.GetY1()) return EG_DRAW_MASK_RESULT_FULL_COVER;
 	if(AbsY > pMask->Fade.Area.GetY2()) return EG_DRAW_MASK_RESULT_FULL_COVER;
@@ -943,7 +944,7 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskFade(EG_OPA_t *pMaskArray, EG
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskMap(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskMapParam_t *pMask)
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskMap(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskMapParam_t *pMask)
 {
 	// Handle out of the mask cases
 	if(AbsY < pMask->Map.Area.GetY1()) return EG_DRAW_MASK_RESULT_FULL_COVER;
@@ -969,7 +970,7 @@ static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskMap(EG_OPA_t *pMaskArray, EG_
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskPolygon(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, MaskPolygonParam_t *pMask)
+static DrawMaskRes_t EG_ATTRIBUTE_FAST_MEM DrawMaskPolygon(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, MaskPolygonParam_t *pMask)
 {
 uint16_t i;
 struct {
@@ -1008,8 +1009,8 @@ uint16_t line_cnt = 0;
 	MaskLineParam_t LineParam;
 	DrawMaskSetLinePoints(&LineParam, lines[0].Point1, lines[0].Point2, EG_DRAW_MASK_LINE_SIDE_RIGHT);
 	if(LineParam.Steep == 0 && LineParam.Flat) {
-		EG_Coord_t x1 = EG_MIN(lines[0].Point1.m_X, lines[0].Point2.m_X);
-		EG_Coord_t x2 = EG_MAX(lines[0].Point1.m_X, lines[0].Point2.m_X);
+		int32_t x1 = EG_MIN(lines[0].Point1.m_X, lines[0].Point2.m_X);
+		int32_t x2 = EG_MAX(lines[0].Point1.m_X, lines[0].Point2.m_X);
 		for(i = 0; i < Length; i++) {
 			pMaskArray[i] = MaskMix(pMaskArray[i], (AbsX + i >= x1 && AbsX + i <= x2) * 0xFF);
 		}
@@ -1023,8 +1024,8 @@ uint16_t line_cnt = 0;
 	}
 	DrawMaskSetLinePoints(&LineParam, lines[1].Point1, lines[1].Point2, EG_DRAW_MASK_LINE_SIDE_LEFT);
 	if(LineParam.Steep == 0 && LineParam.Flat) {
-		EG_Coord_t x1 = EG_MIN(lines[1].Point1.m_X, lines[1].Point2.m_X);
-		EG_Coord_t x2 = EG_MAX(lines[1].Point1.m_X, lines[1].Point2.m_X);
+		int32_t x1 = EG_MIN(lines[1].Point1.m_X, lines[1].Point2.m_X);
+		int32_t x2 = EG_MAX(lines[1].Point1.m_X, lines[1].Point2.m_X);
 		for(i = 0; i < Length; i++) {
 			pMaskArray[i] = MaskMix(pMaskArray[i], (AbsX + i >= x1 && AbsX + i <= x2) * 0xFF);
 		}
@@ -1042,7 +1043,7 @@ uint16_t line_cnt = 0;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static void CircleInitialise(EGPoint *pCircle, EG_Coord_t *pTemp, EG_Coord_t Radius)
+static void CircleInitialise(EGPoint *pCircle, int32_t *pTemp, int32_t Radius)
 {
 	pCircle->m_X = Radius;
 	pCircle->m_Y = 0;
@@ -1058,7 +1059,7 @@ static bool CircleContinue(EGPoint *pCircle)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static void CircleNext(EGPoint *pCircle, EG_Coord_t *pTemp)
+static void CircleNext(EGPoint *pCircle, int32_t *pTemp)
 {
 	if(*pTemp <= 0) {
 		(*pTemp) += 2 * pCircle->m_Y + 3; // Change in decision criterion for y -> y+1
@@ -1072,7 +1073,7 @@ static void CircleNext(EGPoint *pCircle, EG_Coord_t *pTemp)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static void CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t Radius)
+static void CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, int32_t Radius)
 {
 	if(Radius == 0) return;
 	pCircle->Radius = Radius;
@@ -1094,16 +1095,16 @@ static void CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t Radius
 		pCircle->pStartXonY[0] = 0;
 		return;
 	}
-	EG_Coord_t *cir_x = (EG_Coord_t *)EG_GetBufferMem((Radius + 1) * 2 * 2 * sizeof(EG_Coord_t));
-	EG_Coord_t *cir_y = &cir_x[(Radius + 1) * 2];
+	int32_t *cir_x = (int32_t *)EG_GetBufferMem((Radius + 1) * 2 * 2 * sizeof(int32_t));
+	int32_t *cir_y = &cir_x[(Radius + 1) * 2];
 	uint32_t y_8th_cnt = 0;
 	EGPoint cp;
-	EG_Coord_t tmp;
+	int32_t tmp;
 	CircleInitialise(&cp, &tmp, Radius * 4); // Upscale by 4
 	int32_t i;
 	uint32_t x_int[4];
 	uint32_t x_fract[4];
-	EG_Coord_t cir_size = 0;
+	int32_t cir_size = 0;
 	x_int[0] = cp.m_X >> 2;
 	x_fract[0] = 0;
 	// Calculate an 1/8 pCircle
@@ -1193,7 +1194,7 @@ static void CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t Radius
 		cir_y[cir_size] = cir_x[i];
 		pCircle->pCircleOPA[cir_size] = pCircle->pCircleOPA[i];
 	}
-	EG_Coord_t y = 0;
+	int32_t y = 0;
 	i = 0;
 	pCircle->pStartOPAonY[0] = 0;
 	while(i < cir_size) {
@@ -1209,7 +1210,7 @@ static void CircleCalc_aa4(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t Radius
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static EG_OPA_t* GetNextLine(MaskRadiusCircleDiscrpt_t *pCircle, EG_Coord_t PosY, EG_Coord_t *pLength, EG_Coord_t *pStartX)
+static EG_OPA_t* GetNextLine(MaskRadiusCircleDiscrpt_t *pCircle, int32_t PosY, int32_t *pLength, int32_t *pStartX)
 {
 	*pLength = pCircle->pStartOPAonY[PosY + 1] - pCircle->pStartOPAonY[PosY];
 	*pStartX = pCircle->pStartXonY[PosY];

@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -208,16 +209,16 @@ void EGFlexLayout::UpdateCB(EGObject *pObj, void *pUserData)
 	Flex.m_CrossPlace = GetObjStyleCrossPlace(pObj, EG_PART_MAIN);
 	Flex.m_TrackPlace = GetObjStyleTrackPlace(pObj, EG_PART_MAIN);
 	bool rtl = pObj->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL ? true : false;
-	EG_Coord_t track_gap = !Flex.m_Row ? pObj->GetStylePadColumn(EG_PART_MAIN) : pObj->GetStylePadRow(EG_PART_MAIN);
-	EG_Coord_t item_gap = Flex.m_Row ? pObj->GetStylePadColumn(EG_PART_MAIN) : pObj->GetStylePadRow(EG_PART_MAIN);
-	EG_Coord_t max_main_size = (Flex.m_Row ? pObj->GetContentWidth() : pObj->GetContentHeight());
-	EG_Coord_t border_width = pObj->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t abs_y = pObj->m_Rect.GetY1() + pObj->GetStylePadTop(EG_PART_MAIN) + border_width - pObj->GetScrollY();
-	EG_Coord_t abs_x = pObj->m_Rect.GetX1() + pObj->GetStylePadLeft(EG_PART_MAIN) + border_width - pObj->GetScrollX();
+	int32_t track_gap = !Flex.m_Row ? pObj->GetStylePadColumn(EG_PART_MAIN) : pObj->GetStylePadRow(EG_PART_MAIN);
+	int32_t item_gap = Flex.m_Row ? pObj->GetStylePadColumn(EG_PART_MAIN) : pObj->GetStylePadRow(EG_PART_MAIN);
+	int32_t max_main_size = (Flex.m_Row ? pObj->GetContentWidth() : pObj->GetContentHeight());
+	int32_t border_width = pObj->GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t abs_y = pObj->m_Rect.GetY1() + pObj->GetStylePadTop(EG_PART_MAIN) + border_width - pObj->GetScrollY();
+	int32_t abs_x = pObj->m_Rect.GetX1() + pObj->GetStylePadLeft(EG_PART_MAIN) + border_width - pObj->GetScrollX();
 	EG_FlexAlign_e track_cross_place = Flex.m_TrackPlace;
-	EG_Coord_t *cross_pos = (Flex.m_Row ? &abs_y : &abs_x);
-	EG_Coord_t w_set = pObj->GetStyleWidth(EG_PART_MAIN);
-	EG_Coord_t h_set = pObj->GetStyleHeight(EG_PART_MAIN);
+	int32_t *cross_pos = (Flex.m_Row ? &abs_y : &abs_x);
+	int32_t w_set = pObj->GetStyleWidth(EG_PART_MAIN);
+	int32_t h_set = pObj->GetStyleHeight(EG_PART_MAIN);
 
 	// Content sized objects should squeezed the gap between the children, therefore any alignment will look like `START`
 	if((Flex.m_Row && h_set == EG_SIZE_CONTENT && pObj->m_HeightLayout == 0) || (!Flex.m_Row && w_set == EG_SIZE_CONTENT && pObj->m_WidthLayout == 0)) {
@@ -227,8 +228,8 @@ void EGFlexLayout::UpdateCB(EGObject *pObj, void *pUserData)
 		if(track_cross_place == EG_FLEX_ALIGN_START) track_cross_place = EG_FLEX_ALIGN_END;
 		else if(track_cross_place == EG_FLEX_ALIGN_END)	track_cross_place = EG_FLEX_ALIGN_START;
 	}
-	EG_Coord_t total_track_cross_size = 0;
-	EG_Coord_t gap = 0;
+	int32_t total_track_cross_size = 0;
+	int32_t gap = 0;
 	uint32_t track_cnt = 0;
 	int32_t track_first_item;
 	int32_t next_track_first_item;
@@ -245,7 +246,7 @@ void EGFlexLayout::UpdateCB(EGObject *pObj, void *pUserData)
 		}
 		if(track_cnt) total_track_cross_size -= track_gap; /*No gap after the last track*/
 		/*Place the tracks to get the start position*/
-		EG_Coord_t max_cross_size = (Flex.m_Row ? pObj->GetContentHeight() : pObj->GetContentWidth());
+		int32_t max_cross_size = (Flex.m_Row ? pObj->GetContentHeight() : pObj->GetContentWidth());
 		Flex.PlaceContent(track_cross_place, max_cross_size, total_track_cross_size, track_cnt, cross_pos, &gap);
 	}
 	track_first_item = Flex.m_Reverse ? pObj->m_pAttributes->ChildCount - 1 : 0;
@@ -282,10 +283,10 @@ void EGFlexLayout::UpdateCB(EGObject *pObj, void *pUserData)
 ///////////////////////////////////////////////////////////////////////////////
 
 // Find the last item of a track
-int32_t EGFlexLayout::FindTrackEnd(EGObject *pObj, int32_t item_start_id, EG_Coord_t max_main_size,	EG_Coord_t item_gap, TrackProps_t *t)
+int32_t EGFlexLayout::FindTrackEnd(EGObject *pObj, int32_t item_start_id, int32_t max_main_size,	int32_t item_gap, TrackProps_t *t)
 {
-	EG_Coord_t w_set = pObj->GetStyleWidth(EG_PART_MAIN);
-	EG_Coord_t h_set = pObj->GetStyleHeight(EG_PART_MAIN);
+	int32_t w_set = pObj->GetStyleWidth(EG_PART_MAIN);
+	int32_t h_set = pObj->GetStyleHeight(EG_PART_MAIN);
 	// Can't wrap if the size if auto (i.e. the size depends on the children)
 	if(m_Wrap && ((m_Row && w_set == EG_SIZE_CONTENT) || (!m_Row && h_set == EG_SIZE_CONTENT))) {
 		m_Wrap = false;
@@ -322,7 +323,7 @@ int32_t EGFlexLayout::FindTrackEnd(EGObject *pObj, int32_t item_start_id, EG_Coo
 				}
 			}
 			else {
-				EG_Coord_t item_size = (m_Row) ? pItem->GetWidth() : pItem->GetHeight();
+				int32_t item_size = (m_Row) ? pItem->GetWidth() : pItem->GetHeight();
 				if(m_Wrap && t->track_fix_main_size + item_size > max_main_size) break;
 				t->track_fix_main_size += item_size + item_gap;
 			}
@@ -352,16 +353,16 @@ int32_t EGFlexLayout::FindTrackEnd(EGObject *pObj, int32_t item_start_id, EG_Coo
 ///////////////////////////////////////////////////////////////////////////////
 
 // Position the children in the same track
-void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int32_t item_last_id, EG_Coord_t abs_x,
-													 EG_Coord_t abs_y, EG_Coord_t max_main_size, EG_Coord_t item_gap, TrackProps_t *t)
+void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int32_t item_last_id, int32_t abs_x,
+													 int32_t abs_y, int32_t max_main_size, int32_t item_gap, TrackProps_t *t)
 {
 	//Calculate the size of grow items first
 	uint32_t i;
 	bool grow_reiterate = true;
 	while(grow_reiterate) {
 		grow_reiterate = false;
-		EG_Coord_t grow_value_sum = 0;
-		EG_Coord_t grow_max_size = t->track_main_size - t->track_fix_main_size;
+		int32_t grow_value_sum = 0;
+		int32_t grow_max_size = t->track_main_size - t->track_fix_main_size;
 		for(i = 0; i < t->grow_item_cnt; i++) {
 			if(t->grow_dsc[i].clamped == 0) {
 				grow_value_sum += t->grow_dsc[i].grow_value;
@@ -370,14 +371,14 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 				grow_max_size -= t->grow_dsc[i].final_size;
 			}
 		}
-		EG_Coord_t grow_unit;
+		int32_t grow_unit;
 
 		for(i = 0; i < t->grow_item_cnt; i++) {
 			if(t->grow_dsc[i].clamped == 0) {
 				EG_ASSERT(grow_value_sum != 0);
 				grow_unit = grow_max_size / grow_value_sum;
-				EG_Coord_t size = grow_unit * t->grow_dsc[i].grow_value;
-				EG_Coord_t size_clamp = EG_CLAMP(t->grow_dsc[i].min_size, size, t->grow_dsc[i].max_size);
+				int32_t size = grow_unit * t->grow_dsc[i].grow_value;
+				int32_t size_clamp = EG_CLAMP(t->grow_dsc[i].min_size, size, t->grow_dsc[i].max_size);
 
 				if(size_clamp != size) {
 					t->grow_dsc[i].clamped = 1;
@@ -392,9 +393,9 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 
 	bool rtl = pObj->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL ? true : false;
 
-	EG_Coord_t main_pos = 0;
+	int32_t main_pos = 0;
 
-	EG_Coord_t place_gap = 0;
+	int32_t place_gap = 0;
 	PlaceContent(m_MainPlace, max_main_size, t->track_main_size, t->item_cnt, &main_pos, &place_gap);
 	if(m_Row && rtl) main_pos += pObj->GetContentWidth();
 
@@ -405,9 +406,9 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 			pItem = GetNextItem(pObj, m_Reverse, &item_first_id);
 			continue;
 		}
-		EG_Coord_t grow_size = GetObjStyleGrow(pItem, EG_PART_MAIN);
+		int32_t grow_size = GetObjStyleGrow(pItem, EG_PART_MAIN);
 		if(grow_size) {
-			EG_Coord_t s = 0;
+			int32_t s = 0;
 			for(i = 0; i < t->grow_item_cnt; i++) {
 				if(t->grow_dsc[i].pItem == pItem) {
 					s = t->grow_dsc[i].final_size;
@@ -436,7 +437,7 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 			pItem->m_WidthLayout = 0;
 			pItem->m_HeightLayout = 0;
 		}
-		EG_Coord_t cross_pos = 0;
+		int32_t cross_pos = 0;
 		switch(m_CrossPlace) {
 			case EG_FLEX_ALIGN_CENTER:{
 				/*Round up the cross size to avoid rounding error when dividing by 2
@@ -453,14 +454,14 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 		}
 		if(m_Row && rtl) main_pos -= (m_Row ? pItem->m_Rect.GetWidth() : pItem->m_Rect.GetHeight());
 		/*Handle percentage value of translate*/
-		EG_Coord_t tr_x = pItem->GetStyleTranslateX(EG_PART_MAIN);
-		EG_Coord_t tr_y = pItem->GetStyleTranslateY(EG_PART_MAIN);
-		EG_Coord_t w = pItem->GetWidth();
-		EG_Coord_t h = pItem->GetHeight();
+		int32_t tr_x = pItem->GetStyleTranslateX(EG_PART_MAIN);
+		int32_t tr_y = pItem->GetStyleTranslateY(EG_PART_MAIN);
+		int32_t w = pItem->GetWidth();
+		int32_t h = pItem->GetHeight();
 		if(EG_COORD_IS_PCT(tr_x)) tr_x = (w * EG_COORD_GET_PCT(tr_x)) / 100;
 		if(EG_COORD_IS_PCT(tr_y)) tr_y = (h * EG_COORD_GET_PCT(tr_y)) / 100;
-		EG_Coord_t diff_x = abs_x - pItem->m_Rect.GetX1() + tr_x;
-		EG_Coord_t diff_y = abs_y - pItem->m_Rect.GetY1() + tr_y;
+		int32_t diff_x = abs_x - pItem->m_Rect.GetX1() + tr_x;
+		int32_t diff_y = abs_y - pItem->m_Rect.GetY1() + tr_y;
 		diff_x += m_Row ? main_pos : cross_pos;
 		diff_y += m_Row ? cross_pos : main_pos;
 		if(diff_x || diff_y) {
@@ -483,8 +484,8 @@ void EGFlexLayout::RepositionChildren(EGObject *pObj, int32_t item_first_id, int
 /**
  * Tell a start coordinate and gap for a placement type.
  */
-void EGFlexLayout::PlaceContent(EG_FlexAlign_e place, EG_Coord_t max_size, EG_Coord_t content_size, EG_Coord_t item_cnt,
-													EG_Coord_t *start_pos, EG_Coord_t *gap)
+void EGFlexLayout::PlaceContent(EG_FlexAlign_e place, int32_t max_size, int32_t content_size, int32_t item_cnt,
+													int32_t *start_pos, int32_t *gap)
 {
 	if(item_cnt <= 1) {
 		switch(place) {
@@ -507,14 +508,14 @@ void EGFlexLayout::PlaceContent(EG_FlexAlign_e place, EG_Coord_t max_size, EG_Co
 			*start_pos += max_size - content_size;
 			break;
 		case EG_FLEX_ALIGN_SPACE_BETWEEN:
-			*gap = (EG_Coord_t)(max_size - content_size) / (EG_Coord_t)(item_cnt - 1);
+			*gap = (int32_t)(max_size - content_size) / (int32_t)(item_cnt - 1);
 			break;
 		case EG_FLEX_ALIGN_SPACE_AROUND:
-			*gap += (EG_Coord_t)(max_size - content_size) / (EG_Coord_t)(item_cnt);
+			*gap += (int32_t)(max_size - content_size) / (int32_t)(item_cnt);
 			*start_pos += *gap / 2;
 			break;
 		case EG_FLEX_ALIGN_SPACE_EVENLY:
-			*gap = (EG_Coord_t)(max_size - content_size) / (EG_Coord_t)(item_cnt + 1);
+			*gap = (int32_t)(max_size - content_size) / (int32_t)(item_cnt + 1);
 			*start_pos += *gap;
 			break;
 		default:

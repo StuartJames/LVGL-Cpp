@@ -1,9 +1,33 @@
 
+/*
+ *                EGL 2025-2026 HydraSystems.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  Based on a design by LVGL Kft
+ *
+ * =====================================================================
+ *
+ * Edit     Date     Version       Edit Description
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
+ *
+ */
+
 #include "widgets/EG_Roller.h"
 #if EG_USE_ROLLER != 0
 
 #include "misc/EG_Assert.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "core/EG_Group.h"
 #include "core/EG_InputDevice.h"
 
@@ -144,8 +168,8 @@ void EGRoller::SetSelected(uint16_t SelectedItem, EG_AnimateEnable_e Enable)
 void EGRoller::SetVisibleRowCount(uint8_t RowCount)
 {
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	SetHeight((EG_FontGetLineHeight(pFont) + LineSpace) * RowCount + 2 * BorderWidth);
 }
 
@@ -175,7 +199,7 @@ void EGRoller::GetSelectedText(char *pBuffer, uint32_t BufferSize)
 	uint32_t c;
 	for(c = 0; i < txt_len && opt_txt[i] != '\n'; c++, i++) {
 		if(BufferSize && c >= BufferSize - 1) {
-			EG_LOG_WARN("lv_dropdown_get_selected_str: the buffer was too small");
+			EG_LOG_WARN("EGRoller::GetSelectedText: the buffer was too small");
 			break;
 		}
 		pBuffer[c] = opt_txt[i];
@@ -318,13 +342,13 @@ void EGRoller::Event(EGEvent *pEvent)
 void EGRoller::DrawMain(EGEvent *pEvent)
 {
 	EG_EventCode_e Code = pEvent->GetCode();
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	if(Code == EG_EVENT_DRAW_MAIN) {		// Draw the select rectangle
 		EGRect SelectRect;
 		GetSelectionRect(&SelectRect);
 		EGDrawRect DrawRect;
 		InititialseDrawRect(EG_PART_SELECTED, &DrawRect);
-		DrawRect.Draw(pContext, &SelectRect);
+		DrawRect.Draw(pDC, &SelectRect);
 	}
 	else if(Code == EG_EVENT_DRAW_POST) {	// Post draw when the children are drawn
 		EGDrawLabel DrawLabel;
@@ -332,35 +356,35 @@ void EGRoller::DrawMain(EGEvent *pEvent)
 		EGRect SelectRect;		// Redraw the text on the selected area
 		GetSelectionRect(&SelectRect);
 		EGRect SelectMask;
-		if(SelectMask.Intersect(pContext->m_pClipRect, &SelectRect)) {
+		if(SelectMask.Intersect(pDC->m_pClipRect, &SelectRect)) {
 			EGLabel *pLabel = GetLabel();
 			if(pLabel->GetRecolor()) DrawLabel.m_Flag |= EG_TEXT_FLAG_RECOLOR;
-			EGPoint ResultPoint;			// Get the size of the "selected text"
-			EG_GetTextSize(&ResultPoint, pLabel->GetText(), DrawLabel.m_pFont, DrawLabel.m_Kerning, DrawLabel.m_LineSpace,	GetWidth(), EG_TEXT_FLAG_EXPAND);
+			EGSize Size;			// Get the size of the "selected text"
+			EG_GetTextSize(&Size, pLabel->GetText(), DrawLabel.m_pFont, DrawLabel.m_Kerning, DrawLabel.m_LineSpace,	GetWidth(), EG_TEXT_FLAG_EXPAND);
 			// Move the selected pLabel proportionally with the background pLabel
-			EG_Coord_t roller_h = GetHeight();
+			int32_t roller_h = GetHeight();
 			int32_t label_y_prop = pLabel->m_Rect.GetY1() - (roller_h / 2 + m_Rect.GetY1()); // pLabel offset from the middle line of the pRoller
 			label_y_prop = (label_y_prop * 16384) / pLabel->GetHeight(); // Proportional position from the middle line (upscaled by << 14)
 			// Apply a correction with different line heights
 			const EG_Font_t *pStyleFont = GetStyleTextFont(EG_PART_MAIN);
-			EG_Coord_t corr = (DrawLabel.m_pFont->LineHeight - pStyleFont->LineHeight) / 2;
-			ResultPoint.m_Y -= corr;			// Apply the proportional position to the selected text
+			int32_t corr = (DrawLabel.m_pFont->LineHeight - pStyleFont->LineHeight) / 2;
+			Size.m_Y -= corr;			// Apply the proportional position to the selected text
 			int32_t label_sel_y = roller_h / 2 + m_Rect.GetY1();
-			label_sel_y += (label_y_prop * ResultPoint.m_Y) >> 14;
+			label_sel_y += (label_y_prop * Size.m_Y) >> 14;
 			label_sel_y -= corr;
-			EG_Coord_t bwidth = GetStyleBorderWidth(EG_PART_MAIN);
-			EG_Coord_t pleft = GetStylePadLeft(EG_PART_MAIN);
-			EG_Coord_t pright = GetStylePadRight(EG_PART_MAIN);
+			int32_t bwidth = GetStyleBorderWidth(EG_PART_MAIN);
+			int32_t pleft = GetStylePadLeft(EG_PART_MAIN);
+			int32_t pright = GetStylePadRight(EG_PART_MAIN);
 			EGRect SelectRect;			// Draw the selected text
 			SelectRect.SetX1(m_Rect.GetX1() + pleft + bwidth);
 			SelectRect.SetY1(label_sel_y);
 			SelectRect.SetX2(m_Rect.GetX2() - pright - bwidth);
-			SelectRect.SetY2(SelectRect.GetY1() + ResultPoint.m_Y);
+			SelectRect.SetY2(SelectRect.GetY1() + Size.m_Y);
 			DrawLabel.m_Flag |= EG_TEXT_FLAG_EXPAND;
-			const EGRect *pClipRect = pContext->m_pClipRect;
-			pContext->m_pClipRect = &SelectMask;
-			DrawLabel.Draw(pContext, &SelectRect, pLabel->GetText(), nullptr);
-			pContext->m_pClipRect = pClipRect;
+			const EGRect *pClipRect = pDC->m_pClipRect;
+			pDC->m_pClipRect = &SelectMask;
+			DrawLabel.Draw(pDC, &SelectRect, pLabel->GetText(), nullptr);
+			pDC->m_pClipRect = pClipRect;
 		}
 	}
 }
@@ -371,10 +395,10 @@ void EGRoller::GetSelectionRect(EGRect *pRect)
 {
 	const EG_Font_t *pFontMain = GetStyleTextFont(EG_PART_MAIN);
 	const EG_Font_t *pFontSelect = GetStyleTextFont(EG_PART_SELECTED);
-	EG_Coord_t MainHeight = EG_FontGetLineHeight(pFontMain);
-	EG_Coord_t SelectHeight = EG_FontGetLineHeight(pFontSelect);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t d = (SelectHeight + MainHeight) / 2 + LineSpace;
+	int32_t MainHeight = EG_FontGetLineHeight(pFontMain);
+	int32_t SelectHeight = EG_FontGetLineHeight(pFontSelect);
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t d = (SelectHeight + MainHeight) / 2 + LineSpace;
 	pRect->SetY1(m_Rect.GetY1() + GetHeight() / 2 - d / 2);
 	pRect->SetY2(pRect->GetY1() + d);
 	pRect->SetX1(m_Rect.GetX1());
@@ -400,18 +424,18 @@ void EGRoller::RefreshPosition(EG_AnimateEnable_e Enable)
 			break;
 	}
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t line_space = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t font_h = EG_FontGetLineHeight(pFont);
-	EG_Coord_t Height = GetContentHeight();
+	int32_t line_space = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t font_h = EG_FontGetLineHeight(pFont);
+	int32_t Height = GetContentHeight();
 	uint16_t anim_time = GetStyleAnimationTime(EG_PART_MAIN);
 	// Normally the animation'pSize `end_cb` sets correct position of the pRoller if infinite. But without animations do it manually
 	if(Enable == EG_ANIM_OFF || anim_time == 0) {
 		Normalize();
 	}
 	int32_t id = m_CurrentItemIndex;
-	EG_Coord_t sel_y1 = id * (font_h + line_space);
-	EG_Coord_t mid_y1 = Height / 2 - font_h / 2;
-	EG_Coord_t new_y = mid_y1 - sel_y1;
+	int32_t sel_y1 = id * (font_h + line_space);
+	int32_t mid_y1 = Height / 2 - font_h / 2;
+	int32_t new_y = mid_y1 - sel_y1;
 	if(Enable == EG_ANIM_OFF || anim_time == 0) {
 		EGAnimate::Delete(pLabel, SetAnimateY);
 		pLabel->SetY(new_y);
@@ -471,11 +495,11 @@ EG_Result_t EGRoller::ReleaseHandler(void)
 		else {
 			// If dragged then align the list to have an element in the middle
 			const EG_Font_t *font = GetStyleTextFont(EG_PART_MAIN);
-			EG_Coord_t line_space = GetStyleTextLineSpace(EG_PART_MAIN);
-			EG_Coord_t font_h = EG_FontGetLineHeight(font);
-			EG_Coord_t label_unit = font_h + line_space;
-			EG_Coord_t mid = m_Rect.GetY1() + (m_Rect.GetY2() - m_Rect.GetY1()) / 2;
-			EG_Coord_t label_y1 = pLabel->m_Rect.GetY1() + pInput->ScrollThrowPredict(EG_DIR_VER);
+			int32_t line_space = GetStyleTextLineSpace(EG_PART_MAIN);
+			int32_t font_h = EG_FontGetLineHeight(font);
+			int32_t label_unit = font_h + line_space;
+			int32_t mid = m_Rect.GetY1() + (m_Rect.GetY2() - m_Rect.GetY1()) / 2;
+			int32_t label_y1 = pLabel->m_Rect.GetY1() + pInput->ScrollThrowPredict(EG_DIR_VER);
 			int32_t id = (mid - label_y1) / label_unit;
 			if(id < 0) id = 0;
 			if(id >= m_ItemCount) id = m_ItemCount - 1;
@@ -503,13 +527,13 @@ void EGRoller::Normalize(void)
 
 		// Move to the new id
 		const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-		EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-		EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
-		EG_Coord_t Height = GetContentHeight();
+		int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+		int32_t FontHeight = EG_FontGetLineHeight(pFont);
+		int32_t Height = GetContentHeight();
 		EGObject *pLabel = GetLabel();
-		EG_Coord_t SelectY = m_CurrentItemIndex * (FontHeight + LineSpace);
-		EG_Coord_t MiddleY = Height / 2 - FontHeight / 2;
-		EG_Coord_t SetY = MiddleY - SelectY;
+		int32_t SelectY = m_CurrentItemIndex * (FontHeight + LineSpace);
+		int32_t MiddleY = Height / 2 - FontHeight / 2;
+		int32_t SetY = MiddleY - SelectY;
 		pLabel->SetY(SetY);
 	}
 }
@@ -523,14 +547,14 @@ EGLabel* EGRoller::GetLabel(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGRoller::GetSelectedLabelWidth(void)
+int32_t EGRoller::GetSelectedLabelWidth(void)
 {
 	EGLabel *pLabel = GetLabel();
 	if(pLabel == nullptr) return 0;
 	const EG_Font_t *font = GetStyleTextFont(EG_PART_SELECTED);
-	EG_Coord_t letter_space = GetStyleTextKerning(EG_PART_SELECTED);
+	int32_t letter_space = GetStyleTextKerning(EG_PART_SELECTED);
 	const char *pText = pLabel->GetText();
-	EGPoint Size;
+	EGSize Size;
 	EG_GetTextSize(&Size, pText, font, letter_space, 0, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
 	return Size.m_X;
 }
@@ -546,9 +570,9 @@ void EGRoller::LabelEventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 	EG_EventCode_e Code = pEvent->GetCode();
 	if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {
 		// If the selected text has a larger font it needs some extra space to draw it
-		EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();
-		EG_Coord_t sel_w = pRoller->GetSelectedLabelWidth();
-		EG_Coord_t label_w = pLabel->GetWidth();
+		int32_t *pSize = (int32_t*)pEvent->GetParam();
+		int32_t sel_w = pRoller->GetSelectedLabelWidth();
+		int32_t label_w = pLabel->GetWidth();
 		*pSize = EG_MAX(*pSize, sel_w - label_w);
 	}
 	else if(Code == EG_EVENT_SIZE_CHANGED) {
@@ -567,14 +591,14 @@ void EGRoller::DrawLabel(EGEvent *pEvent, EGLabel *pLabel)
 	EGDrawLabel DrawLabel;
   InititialseDrawLabel(EG_PART_MAIN, &DrawLabel);
 	if(pLabel->GetRecolor()) DrawLabel.m_Flag |= EG_TEXT_FLAG_RECOLOR;
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	/* If the pRoller has shadow or outline it has some ext. draw size
      *therefore the pLabel can overflow the pRoller'pSize boundaries.
      *To solve this limit the clip area to the "plain" pRoller.*/
-	const EGRect *pClipRectTemp = pContext->m_pClipRect;
+	const EGRect *pClipRectTemp = pDC->m_pClipRect;
 	EGRect ClipRect;
-	if(!ClipRect.Intersect(pContext->m_pClipRect, &m_Rect)) return;
-	pContext->m_pClipRect = &ClipRect;
+	if(!ClipRect.Intersect(pDC->m_pClipRect, &m_Rect)) return;
+	pDC->m_pClipRect = &ClipRect;
 	EGRect SelectRect;
 	GetSelectionRect(&SelectRect);
 	EGRect ClipRect2;
@@ -582,23 +606,23 @@ void EGRoller::DrawLabel(EGEvent *pEvent, EGLabel *pLabel)
 	ClipRect2.SetY1(m_Rect.GetY1());
 	ClipRect2.SetX2(m_Rect.GetX2());
 	ClipRect2.SetY2(SelectRect.GetY1());
-	if(ClipRect2.Intersect(&ClipRect2, pContext->m_pClipRect)) {
-		const EGRect *clip_area_ori2 = pContext->m_pClipRect;
-		pContext->m_pClipRect = &ClipRect2;
-		DrawLabel.Draw(pContext, &pLabel->m_Rect, pLabel->GetText(), nullptr);
-		pContext->m_pClipRect = clip_area_ori2;
+	if(ClipRect2.Intersect(&ClipRect2, pDC->m_pClipRect)) {
+		const EGRect *clip_area_ori2 = pDC->m_pClipRect;
+		pDC->m_pClipRect = &ClipRect2;
+		DrawLabel.Draw(pDC, &pLabel->m_Rect, pLabel->GetText(), nullptr);
+		pDC->m_pClipRect = clip_area_ori2;
 	}
 	ClipRect2.SetX1(m_Rect.GetX1());
 	ClipRect2.SetY1(SelectRect.GetY2());
 	ClipRect2.SetX2(m_Rect.GetX2());
 	ClipRect2.SetY2(m_Rect.GetY2());
-	if(ClipRect2.Intersect(&ClipRect2, pContext->m_pClipRect)) {
-		const EGRect *clip_area_ori2 = pContext->m_pClipRect;
-		pContext->m_pClipRect = &ClipRect2;
-		DrawLabel.Draw(pContext, &pLabel->m_Rect, pLabel->GetText(), nullptr);
-		pContext->m_pClipRect = clip_area_ori2;
+	if(ClipRect2.Intersect(&ClipRect2, pDC->m_pClipRect)) {
+		const EGRect *clip_area_ori2 = pDC->m_pClipRect;
+		pDC->m_pClipRect = &ClipRect2;
+		DrawLabel.Draw(pDC, &pLabel->m_Rect, pLabel->GetText(), nullptr);
+		pDC->m_pClipRect = clip_area_ori2;
 	}
-	pContext->m_pClipRect = pClipRectTemp;
+	pDC->m_pClipRect = pClipRectTemp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

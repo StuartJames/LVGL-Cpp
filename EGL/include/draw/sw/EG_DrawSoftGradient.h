@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -51,28 +52,28 @@ typedef struct EG_GradCacheItem_t {
 	uint32_t UnCached : 1;    //  The cache was too small so this item is not managed by the cache
 	EG_Color_t *pMap;         //  The computed gradient low bitdepth color map, points into the
                             //  cache's buffer, no free needed 
-	EG_Coord_t AllocatedSize; //  The map allocated size in colors 
-	EG_Coord_t Size;          //  The computed gradient color map size, in colors 
+	int32_t AllocatedSize; //  The map allocated size in colors 
+	int32_t Size;          //  The computed gradient color map size, in colors 
 #if _DITHER_GRADIENT
 	EG_Color32_t *pHighMap;   //  If dithering, we need to store the current, high bitdepth gradient
                             //  map too, points to the cache's buffer, no free needed 
 #if EG_DITHER_ERROR_DIFFUSION == 1
 	EG_SColor24_t *pError;    //  Error diffusion dithering algorithm requires storing the last error
                             //  drawn, points to the cache's buffer, no free needed  
-	EG_Coord_t Width;         //  The error array width in pixels 
+	int32_t Width;         //  The error array width in pixels 
 #endif
 #endif
 } EG_GradCacheItem_t;
 
 /////////////////////////////////////////////////////////////////////////////////
 
-EG_GradientColor_t /*EG_ATTRIBUTE_FAST_MEM*/ EG_GradientCalculate(const EG_GradDescriptor_t *dsc, EG_Coord_t range,
-																																	EG_Coord_t frac);
+EG_GradientColor_t /*EG_ATTRIBUTE_FAST_MEM*/ EG_GradientCalculate(const EG_GradDescriptor_t *dsc, int32_t range,
+																																	int32_t frac);
 
 void EG_GradientSetCacheSize(size_t max_bytes);
 
 void EG_GradientFreeCache(void);
 
-EG_GradCacheItem_t *EG_GetGradient(const EG_GradDescriptor_t *gradient, EG_Coord_t w, EG_Coord_t h);
+EG_GradCacheItem_t *EG_GetGradient(const EG_GradDescriptor_t *gradient, int32_t w, int32_t h);
 
 void EG_GradientCleanup(EG_GradCacheItem_t *grad);

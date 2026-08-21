@@ -10,10 +10,10 @@
 
 #define EG_IME_PINYIN_K9_MAX_INPUT  7
 
-typedef enum {
+enum lv_ime_pinyin_mode_t{
     EG_IME_PINYIN_MODE_K26,
     EG_IME_PINYIN_MODE_K9,
-} lv_ime_pinyin_mode_t;
+};
 
 /*Data of pinyin_dict*/
 typedef struct {

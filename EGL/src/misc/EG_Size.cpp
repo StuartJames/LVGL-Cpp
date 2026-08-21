@@ -17,7 +17,7 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
  *
  */
 
@@ -51,7 +51,7 @@ EGSize::EGSize(const EGSize *pInSize)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EGSize::EGSize(EG_Coord_t X, EG_Coord_t Y)
+EGSize::EGSize(int32_t X, int32_t Y)
 {
   m_X = X;
 	m_Y = Y;
@@ -59,7 +59,7 @@ EGSize::EGSize(EG_Coord_t X, EG_Coord_t Y)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void EGSize::Set(EG_Coord_t X, EG_Coord_t Y)
+void EGSize::Set(int32_t X, int32_t Y)
 {
   m_X = X;
 	m_Y = Y;
@@ -155,14 +155,14 @@ void EGScale::Negate(void)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGScale::Maximum(void)
+int32_t EGScale::Maximum(void)
 {
   return ((m_X > m_Y)) ? m_X : m_Y;  
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGScale::Minimum(void)
+int32_t EGScale::Minimum(void)
 {
   return ((m_X <= m_Y)) ? m_X : m_Y;  
 }

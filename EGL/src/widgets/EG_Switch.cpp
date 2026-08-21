@@ -1,23 +1,24 @@
 /*
- *        Copyright (Center) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -100,14 +101,14 @@ void EGSwitch::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
   EG_EventCode_e Code = pEvent->GetCode();
 	EGSwitch *pSwitch = (EGSwitch*)pEvent->GetTarget();
 	if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {
-		EG_Coord_t KnobLeft = pSwitch->GetStylePadLeft(EG_PART_KNOB);
-		EG_Coord_t KnobRight = pSwitch->GetStylePadRight(EG_PART_KNOB);
-		EG_Coord_t KnobTop = pSwitch->GetStylePadTop(EG_PART_KNOB);
-		EG_Coord_t KnobBottom = pSwitch->GetStylePadBottom(EG_PART_KNOB);
-		EG_Coord_t KnobSize = EG_MAX4(KnobLeft, KnobRight, KnobBottom, KnobTop);		// The smaller size is the knob diameter
+		int32_t KnobLeft = pSwitch->GetStylePadLeft(EG_PART_KNOB);
+		int32_t KnobRight = pSwitch->GetStylePadRight(EG_PART_KNOB);
+		int32_t KnobTop = pSwitch->GetStylePadTop(EG_PART_KNOB);
+		int32_t KnobBottom = pSwitch->GetStylePadBottom(EG_PART_KNOB);
+		int32_t KnobSize = EG_MAX4(KnobLeft, KnobRight, KnobBottom, KnobTop);		// The smaller size is the knob diameter
 		KnobSize += _EG_SWITCH_KNOB_EXT_AREA_CORRECTION;
 		KnobSize += pSwitch->CalculateExtDrawSize(EG_PART_KNOB);
-		EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();
+		int32_t *pSize = (int32_t*)pEvent->GetParam();
 		*pSize = EG_MAX(*pSize, KnobSize);
 		*pSize = EG_MAX(*pSize, pSwitch->CalculateExtDrawSize(EG_PART_INDICATOR));
 	}
@@ -124,19 +125,19 @@ void EGSwitch::EventCB(const EG_ClassType_t *pClass, EGEvent *pEvent)
 
 void EGSwitch::DrawMain(EGEvent *pEvent)
 {
-  EGDrawContext *pContext = pEvent->GetDrawContext();
-	EG_Coord_t BackLeft = GetStylePadLeft(EG_PART_MAIN);	// Calculate the indicator area
-	EG_Coord_t BackRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t BackTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t BackBottom = GetStylePadBottom(EG_PART_MAIN);
+  EGDeviceContext *pDC = pEvent->GetDeviceContext();
+	int32_t BackLeft = GetStylePadLeft(EG_PART_MAIN);	// Calculate the indicator area
+	int32_t BackRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t BackTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t BackBottom = GetStylePadBottom(EG_PART_MAIN);
 	EGRect IndicatorRect(m_Rect);	    // Draw the indicator. Respect the background'pSize padding
 	IndicatorRect.Deflate(BackLeft, BackRight, BackTop, BackBottom);
 	EGDrawRect DrawIndicator;
 	InititialseDrawRect(EG_PART_INDICATOR, &DrawIndicator);
-	DrawIndicator.Draw(pContext, &IndicatorRect);
-	EG_Coord_t AnimateX = 0;	// Draw the knob
-	EG_Coord_t KnobSize = GetHeight();
-	EG_Coord_t AnimateLength = m_Rect.GetWidth() - KnobSize;
+	DrawIndicator.Draw(pDC, &IndicatorRect);
+	int32_t AnimateX = 0;	// Draw the knob
+	int32_t KnobSize = GetHeight();
+	int32_t AnimateLength = m_Rect.GetWidth() - KnobSize;
 	if(m_AnimateState != EG_SWITCH_ANIM_STATE_INVALID) {
 		AnimateX = (AnimateLength * m_AnimateState) / EG_SWITCH_ANIM_STATE_END;		//  Use the animation's coordinate 
 	}
@@ -152,14 +153,14 @@ void EGSwitch::DrawMain(EGEvent *pEvent)
 	KnobRect.SetX2(KnobRect.GetX1() + KnobSize);
 	KnobRect.SetY1(m_Rect.GetY1());
 	KnobRect.SetY2(m_Rect.GetY2());
-	EG_Coord_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
-	EG_Coord_t KnobRight = GetStylePadRight(EG_PART_KNOB);
-	EG_Coord_t KnobTop = GetStylePadTop(EG_PART_KNOB);
-	EG_Coord_t KnobBottom = GetStylePadBottom(EG_PART_KNOB);
+	int32_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
+	int32_t KnobRight = GetStylePadRight(EG_PART_KNOB);
+	int32_t KnobTop = GetStylePadTop(EG_PART_KNOB);
+	int32_t KnobBottom = GetStylePadBottom(EG_PART_KNOB);
 	KnobRect.Inflate(KnobLeft, KnobRight, KnobTop, KnobBottom);	// Apply the paddings on the knob area
 	EGDrawRect DrawKnob;
 	InititialseDrawRect(EG_PART_KNOB, &DrawKnob);
-	DrawKnob.Draw(pContext, &KnobRect);
+	DrawKnob.Draw(pDC, &KnobRect);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

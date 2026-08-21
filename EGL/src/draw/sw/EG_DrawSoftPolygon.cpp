@@ -1,30 +1,31 @@
-/* 
+/*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
  
 
 
 #include "draw/sw/EG_SoftContext.h"
-#include "draw/sw/EG_DrawSoftBlend.h"     // lv_draw_sw_blend
+#include "draw/sw/EG_DrawSoftBlend.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Memory.h"
 #include "misc/EG_Point.h"
@@ -74,7 +75,7 @@ uint16_t TotalCount = 0;
 	}
 	const EGRect *pClipRect = pDrawPolygon->m_pContext->m_pClipRect;  // save the original
 	pDrawPolygon->m_pContext->m_pClipRect = &ClipRect;								// set the clip area as the visible part of the bounding box
-	EG_Coord_t MinY = pArray[0].m_Y;															// Find the lowest point
+	int32_t MinY = pArray[0].m_Y;															// Find the lowest point
 	int16_t IndexMinY = 0;
 	for(i = 1; i < VerticesCount; i++) {
 		if(pArray[i].m_Y < MinY) {
@@ -96,10 +97,10 @@ uint16_t TotalCount = 0;
      *   if angle(p_left) < angle(p_right) -> inverted
      *   dy_left/dx_left < dy_right/dx_right
      *   dy_left * dx_right < dy_right * dx_left */
-	EG_Coord_t DiffLeftX = pArray[NextCCW].m_X - pArray[IndexMinY].m_X;
-	EG_Coord_t DiffRightX = pArray[NextCW].m_X - pArray[IndexMinY].m_X;
-	EG_Coord_t DiffLeftY = pArray[NextCCW].m_Y - pArray[IndexMinY].m_Y;
-	EG_Coord_t DiffRightY = pArray[NextCW].m_Y - pArray[IndexMinY].m_Y;
+	int32_t DiffLeftX = pArray[NextCCW].m_X - pArray[IndexMinY].m_X;
+	int32_t DiffRightX = pArray[NextCW].m_X - pArray[IndexMinY].m_X;
+	int32_t DiffLeftY = pArray[NextCCW].m_Y - pArray[IndexMinY].m_Y;
+	int32_t DiffRightY = pArray[NextCW].m_Y - pArray[IndexMinY].m_Y;
 	bool Invert = false;
 	if(DiffLeftY * DiffRightX < DiffRightY * DiffLeftX) Invert = true;
 	do {
@@ -204,7 +205,7 @@ uint16_t TotalCount = 0;
 	}
 	const EGRect *pClipRect = pDrawPolygon->m_pContext->m_pClipRect;  // save the original
 	pDrawPolygon->m_pContext->m_pClipRect = &ClipRect;								// set the clip area as the visible part of the bounding box
-	EG_Coord_t MinY = pArray[0].m_Y;															// Find the lowest point
+	int32_t MinY = pArray[0].m_Y;															// Find the lowest point
 	int16_t IndexMinY = 0;
 	for(i = 1; i < VerticesCount; i++) {
 		if(pArray[i].m_Y < MinY) {

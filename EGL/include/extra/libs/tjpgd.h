@@ -18,7 +18,7 @@ typedef uint8_t jd_yuv_t;
 
 
 /* Error code */
-typedef enum {
+enum JRESULT{
 	JDR_OK = 0,	/* 0: Succeeded */
 	JDR_INTR,	/* 1: Interrupted by output function */	
 	JDR_INP,	/* 2: Device error or wrong termination of input stream */
@@ -28,7 +28,7 @@ typedef enum {
 	JDR_FMT1,	/* 6: Data format error (may be broken data) */
 	JDR_FMT2,	/* 7: Right format but not supported */
 	JDR_FMT3	/* 8: Not supported JPEG standard */
-} JRESULT;
+};
 
 /* Rectangular region in the output image */
 typedef struct {

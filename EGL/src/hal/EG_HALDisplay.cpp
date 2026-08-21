@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -31,6 +32,22 @@
 #include "core/EG_Refresh.h"
 #include "core/EG_Theme.h"
 #include "draw/sw/EG_SoftContext.h"
+
+#if EG_USE_GPU_ARM2D
+#include "draw/arm2d/EG_GPU_ARM2D.h"
+#elif EG_USE_GPU_NXP_VG_LITE
+#include "draw/nxp/vglite/EG_VGLite_Context.h"
+#elif EG_USE_GPU_NXP_PXP
+#include "draw/nxp/pxp/EG_PXP_Context.h"
+#elif EG_USE_GPU_RA6M3_G2D
+#include "draw/renesas/EG_Dave2Context.h"
+#elif EG_USE_GPU_SDL
+#include "draw/sdl/EG_SDL_Context.h"
+#elif EG_USE_GPU_STM32_DMA2D
+#include "draw/stm32_dma2d/EG_GPU_STM32_DMA2D.h"
+#elif EG_USE_GPU_SWM341_DMA2D
+#include "draw/swm341_dma2d/EG_GPU_SWM341_DMA2D.h"
+#endif
 
 #if EG_USE_THEME_DEFAULT
 #include "extra/themes/EG_DefaultTheme.h"
@@ -52,38 +69,30 @@ void EGDisplay::InitialiseDriver(EGDisplayDriver *pDriver)
 	pDriver->m_ColorChromaKey = EG_COLOR_CHROMA_KEY;
 
 #if EG_USE_GPU_RA6M3_G2D
-	pDriver->draw_ctx_init = lv_draw_ra6m3_2d_ctx_init;
-	pDriver->draw_ctx_deinit = lv_draw_ra6m3_2d_ctx_init;
-	pDriver->draw_ctx_size = sizeof(lv_draw_ra6m3_dma2d_ctx_t);
+  EGDave2Context *pDC = new EGDave2Context;
 #elif EG_USE_GPU_STM32_DMA2D
-	pDriver->draw_ctx_init = lv_draw_stm32_dma2d_ctx_init;
-	pDriver->draw_ctx_deinit = lv_draw_stm32_dma2d_ctx_init;
-	pDriver->draw_ctx_size = sizeof(lv_draw_stm32_dma2d_ctx_t);
+  EGSTM32Context *pDC = new EGSTM32Context;
 #elif EG_USE_GPU_SWM341_DMA2D
-	pDriver->draw_ctx_init = lv_draw_swm341_dma2d_ctx_init;
-	pDriver->draw_ctx_deinit = lv_draw_swm341_dma2d_ctx_init;
-	pDriver->draw_ctx_size = sizeof(lv_draw_swm341_dma2d_ctx_t);
+  EGSWM341Context *pDC = new EGSWM341Context;
 #elif EG_USE_GPU_NXP_VG_LITE
-	pDriver->draw_ctx_init = lv_draw_vglite_ctx_init;
-	pDriver->draw_ctx_deinit = lv_draw_vglite_ctx_deinit;
-	pDriver->draw_ctx_size = sizeof(lv_draw_vglite_ctx_t);
+  EGVGLiteContext *pDC = new EGVGLiteContext;
 #elif EG_USE_GPU_NXP_PXP
-	pDriver->draw_ctx_init = lv_draw_pxp_ctx_init;
-	pDriver->draw_ctx_deinit = lv_draw_pxp_ctx_deinit;
-	pDriver->draw_ctx_size = sizeof(lv_draw_pxp_ctx_t);
+  EGPXPContext *pDC = new EGPXPContext;
 #elif EG_USE_GPU_SDL
-	pDriver->draw_ctx_init = lv_draw_sdl_init_ctx;
-	pDriver->draw_ctx_deinit = lv_draw_sdl_deinit_ctx;
-	pDriver->draw_ctx_size = sizeof(lv_draw_sdl_ctx_t);
+  EGSDLContext *pDC = new EGSDLContext;
 #elif EG_USE_GPU_ARM2D
-	pDriver->draw_ctx_init = lv_draw_arm2d_ctx_init;
-	pDriver->draw_ctx_deinit = lv_draw_arm2d_ctx_init;
-	pDriver->draw_ctx_size = sizeof(lv_draw_arm2d_ctx_t);
+  EGARM2DContext *pDC = new EGARM2DContext;
 #else
-	EGSoftContext *pDrawContext = new EGSoftContext;
-  pDrawContext->InitialiseContext();
-  pDriver->m_pContext = (EGDrawContext*)pDrawContext;
+	EGSoftContext *pDC = new EGSoftContext;
 #endif
+
+#if EG_USE_GPU_SDL
+  pDC->InitialiseContext(pDriver);
+#else
+  pDC->InitialiseContext();
+#endif
+
+  pDriver->m_pContext = (EGDeviceContext*)pDC;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,10 +119,10 @@ EGDisplay* EGDisplay::RegisterDriver(EGDisplayDriver *pDriver)
 	if(pDisplay == nullptr) return nullptr;
 	m_DisplayList.AddHead(pDisplay);
 	if(pDriver->m_pContext == nullptr) {	// Create a draw context if not created yet
-		EGDrawContext *pDrawContext = new EGDrawContext;
-		if(pDrawContext == nullptr) return nullptr;
-		pDriver->InitialiseContext(pDrawContext);
-		pDriver->m_pContext = pDrawContext;
+		EGDeviceContext *pDC = new EGDeviceContext;
+		if(pDC == nullptr) return nullptr;
+		pDriver->InitialiseContext(pDC);
+		pDriver->m_pContext = pDC;
 	}
 	pDisplay->m_pDriver = pDriver;
 	pDisplay->m_InvalidEnableCount = 1;
@@ -168,8 +177,8 @@ void EGDisplay::UpdateDriver(EGDisplayDriver *pdriver)
 		m_pDriver->m_FullRefresh = 0;
 		EG_LOG_WARN("FullRefresh requires at least screen sized draw buffer(s)");
 	}
-	EG_Coord_t Width = GetHorizontalRes();
-	EG_Coord_t Height = GetVerticalRes();
+	int32_t Width = GetHorizontalRes();
+	int32_t Height = GetVerticalRes();
 	uint32_t i;
 	for(i = 0; i < m_ScreenCount; i++) {
 		EGRect PrevArea;
@@ -236,7 +245,7 @@ EGDisplay* EGDisplay::GetDefault(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetHorizontalRes(void)
+int32_t EGDisplay::GetHorizontalRes(void)
 {
   switch(m_pDriver->m_Rotated) {
     case EG_DISP_ROT_90:
@@ -249,7 +258,7 @@ EG_Coord_t EGDisplay::GetHorizontalRes(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetVerticalRes(void)
+int32_t EGDisplay::GetVerticalRes(void)
 {
   switch(m_pDriver->m_Rotated) {
     case EG_DISP_ROT_90:
@@ -262,7 +271,7 @@ EG_Coord_t EGDisplay::GetVerticalRes(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetPhysicalHorizontalRes(void)
+int32_t EGDisplay::GetPhysicalHorizontalRes(void)
 {
   switch(m_pDriver->m_Rotated) {
     case EG_DISP_ROT_90:
@@ -275,7 +284,7 @@ EG_Coord_t EGDisplay::GetPhysicalHorizontalRes(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetPhysicalVerticalRes(void)
+int32_t EGDisplay::GetPhysicalVerticalRes(void)
 {
   switch(m_pDriver->m_Rotated) {
     case EG_DISP_ROT_90:
@@ -288,7 +297,7 @@ EG_Coord_t EGDisplay::GetPhysicalVerticalRes(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetOffsetX(void)
+int32_t EGDisplay::GetOffsetX(void)
 {
   switch(m_pDriver->m_Rotated) {
     case EG_DISP_ROT_90:
@@ -304,7 +313,7 @@ EG_Coord_t EGDisplay::GetOffsetX(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetOffsetY(void)
+int32_t EGDisplay::GetOffsetY(void)
 {
   switch(m_pDriver->m_Rotated) {
     case EG_DISP_ROT_90:
@@ -327,7 +336,7 @@ bool EGDisplay::GetAntialiasing(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGDisplay::GetDPI(const EGDisplay *pDisplay)
+int32_t EGDisplay::GetDPI(const EGDisplay *pDisplay)
 {
 	if(pDisplay == nullptr) pDisplay = m_pDefaultDisplay;
 	if(pDisplay == nullptr) return EG_DPI_DEF; // Do not return 0 because it might be a divider
@@ -417,7 +426,7 @@ EG_TreeWalkResult_e EGDisplay::InvalidateLayoutCB(EGObject *pObj, void *pUserDat
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetPixelAlpha1CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_Coord_t Width, EG_Coord_t x, EG_Coord_t y,
+void EGDisplay::SetPixelAlpha1CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, int32_t Width, int32_t x, int32_t y,
 											EG_Color_t color, EG_OPA_t opa)
 {
 	(void)pDriver; /*Unused*/
@@ -431,7 +440,7 @@ void EGDisplay::SetPixelAlpha1CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetPixelAlpha2CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_Coord_t Width, EG_Coord_t x, EG_Coord_t y,
+void EGDisplay::SetPixelAlpha2CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, int32_t Width, int32_t x, int32_t y,
 											EG_Color_t color, EG_OPA_t opa)
 {
 	(void)pDriver; /*Unused*/
@@ -445,7 +454,7 @@ void EGDisplay::SetPixelAlpha2CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetPixelAlpha4CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_Coord_t Width, EG_Coord_t x, EG_Coord_t y,
+void EGDisplay::SetPixelAlpha4CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, int32_t Width, int32_t x, int32_t y,
 											EG_Color_t color, EG_OPA_t opa)
 {
 	(void)pDriver; /*Unused*/
@@ -459,7 +468,7 @@ void EGDisplay::SetPixelAlpha4CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetPixelAlpha8CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_Coord_t Width, EG_Coord_t x, EG_Coord_t y,
+void EGDisplay::SetPixelAlpha8CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, int32_t Width, int32_t x, int32_t y,
 											EG_Color_t color, EG_OPA_t opa)
 {
 	(void)pDriver; /*Unused*/
@@ -473,7 +482,7 @@ void EGDisplay::SetPixelAlpha8CB(EGDisplayDriver *pDriver, uint8_t *pBuffer, EG_
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetPixelAlphaGeneric(EGImageBuffer *pImage, EG_Coord_t x, EG_Coord_t y, EG_Color_t color, EG_OPA_t opa)
+void EGDisplay::SetPixelAlphaGeneric(EGImageBuffer *pImage, int32_t x, int32_t y, EG_Color_t color, EG_OPA_t opa)
 {
 	pImage->m_Header.AlwaysZero = 0;
 	pImage->m_Header.Height = 1; /*Doesn't matter*/
@@ -487,8 +496,8 @@ void EGDisplay::SetPixelAlphaGeneric(EGImageBuffer *pImage, EG_Coord_t x, EG_Coo
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGDisplay::SetPixelTrueColorAlpha(EGDisplayDriver *pDriver, uint8_t *buf, EG_Coord_t buf_w,
-														EG_Coord_t x, EG_Coord_t y, EG_Color_t color, EG_OPA_t opa)
+void EGDisplay::SetPixelTrueColorAlpha(EGDisplayDriver *pDriver, uint8_t *buf, int32_t buf_w,
+														int32_t x, int32_t y, EG_Color_t color, EG_OPA_t opa)
 {
 	(void)pDriver; /*Unused*/
 	uint8_t *buf_px = buf + (buf_w * y * EG_IMG_PX_SIZE_ALPHA_BYTE + x * EG_IMG_PX_SIZE_ALPHA_BYTE);
@@ -532,20 +541,20 @@ EGDisplayDriver::EGDisplayDriver(void)
   CleanDcacheCB = nullptr;
   UpdateCB = nullptr;
   RenderStartCB = nullptr;
-  m_HorizontalRes = 0;          
-  m_VerticalRes = 0;            
-  m_PhysicalHorizontalRes = 0;  
-  m_PhysicalVerticalRes = 0;    
-  m_OffsetX = 0;                
-  m_OffsetY = 0;                
-  m_pDrawBuffers = 0;           
-  m_DirectMode = 0;         
-  m_FullRefresh = 0;        
-  m_SoftRotate = 0;         
-  m_AntiAliasing = 0;       
-  m_Rotated = 0;            
-  m_ScreenTransparent = 0;  
-  m_DPI = 0;               
+  m_HorizontalRes = 0;
+  m_VerticalRes = 0;
+  m_PhysicalHorizontalRes = 0;
+  m_PhysicalVerticalRes = 0;
+  m_OffsetX = 0;
+  m_OffsetY = 0;
+  m_pDrawBuffers = 0;
+  m_DirectMode = 0;
+  m_FullRefresh = 0;
+  m_SoftRotate = 0;
+  m_AntiAliasing = 0;
+  m_Rotated = 0;
+  m_ScreenTransparent = 0;
+  m_DPI = 0;
   m_pContext = nullptr;
   m_ContextSize = 0;
 }
@@ -558,12 +567,12 @@ EGDisplayDriver::~EGDisplayDriver(void)
 
 ///////////////////////////////////////////////////////////////////////
 
-void EGDisplayDriver::InitialiseContext(EGDrawContext *pDrawContext)
+void EGDisplayDriver::InitialiseContext(EGDeviceContext *pDC)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////
 
-void EGDisplayDriver::DeinitialiseContext(EGDrawContext *pDrawContext)
+void EGDisplayDriver::DeinitialiseContext(EGDeviceContext *pDC)
 {
 }

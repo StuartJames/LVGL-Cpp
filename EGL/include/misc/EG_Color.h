@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -70,12 +71,16 @@ enum {
 
 #if EG_COLOR_DEPTH == 1
 #define EG_COLOR_SIZE 8
+#define BYTES_PER_PIXEL 1
 #elif EG_COLOR_DEPTH == 8
 #define EG_COLOR_SIZE 8
+#define BYTES_PER_PIXEL 1
 #elif EG_COLOR_DEPTH == 16
 #define EG_COLOR_SIZE 16
+#define BYTES_PER_PIXEL 2
 #elif EG_COLOR_DEPTH == 32
 #define EG_COLOR_SIZE 32
+#define BYTES_PER_PIXEL 4
 #else
 #error "Invalid EG_COLOR_DEPTH in EG_Config.h! Set it to 1, 8, 16 or 32!"
 #endif
@@ -269,7 +274,7 @@ typedef struct EG_ColorFilterProps_t {
 	void *pParam;
 } EG_ColorFilterProps_t;
 
-typedef enum : uint8_t {
+enum EG_Palette_e : uint8_t {
 	EG_PALETTE_RED,          // 00
 	EG_PALETTE_PINK,         // 01
 	EG_PALETTE_PURPLE,       // 02
@@ -291,10 +296,10 @@ typedef enum : uint8_t {
 	EG_PALETTE_GREY,         // 18
 	EG_PALETTE_LAST,         // 19
 	EG_PALETTE_NONE = 0xff,
-} EG_Palette_e;
+};
 
 // Image color format
-typedef enum EG_ImageColorFormat_t : uint8_t{
+enum EG_ImageColorFormat_t : uint8_t{
     EG_COLOR_FORMAT_UNKNOWN = 0,
 
     EG_COLOR_FORMAT_RAW,              // Contains the file as it is. Needs custom decoder function
@@ -322,7 +327,7 @@ typedef enum EG_ImageColorFormat_t : uint8_t{
     EG_COLOR_FORMAT_RGBA8565,                 // Format 3 bytes: Alpha 8 bit, Red: 5 bit, Green: 6 bit, Blue: 5 bit
     EG_COLOR_FORMAT_RGB565A8,                 // Format 3 bytes: Red: 5 bit, Green: 6 bit, Blue: 5 bit, Alpha 8 bit
 
-} EG_ImageColorFormat_t;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 

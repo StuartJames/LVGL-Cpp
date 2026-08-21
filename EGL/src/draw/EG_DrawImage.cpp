@@ -1,23 +1,24 @@
-/* 
+/*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -32,22 +33,35 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawImage::EGDrawImage(void) : 
-  m_pContext(nullptr),
+EGDrawImage::EGDrawImage(void) : EGDrawBase(),
   m_Angle(0),
   m_Scale(EG_SCALE_NONE),
   m_Pivot(0, 0),
   m_Recolor(EG_ColorBlack()),
   m_OPA(EG_OPA_COVER),
-  m_BlendMode(EG_BLEND_MODE_NORMAL),
-  m_FrameID(0)
+  m_FrameID(0),
+  m_BlendMode(EG_BLEND_MODE_NORMAL)
 {
 	m_AntiAlias = EG_COLOR_DEPTH > 8 ? 1 : 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGDrawImage::Draw(const EGDrawContext *pDrawContext, const EGRect *pRect, const void *pSource)
+void EGDrawImage::Initialise(void)
+{
+  m_Angle = 0;
+  m_Scale = EG_SCALE_NONE;
+  m_Pivot.Set(0, 0);
+  m_Recolor = EG_ColorBlack();
+  m_OPA = EG_OPA_COVER;
+  m_BlendMode = EG_BLEND_MODE_NORMAL;
+  m_FrameID = 0;
+	m_AntiAlias = EG_COLOR_DEPTH > 8 ? 1 : 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+void EGDrawImage::Draw(EGDeviceContext *pDC, const EGRect *pRect, const void *pSource)
 {
 EG_Result_t res = EG_RES_INVALID;
 
@@ -57,9 +71,9 @@ EG_Result_t res = EG_RES_INVALID;
 		return;
 	}
 	if(m_OPA <= EG_OPA_MIN) return;
-  m_pContext = pDrawContext;
-	if(pDrawContext->DrawImageProc) {
-		res = pDrawContext->DrawImageProc(this, pRect, pSource);
+  m_pContext = pDC;
+	if(pDC->DrawImageProc) {
+		res = pDC->DrawImageProc(this, pRect, pSource);
 	}
 	if(res != EG_RES_OK) {
 		res = PreDraw(pRect, pSource);
@@ -113,7 +127,7 @@ uint8_t EGDrawImage::GetPixelSize(EG_ImageColorFormat_t ColorFormat)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-bool EGDrawImage::IsChromaKeyed(EG_ImageColorFormat_t ColorFormat)
+bool EGDrawImage::IsChromaKeyed(EG_ImageColorFormat_t ColorFormat) const
 {
 	switch(ColorFormat) {
 		case EG_COLOR_FORMAT_NATIVE_CHROMA_KEYED:
@@ -151,9 +165,9 @@ bool EGDrawImage::HasAlpha(EG_ImageColorFormat_t ColorFormat)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EG_ImageSource_t EGDrawImage::GetType(const void *pSource)
+EG_ImageSource_e EGDrawImage::GetType(const void *pSource)
 {
-	EG_ImageSource_t SourceType = EG_IMG_SRC_UNKNOWN;
+	EG_ImageSource_e SourceType = EG_IMG_SRC_UNKNOWN;
 
 	if(pSource == nullptr) return SourceType;
 	const uint8_t *pUint8 = (uint8_t *)pSource;
@@ -172,10 +186,10 @@ EG_ImageSource_t EGDrawImage::GetType(const void *pSource)
 		SourceType = EG_IMG_SRC_SYMBOL;  // Symbols begins after 0x7F
 	}
 	else {
-		SourceType = EG_IMG_SRC_VARIABLE;  // `lv_img_dsc_t` is draw to the first byte < 0x20
+		SourceType = EG_IMG_SRC_VARIABLE;  // draw to the first byte < 0x20
 	}
 	if(EG_IMG_SRC_UNKNOWN == SourceType) {
-		EG_LOG_WARN("lv_img_src_get_type: unknown image type");
+		EG_LOG_WARN("EGDrawImage::GetType: unknown image type");
 	}
 	return SourceType;
 }

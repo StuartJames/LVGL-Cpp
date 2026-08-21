@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -25,9 +26,9 @@
 #if EG_USE_CHECKBOX != 0
 
 #include "misc/EG_Assert.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 #include "core/EG_Group.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,16 +141,16 @@ void EGCheckbox::Event(EGEvent *pEvent)
   if(Code == EG_EVENT_GET_SELF_SIZE) {
 		EGPoint *pPoint = (EGPoint*)pEvent->GetParam();
 		const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-		EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
-		EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-		EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-		EGPoint TextSize;
+		int32_t FontHeight = EG_FontGetLineHeight(pFont);
+		int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+		int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+		EGSize TextSize;
 		EG_GetTextSize(&TextSize, m_pText, pFont, Kerning, LineSpace, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
-		EG_Coord_t bg_colp = GetStylePadColumn(EG_PART_MAIN);
-		EG_Coord_t marker_leftp = GetStylePadLeft(EG_PART_INDICATOR);
-		EG_Coord_t marker_rightp = GetStylePadRight(EG_PART_INDICATOR);
-		EG_Coord_t marker_topp = GetStylePadTop(EG_PART_INDICATOR);
-		EG_Coord_t marker_bottomp = GetStylePadBottom(EG_PART_INDICATOR);
+		int32_t bg_colp = GetStylePadColumn(EG_PART_MAIN);
+		int32_t marker_leftp = GetStylePadLeft(EG_PART_INDICATOR);
+		int32_t marker_rightp = GetStylePadRight(EG_PART_INDICATOR);
+		int32_t marker_topp = GetStylePadTop(EG_PART_INDICATOR);
+		int32_t marker_bottomp = GetStylePadBottom(EG_PART_INDICATOR);
 		EGPoint marker_size;
 		marker_size.m_X = FontHeight + marker_leftp + marker_rightp;
 		marker_size.m_Y = FontHeight + marker_topp + marker_bottomp;
@@ -157,8 +158,8 @@ void EGCheckbox::Event(EGEvent *pEvent)
 		pPoint->m_Y = EG_MAX(marker_size.m_Y, TextSize.m_Y);
 	}
 	else if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {
-		EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();
-		EG_Coord_t m = CalculateExtDrawSize(EG_PART_INDICATOR);
+		int32_t *pSize = (int32_t*)pEvent->GetParam();
+		int32_t m = CalculateExtDrawSize(EG_PART_INDICATOR);
 		*pSize = EG_MAX(*pSize, m);
 	}
 	else if(Code == EG_EVENT_DRAW_MAIN)	Draw(pEvent);
@@ -168,19 +169,19 @@ void EGCheckbox::Event(EGEvent *pEvent)
 
 void EGCheckbox::Draw(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t FontHeight = EG_FontGetLineHeight(pFont);
-	EG_Coord_t bg_border = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t bg_topp = GetStylePadTop(EG_PART_MAIN) + bg_border;
-	EG_Coord_t bg_leftp = GetStylePadLeft(EG_PART_MAIN) + bg_border;
-	EG_Coord_t bg_colp = GetStylePadColumn(EG_PART_MAIN);
-	EG_Coord_t marker_leftp = GetStylePadLeft(EG_PART_INDICATOR);
-	EG_Coord_t marker_rightp = GetStylePadRight(EG_PART_INDICATOR);
-	EG_Coord_t marker_topp = GetStylePadTop(EG_PART_INDICATOR);
-	EG_Coord_t marker_bottomp = GetStylePadBottom(EG_PART_INDICATOR);
-	EG_Coord_t TransformWidth = GetStyleTransformWidth(EG_PART_INDICATOR);
-	EG_Coord_t TransformHeight = GetStyleTransformHeight(EG_PART_INDICATOR);
+	int32_t FontHeight = EG_FontGetLineHeight(pFont);
+	int32_t bg_border = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t bg_topp = GetStylePadTop(EG_PART_MAIN) + bg_border;
+	int32_t bg_leftp = GetStylePadLeft(EG_PART_MAIN) + bg_border;
+	int32_t bg_colp = GetStylePadColumn(EG_PART_MAIN);
+	int32_t marker_leftp = GetStylePadLeft(EG_PART_INDICATOR);
+	int32_t marker_rightp = GetStylePadRight(EG_PART_INDICATOR);
+	int32_t marker_topp = GetStylePadTop(EG_PART_INDICATOR);
+	int32_t marker_bottomp = GetStylePadBottom(EG_PART_INDICATOR);
+	int32_t TransformWidth = GetStyleTransformWidth(EG_PART_INDICATOR);
+	int32_t TransformHeight = GetStyleTransformHeight(EG_PART_INDICATOR);
 	EGDrawRect DrawRect;
 	InititialseDrawRect(EG_PART_INDICATOR, &DrawRect);
 	EGRect MarkerRect;
@@ -190,28 +191,28 @@ void EGCheckbox::Draw(EGEvent *pEvent)
 	MarkerRect.SetY2(MarkerRect.GetY1() + FontHeight + marker_topp + marker_bottomp - 1);
 	EGRect MarkerTransform(&MarkerRect);
 	MarkerTransform.Inflate(TransformWidth, TransformHeight);
-	EGDrawDiscriptor DrawDiscriptor;
-	DrawDiscriptor.m_pDrawRect = &DrawRect;
-	DrawDiscriptor.m_pClass = m_pClass;
-	DrawDiscriptor.m_Type = EG_CHECKBOX_DRAW_PART_BOX;
-	DrawDiscriptor.m_pRect = &MarkerTransform;
-	DrawDiscriptor.m_Part = EG_PART_INDICATOR;
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor); 
-	DrawRect.Draw(pContext, &MarkerTransform);
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-	EGPoint TextSize;
+	EGEventDC EventDC(pDC); 
+	EventDC.m_pDrawRect = &DrawRect;
+	EventDC.m_pClass = m_pClass;
+	EventDC.m_Type = EG_CHECKBOX_DRAW_PART_BOX;
+	EventDC.m_pRect = &MarkerTransform;
+	EventDC.m_Part = EG_PART_INDICATOR;
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC); 
+	DrawRect.Draw(pDC, &MarkerTransform);
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+	EGSize TextSize;
 	EG_GetTextSize(&TextSize, m_pText, pFont, Kerning, LineSpace, EG_COORD_MAX, EG_TEXT_FLAG_NONE);
 	EGDrawLabel DrawLabel;
 	InititialseDrawLabel(EG_PART_MAIN, &DrawLabel);
-	EG_Coord_t y_ofs = (MarkerRect.GetHeight() - FontHeight) / 2;
+	int32_t y_ofs = (MarkerRect.GetHeight() - FontHeight) / 2;
 	EGRect TextRect;
 	TextRect.SetX1(MarkerRect.GetX2() + bg_colp);
 	TextRect.SetX2(TextRect.GetX1() + TextSize.m_X);
 	TextRect.SetY1(m_Rect.GetY1() + bg_topp + y_ofs);
 	TextRect.SetY2(TextRect.GetY1() + TextSize.m_Y);
-	DrawLabel.Draw(pContext, &TextRect, m_pText, nullptr);
+	DrawLabel.Draw(pDC, &TextRect, m_pText, nullptr);
 }
 
 

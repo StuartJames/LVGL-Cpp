@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -31,7 +32,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum : uint8_t {
+enum EG_ScreenAnimateType_e {
     EG_SCR_LOAD_ANIM_NONE,
     EG_SCR_LOAD_ANIM_OVER_LEFT,
     EG_SCR_LOAD_ANIM_OVER_RIGHT,
@@ -47,10 +48,10 @@ typedef enum : uint8_t {
     EG_SCR_LOAD_ANIM_OUT_RIGHT,
     EG_SCR_LOAD_ANIM_OUT_TOP,
     EG_SCR_LOAD_ANIM_OUT_BOTTOM,
-} EG_ScreenAnimateType_t;
+};
 
-inline EG_Coord_t GetHorizontalResolution(void);
-inline EG_Coord_t GetVerticalResolution(void);
+inline int32_t GetHorizontalResolution(void);
+inline int32_t GetVerticalResolution(void);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +77,7 @@ public:
   static void         EnableInvalidation(EGDisplay *pDisplay, bool Enable);
   static EGTimer*     GetRefereshTimer(EGDisplay *pDisplay);
   static bool         IsInvalidationEnabled(EGDisplay *pDisplay);
-  static void         LoadAnimation(EGObject *pScreen, EG_ScreenAnimateType_t anim_type, uint32_t time, uint32_t delay, bool auto_del);
+  static void         LoadAnimation(EGObject *pScreen, EG_ScreenAnimateType_e anim_type, uint32_t time, uint32_t delay, bool auto_del);
   static EGDisplay*   GetDisplay(const EGObject *pScreen);
 
   EGDisplayDriver       *m_pDriver;                            // Driver to the display
@@ -109,17 +110,17 @@ private:
   static void         SetAnimationX(EGAnimate *pAnimate, int32_t v);
   static void         SetAnimationY(EGAnimate *pAnimate, int32_t v);
   static void         AnimationEnd(EGAnimate *pAnimate);
-  static bool         IsOutAnimation(EG_ScreenAnimateType_t a);
+  static bool         IsOutAnimation(EG_ScreenAnimateType_e a);
 
 // Display HAL Section //
 public:
   void                UpdateDriver(EGDisplayDriver *pdriver); // Update the driver in run time.
-  EG_Coord_t          GetHorizontalRes(void); // Get the horizontal resolution of a display
-  EG_Coord_t          GetVerticalRes(void); // Get the vertical resolution of a display
-  EG_Coord_t          GetPhysicalHorizontalRes(void); // Get the full / physical horizontal resolution of a display
-  EG_Coord_t          GetPhysicalVerticalRes(void); // Get the full / physical vertical resolution of a display
-  EG_Coord_t          GetOffsetX(void); // Get the horizontal offset from the full / physical display
-  EG_Coord_t          GetOffsetY(void); // Get the vertical offset from the full / physical display
+  int32_t             GetHorizontalRes(void); // Get the horizontal resolution of a display
+  int32_t             GetVerticalRes(void); // Get the vertical resolution of a display
+  int32_t             GetPhysicalHorizontalRes(void); // Get the full / physical horizontal resolution of a display
+  int32_t             GetPhysicalVerticalRes(void); // Get the full / physical vertical resolution of a display
+  int32_t             GetOffsetX(void); // Get the horizontal offset from the full / physical display
+  int32_t             GetOffsetY(void); // Get the vertical offset from the full / physical display
   bool                GetAntialiasing(void); // Get if anti-aliasing is enabled for a display or not
   void                SetRotation(EG_DisplayRotation_t rotation); 
   EG_DisplayRotation_t    GetRotation(void); // Get the current rotation of this display.
@@ -134,7 +135,7 @@ public:
   static bool         FlushIsLast(EGDisplayDriver * pdriver); // Tell if it's the last area of the refreshing process.
   static void         Remove(EGDisplay *pDisplay); // Remove a display
   static EGDisplay*   GetNext(EGDisplay *pDisplay); // Get the next display.
-  static EG_Coord_t   GetDPI(const EGDisplay *pDisplay); // Get the DPI of the display
+  static int32_t      GetDPI(const EGDisplay *pDisplay); // Get the DPI of the display
   static EGDisplay*   GetDefault(void); // Get the default display
 
   static EGList       m_DisplayList;         // Linked list to store the displays
@@ -142,17 +143,17 @@ public:
 
 private:
   static EG_TreeWalkResult_e  InvalidateLayoutCB(EGObject *pObj, void *pUserData);
-  static void                 SetPixelAlpha1CB(EGDisplayDriver *disp_drv, uint8_t *buf, EG_Coord_t buf_w, EG_Coord_t x, EG_Coord_t y,
+  static void                 SetPixelAlpha1CB(EGDisplayDriver *disp_drv, uint8_t *buf, int32_t buf_w, int32_t x, int32_t y,
                                            EG_Color_t color, EG_OPA_t opa);
-  static void                 SetPixelAlpha2CB(EGDisplayDriver *disp_drv, uint8_t *buf, EG_Coord_t buf_w, EG_Coord_t x, EG_Coord_t y,
+  static void                 SetPixelAlpha2CB(EGDisplayDriver *disp_drv, uint8_t *buf, int32_t buf_w, int32_t x, int32_t y,
                                            EG_Color_t color, EG_OPA_t opa);
-  static void                 SetPixelAlpha4CB(EGDisplayDriver *disp_drv, uint8_t *buf, EG_Coord_t buf_w, EG_Coord_t x, EG_Coord_t y,
+  static void                 SetPixelAlpha4CB(EGDisplayDriver *disp_drv, uint8_t *buf, int32_t buf_w, int32_t x, int32_t y,
                                            EG_Color_t color, EG_OPA_t opa);
-  static void                 SetPixelAlpha8CB(EGDisplayDriver *disp_drv, uint8_t *buf, EG_Coord_t buf_w, EG_Coord_t x, EG_Coord_t y,
+  static void                 SetPixelAlpha8CB(EGDisplayDriver *disp_drv, uint8_t *buf, int32_t buf_w, int32_t x, int32_t y,
                                            EG_Color_t color, EG_OPA_t opa);
-  static void                 SetPixelAlphaGeneric(EGImageBuffer *pImage, EG_Coord_t x, EG_Coord_t y, EG_Color_t color, EG_OPA_t opa);
-  static void                 SetPixelTrueColorAlpha(EGDisplayDriver *disp_drv, uint8_t *buf, EG_Coord_t buf_w,
-                                                  EG_Coord_t x, EG_Coord_t y, EG_Color_t color, EG_OPA_t opa);
+  static void                 SetPixelAlphaGeneric(EGImageBuffer *pImage, int32_t x, int32_t y, EG_Color_t color, EG_OPA_t opa);
+  static void                 SetPixelTrueColorAlpha(EGDisplayDriver *disp_drv, uint8_t *buf, int32_t buf_w,
+                                                  int32_t x, int32_t y, EG_Color_t color, EG_OPA_t opa);
 
 };
 
@@ -188,38 +189,38 @@ static inline void EGLoadScreen(EGObject *pScreen)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t GetHorizontalResolution(void)
+inline int32_t GetHorizontalResolution(void)
 {
   return EGDisplay::GetDefault()->GetHorizontalRes();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline EG_Coord_t eg_dpx(EG_Coord_t n)
+static inline int32_t eg_dpx(int32_t n)
 {
   return EG_DPX(n);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t GetVerticalResolution(void)
+inline int32_t GetVerticalResolution(void)
 {
   return EGDisplay::GetDefault()->GetVerticalRes();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EG_DisplayDPX(const EGDisplay *pDisplay, EG_Coord_t n)
+inline int32_t EG_DisplayDPX(const EGDisplay *pDisplay, int32_t n)
 {
   return _EG_DPX_CALC(EGDisplay::GetDPI(pDisplay), n);
 }
 
-#ifndef EG_HORZ_RES
-#define EG_HORZ_RES EGDisplay::GetDefault()->GetHorizontalRes()
+#ifndef EG_DISP_HORZ_RES
+#define EG_DISP_HORZ_RES EGDisplay::GetDefault()->GetHorizontalRes()
 #endif
 
-#ifndef EG_VERT_RES
-#define EG_VERT_RES EGDisplay::GetDefault()->GetVerticalRes()
+#ifndef EG_DISP_VERT_RES
+#define EG_DISP_VERT_RES EGDisplay::GetDefault()->GetVerticalRes()
 #endif
 
 

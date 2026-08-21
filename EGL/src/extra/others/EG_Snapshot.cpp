@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -47,9 +48,9 @@ uint32_t EG_SnapshotBufferSizeRequired(EGObject *pObj, EG_ImageColorFormat_t Col
 	pObj->UpdateLayout();
 
 	/*Width and height determine snapshot image size.*/
-	EG_Coord_t Wide = pObj->GetWidth();
-	EG_Coord_t Height = pObj->GetHeight();
-	EG_Coord_t ext_size = pObj->GetExtDrawSize();
+	int32_t Wide = pObj->GetWidth();
+	int32_t Height = pObj->GetHeight();
+	int32_t ext_size = pObj->GetExtDrawSize();
 	Wide += ext_size * 2;
 	Height += ext_size * 2;
 	uint8_t px_size = EGDrawImage::GetPixelSize(ColorFormat);
@@ -78,9 +79,9 @@ EG_Result_t EG_TakeSnapshotToBuffer(EGObject *pObj, EG_ImageColorFormat_t ColorF
 	uint32_t SizeNeeded = EG_SnapshotBufferSizeRequired(pObj, ColorFormat);
 	if(SizeNeeded == 0 || BufferSize < SizeNeeded) return EG_RES_INVALID;
 	/*Width and height determine snapshot image size.*/
-	EG_Coord_t Wide = pObj->GetWidth();
-	EG_Coord_t Height = pObj->GetHeight();
-	EG_Coord_t ext_size = pObj->GetExtDrawSize();
+	int32_t Wide = pObj->GetWidth();
+	int32_t Height = pObj->GetHeight();
+	int32_t ext_size = pObj->GetExtDrawSize();
 	Wide += ext_size * 2;
 	Height += ext_size * 2;
 	EGRect SnapRect;
@@ -95,19 +96,19 @@ EG_Result_t EG_TakeSnapshotToBuffer(EGObject *pObj, EG_ImageColorFormat_t ColorF
 	pDisplay->UseGenericSetPixelCB(&Driver, ColorFormat);
 	EGDisplay FakeDisplay;
 	FakeDisplay.m_pDriver = &Driver;
-	EGDrawContext *pContext = new  EGDrawContext;
-	if(pContext == NULL) return EG_RES_INVALID;
-	FakeDisplay.m_pDriver->InitialiseContext(pContext);
-	FakeDisplay.m_pDriver->m_pContext = pContext;
-	pContext->m_pClipRect = &SnapRect;
-	pContext->m_pDrawRect = &SnapRect;
-	pContext->m_pDrawBuffer = (void *)pBuffer;
+	EGDeviceContext *pDC = new  EGDeviceContext;
+	if(pDC == NULL) return EG_RES_INVALID;
+	FakeDisplay.m_pDriver->InitialiseContext(pDC);
+	FakeDisplay.m_pDriver->m_pContext = pDC;
+	pDC->m_pClipRect = &SnapRect;
+	pDC->m_pDrawRect = &SnapRect;
+	pDC->m_pDrawBuffer = (void *)pBuffer;
 	EGDisplay *pRefreshDisplay = GetRefreshingDisplay();
 	SetRefreshingDisplay(&FakeDisplay);
-	RedrawObject(pContext, pObj);
+	RedrawObject(pDC, pObj);
 	SetRefreshingDisplay(pRefreshDisplay);
-	FakeDisplay.m_pDriver->DeinitialiseContext(pContext);
-	delete pContext;
+	FakeDisplay.m_pDriver->DeinitialiseContext(pDC);
+	delete pDC;
 	pImage->m_pData = (uint8_t*)pBuffer;
 	pImage->m_DataSize = SizeNeeded;
 	pImage->m_Header.Width = Wide;

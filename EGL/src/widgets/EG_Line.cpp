@@ -1,23 +1,24 @@
 /*
- *        Copyright (Center) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -25,7 +26,7 @@
 
 #if EG_USE_LINE != 0
 #include "misc/EG_Assert.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Math.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -124,32 +125,32 @@ void EGLine::Event(EGEvent *pEvent)
 {
   EG_EventCode_e Code = pEvent->GetCode();
 	if(Code == EG_EVENT_REFR_EXT_DRAW_SIZE) {
-		EG_Coord_t line_width = GetStyleLineWidth(EG_PART_MAIN);	// The corner of the skew lines is out of the intended Rect
-		EG_Coord_t *s = (EG_Coord_t*)pEvent->GetParam();
+		int32_t line_width = GetStyleLineWidth(EG_PART_MAIN);	// The corner of the skew lines is out of the intended Rect
+		int32_t *s = (int32_t*)pEvent->GetParam();
 		if(*s < line_width) *s = line_width;
 	}
 	else if(Code == EG_EVENT_GET_SELF_SIZE) {
 		if(m_PointCount == 0 || m_pPointArray == nullptr) return;
 		EGPoint *pPoint = (EGPoint*)pEvent->GetParam();
-		EG_Coord_t Width = 0;
-		EG_Coord_t Height = 0;
+		int32_t Width = 0;
+		int32_t Height = 0;
 		for(uint16_t i = 0; i < m_PointCount; i++) {
 			Width = EG_MAX(m_pPointArray[i].m_X, Width);
 			Height = EG_MAX(m_pPointArray[i].m_Y, Height);
 		}
-		EG_Coord_t line_width = GetStyleLineWidth(EG_PART_MAIN);
+		int32_t line_width = GetStyleLineWidth(EG_PART_MAIN);
 		Width += line_width;
 		Height += line_width;
 		pPoint->m_X = Width;
 		pPoint->m_Y = Height;
 	}
 	else if(Code == EG_EVENT_DRAW_MAIN) {
-    EGDrawContext *pContext = pEvent->GetDrawContext();
+    EGDeviceContext *pDC = pEvent->GetDeviceContext();
 		if(m_PointCount == 0 || m_pPointArray == nullptr) return;
 		EGRect Rect(m_Rect);
-		EG_Coord_t OffsetX = Rect.GetX1() - GetScrollX();
-		EG_Coord_t OffsetY = Rect.GetY1() - GetScrollY();
-		EG_Coord_t Height = GetHeight();
+		int32_t OffsetX = Rect.GetX1() - GetScrollX();
+		int32_t OffsetY = Rect.GetY1() - GetScrollY();
+		int32_t Height = GetHeight();
 		EGDrawLine DrawLine;
 		InititialseDrawLine(EG_PART_MAIN, &DrawLine);
 		for(uint16_t i = 0; i < m_PointCount - 1; i++) {	// Read all points and draw the lines
@@ -164,7 +165,7 @@ void EGLine::Event(EGEvent *pEvent)
 				Point1.m_Y = Height - m_pPointArray[i].m_Y + OffsetY;
 				Point2.m_Y = Height - m_pPointArray[i + 1].m_Y + OffsetY;
 			}
-			DrawLine.Draw(pContext, &Point1, &Point2);
+			DrawLine.Draw(pDC, &Point1, &Point2);
 			DrawLine.m_RoundStart = 0; // Draw the rounding only on the end points after the first pLine
 		}
 	}

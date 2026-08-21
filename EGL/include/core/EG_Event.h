@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -30,11 +31,11 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 class EGInputDevice;
-struct EG_EventDiscriptor_t;
+struct EG_EventDescriptor_t;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum : uint16_t {
+enum EG_EventCode_e : uint16_t {
     EG_EVENT_ALL = 0,
 
     // Input device events
@@ -58,7 +59,7 @@ typedef enum : uint16_t {
 
     // Drawing events
     EG_EVENT_COVER_CHECK,        // (18) Check if the object fully covers an area. The event parameter is `EG_CoverCheckInfo_t *`.
-    EG_EVENT_REFR_EXT_DRAW_SIZE, // (19) Get the required extra draw area around the object (e.g. for shadow). The event parameter is `EG_Coord_t *` to store the size.
+    EG_EVENT_REFR_EXT_DRAW_SIZE, // (19) Get the required extra draw area around the object (e.g. for shadow). The event parameter is `int32_t *` to store the size.
     EG_EVENT_DRAW_MAIN_BEGIN,    // (20) Starting the main drawing phase
     EG_EVENT_DRAW_MAIN,          // (21) Perform the main drawing
     EG_EVENT_DRAW_MAIN_END,      // (22) Finishing the main drawing phase
@@ -92,7 +93,7 @@ typedef enum : uint16_t {
     _EG_EVENT_LAST,               // (45) Number of default events
 
     EG_EVENT_PREPROCESS = 0x80,   // This is a flag that can be set with an event so it's processed before the class default event processing 
-} EG_EventCode_e;
+};
 
 typedef void (*EG_EventCB_t)(EGEvent *pEvent);
 
@@ -108,11 +109,11 @@ typedef struct {
     const EGRect    *pRect;
 } EG_CoverCheckInfo_t;
 
-typedef struct EG_EventDiscriptor_t {
+typedef struct EG_EventDescriptor_t {
     EG_EventCB_t  EventCB;
     void          *pExtParam;
-    EG_EventCode_e Filter : 8;
-} EG_EventDiscriptor_t;
+    EG_EventCode_e Filter;
+} EG_EventDescriptor_t;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -130,25 +131,27 @@ public:
   void                    StopBubbling(void){ m_StopBubbling = 1; };
   void                    StopProcessing(void){ m_StopProcessing = 1; };
   bool                    RemoveEventCBWithUserData(EGObject *pObj, EG_EventCB_t EventCB, const void *pParam);
-  bool                    RemoveEventDiscriptor(EGObject *pObj, struct EG_EventDiscriptor_t *pEventDiscriptor);
+  bool                    RemoveEventDescriptor(EGObject *pObj, struct EG_EventDescriptor_t *pEventDescriptor);
   EGInputDevice*          GetInputDevice(void);
-  EGDrawContext*          GetDrawPartDiscriptor(void);
-  EGDrawContext*          GetDrawContext(void);
+  EGEventDC*              GetDrawContext(void);
+  EGDeviceContext*        GetDeviceContext(void);
+  EGLayerContext* 		    GetLayerContext(void);
   const EGRect*           GetOldSize(void);
   uint32_t                GetKey(void);
   EGAnimate*              GetScrollAnimation(void);
-  void                    SetExtDrawSize(EG_Coord_t Size);
+  void                    SetExtDrawSize(int32_t Size);
   EGPoint*                GetSelfSizeInfo(void);
   EG_HitTestState_t*      GetHitTestInfo(void);
   const EGRect*           GetCoverArea(void);
   void                    SetCoverResult(EG_CoverResult_e Result);
 
-  static EG_EventDiscriptor_t* AddEventCB(EGObject *pObj, EG_EventCB_t EventCB, EG_EventCode_e Filter, void *pParam);
+  static EG_EventDescriptor_t* AddEventCB(EGObject *pObj, EG_EventCB_t EventCB, EG_EventCode_e Filter, void *pParam);
   static bool             RemoveEventCB(EGObject *pObj, EG_EventCB_t EventCB);
   static EG_Result_t      EventSend(EGObject *pObj, EG_EventCode_e EventCode, void *pParam);
   static void             MarkDeleted(EGObject *pObj);
   static EG_EventCode_e   GenerateNewID(void);
   static void*            GetEventExtParam(EGObject *pObj, EG_EventCB_t EventCB);
+  static EG_EventDescriptor_t*   GetDescriptor(const EGObject *pObj, uint32_t Id);
 
   EGObject               *m_pTarget;
   EGObject               *m_pCurrentTarget;
@@ -162,7 +165,6 @@ public:
 
 private:
 
-  EG_EventDiscriptor_t*   GetDiscriptor(const EGObject *pObj, uint32_t Id);
   EG_Result_t             SendCore(void);
 
   static uint32_t         m_LastID;

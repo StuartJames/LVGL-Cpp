@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -35,20 +36,21 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#if EG_USE_GPU_STM32_DMA2D
-#include "../draw/stm32_dma2d/lv_gpu_stm32_dma2d.h"
-#endif
-
-#if EG_USE_GPU_RA6M3_G2D
-#include "../draw/renesas/lv_gpu_d2_ra6m3.h"
-#endif
-
-#if EG_USE_GPU_SWM341_DMA2D
-#include "../draw/swm341_dma2d/lv_gpu_swm341_dma2d.h"
-#endif
-
-#if EG_USE_GPU_NXP_PXP && EG_USE_GPU_NXP_PXP_AUTO_INIT
-#include "../draw/nxp/pxp/lv_gpu_nxp_pxp.h"
+#if EG_USE_GPU_ARM2D
+#include "draw/arm2d/EG_GPU_ARM2D.h"
+#elif EG_USE_GPU_NXP_PXP && EG_USE_GPU_NXP_PXP_AUTO_INIT
+#include "draw/nxp/pxp/EG_PXP_Context.h"
+#include "draw/nxp/pxp/EG_PXP_GPU.h"
+#elif EG_USE_GPU_NXP_VG_LITE
+#include "draw/nxp/vglite/EG_VGLite_Context.h"
+#elif EG_USE_GPU_RA6M3_G2D
+#include "draw/renesas/EG_Dave2Context.h"
+#elif EG_USE_GPU_SDL
+#include "draw/sdl/EG_SDL_Context.h"
+#elif EG_USE_GPU_STM32_DMA2D
+#include "draw/stm32_dma2d/EG_GPU_STM32_DMA2D.h"
+#elif EG_USE_GPU_SWM341_DMA2D
+#include "draw/swm341_dma2d/EG_GPU_SWM341_DMA2D.h"
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,23 +73,19 @@ void EG_Initialise(void)
 	EGTimer::InitialiseCore();
   EGAnimate::InitialiseCore();
   EGImageDecoder::Register(&DecoderBuiltIn);
-#if EG_USE_GPU_STM32_DMA2D
-  lv_draw_stm32_dma2d_init();	              // Initialize DMA2D GPU
-	#endif
-#if EG_USE_GPU_RA6M3_G2D
-	lv_draw_ra6m3_g2d_init();	                // Initialize G2D GPU
-#endif
-#if EG_USE_GPU_SWM341_DMA2D
-	lv_draw_swm341_dma2d_init();	            // Initialize DMA2D GPU
-#endif
 #if EG_USE_GPU_NXP_PXP && EG_USE_GPU_NXP_PXP_AUTO_INIT
-	PXP_COND_STOP(!lv_gpu_nxp_pxp_init(), "PXP init failed.");
+	PXP_COND_STOP(!PXP_InitialiseGPU(), "PXP init failed.");
+#elif EG_USE_GPU_RA6M3_G2D
+  EGDave2Context::InitGPU();	                      // Initialize G2D GPU
+#elif EG_USE_GPU_STM32_DMA2D
+  EGSTM32Context::InitialiseDMA2D();	              // Initialize DMA2D GPU
+#elif EG_USE_GPU_SWM341_DMA2D
+  EGSWM341Context::InitialiseDMA2d();	              // Initialize DMA2D GPU
 #endif
 	RefreshInitialise();	                        // Initialize the screen refresh system
 #if EG_IMG_CACHE_DEF_SIZE
-	lv_img_cache_set_size(EG_IMG_CACHE_DEF_SIZE);
+  SetImageCacheSize(EG_IMG_CACHE_DEF_SIZE);
 #endif
-
   const char *pText = "Á";	                // Test if the IDE has UTF-8 encoding
 	const uint8_t *pTextU8 = (uint8_t *)pText;
 	if(pTextU8[0] != 0xc3 || pTextU8[1] != 0x81 || pTextU8[2] != 0x00) {
@@ -124,7 +122,7 @@ void EG_Deinitialise(void)
     EGDisplay::SetDefault(nullptr);
     EG_DeinitMem();
     EGInitialized = false;
-    EG_LOG_INFO("lv_deinit done");
+    EG_LOG_INFO("Deinitialise completed");
 
 #if EG_USE_LOG
     EG_RegisterLogPrintCB(NULL);

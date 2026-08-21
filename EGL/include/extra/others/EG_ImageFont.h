@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -41,7 +42,7 @@ public:
                           ~EGImageFont(void);
   EG_Font_t*              Create(uint16_t Height);
   virtual bool            GetPath(const EG_Font_t *pFont, void *pSource, uint16_t Len, uint32_t Unicode, uint32_t UnicodeNext) = 0;
-  static  bool            GetGlyphDiscriptor(const EG_Font_t *pFont, EG_FontGlyphProps_t *pDiscriptor,	uint32_t Unicode, uint32_t UnicodeNext);
+  static  bool            GetGlyphDescriptor(const EG_Font_t *pFont, EG_FontGlyphProps_t *pDescriptor,	uint32_t Unicode, uint32_t UnicodeNext);
   static const uint8_t*   GetGlyphBitmap(const EG_Font_t *pFont, uint32_t Unicode);
 
 

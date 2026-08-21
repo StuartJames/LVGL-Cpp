@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -28,7 +29,7 @@
 #include "core/EG_Display.h"
 #include "core/EG_Theme.h"
 #include "misc/EG_Assert.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Animate.h"
 #include "misc/EG_Timer.h"
 #include "misc/EG_Async.h"
@@ -143,8 +144,8 @@ void EGObject::Configure(void)
 {
 	if(m_pParent) {
     EG_LOG_INFO("[Object]", "Configure.");
-		EG_Coord_t ScrollLeft = m_pParent->GetScrollLeft();
-		EG_Coord_t ScrollTop = m_pParent->GetScrollTop();
+		int32_t ScrollLeft = m_pParent->GetScrollLeft();
+		int32_t ScrollTop = m_pParent->GetScrollTop();
 		m_Rect.SetY1(m_pParent->m_Rect.GetY1() + m_pParent->GetStylePadTop(EG_PART_MAIN) - ScrollTop);
 		m_Rect.SetY2(m_Rect.GetY1() - 1);
 		m_Rect.SetX1(m_pParent->m_Rect.GetX1() + m_pParent->GetStylePadLeft(EG_PART_MAIN) - ScrollLeft);
@@ -269,8 +270,8 @@ uint32_t i, j, t, TransitionIndex = 0;
 	m_State = NewState;
 	EG_StyleStateCmp_e CompareResult = CompareState(PreviousState, NewState);
 	if(CompareResult == _EG_STYLE_STATE_CMP_SAME) return;	      // If there is no difference in styles there is nothing else to do
-	EG_TransitionDiscriptor_t *pTransitions = (EG_TransitionDiscriptor_t*)EG_AllocMem(sizeof(EG_TransitionDiscriptor_t) * STYLE_TRANSITION_MAX);
-	EG_ZeroMem(pTransitions, sizeof(EG_TransitionDiscriptor_t) * STYLE_TRANSITION_MAX);
+	EG_TransitionDescriptor_t *pTransitions = (EG_TransitionDescriptor_t*)EG_AllocMem(sizeof(EG_TransitionDescriptor_t) * STYLE_TRANSITION_MAX);
+	EG_ZeroMem(pTransitions, sizeof(EG_TransitionDescriptor_t) * STYLE_TRANSITION_MAX);
 	for(i = 0; (i < m_StyleCount) && (TransitionIndex < STYLE_TRANSITION_MAX); i++) { // iterate the styles
 		EG_ObjStyle_t *pObjStyle = &m_pStyles[i];
 		EGState_t StyleState = GetSelectorState(pObjStyle->SelectFlags);
@@ -279,7 +280,7 @@ uint32_t i, j, t, TransitionIndex = 0;
 		if(pObjStyle->IsTransition) continue;
 		EG_StyleValue_t Value;
 		if(pObjStyle->pStyle->GetProperty(EG_STYLE_TRANSITION, &Value) != EG_STYLE_RES_FOUND) continue;
-		const EG_StyleTransitionDiscriptor_t *pStyleTransitionParams = (EG_StyleTransitionDiscriptor_t*)Value.pPtr;
+		const EG_StyleTransitionDescriptor_t *pStyleTransitionParams = (EG_StyleTransitionDescriptor_t*)Value.pPtr;
 		for(j = 0; (pStyleTransitionParams->pProperties[j] != 0) && (TransitionIndex < STYLE_TRANSITION_MAX); j++) {	 // iterate the transition properties
 			for(t = 0; t < TransitionIndex; t++) {// Add the props to the set if not added yet or exists but with smaller weight
 				EG_StyleFlags_t SelectFlags = pTransitions[t].SelectFlags;
@@ -460,6 +461,14 @@ void EGObject::AllocateAttribute(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+uint32_t EGObject::GetEventCount(void)
+{
+  if(m_pAttributes == nullptr) return 0;
+  return m_pAttributes->EventDescriptorCount;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool EGObject::IsKindOf(const EGObject *pObj, const EG_ClassType_t *pClassType)
 {
   if(pObj == nullptr) return false;
@@ -582,9 +591,9 @@ void EGObject::Draw(EGEvent *pEvent)
         break;
       }
       // Most trivial test. Is the mask fully IN the object? If no it surely doesn't cover it
-      EG_Coord_t Radius = GetStyleRadius(EG_PART_MAIN);
-      EG_Coord_t Width = GetStyleTransformWidth(EG_PART_MAIN);
-      EG_Coord_t Height = GetStyleTransformHeight(EG_PART_MAIN);
+      int32_t Radius = GetStyleRadius(EG_PART_MAIN);
+      int32_t Width = GetStyleTransformWidth(EG_PART_MAIN);
+      int32_t Height = GetStyleTransformHeight(EG_PART_MAIN);
       EGRect Rect(m_Rect);
       Rect.Inflate(Width, Height);
       if(pInfo->pRect->IsInside(&Rect, Radius) == false) {
@@ -603,24 +612,23 @@ void EGObject::Draw(EGEvent *pEvent)
       break;
     }
     case EG_EVENT_DRAW_MAIN: {
-      const EGDrawContext *pContext = pEvent->GetDrawContext();
+      EGDeviceContext *pDC = pEvent->GetDeviceContext();
       EGDrawRect DrawRect;
       if(GetStyleBorderPost(EG_PART_MAIN)) {		// If the border is drawn later disable loading its properties
         DrawRect.m_BorderPost = 1;
       }
       InititialseDrawRect(EG_PART_MAIN, &DrawRect);
-      EG_Coord_t Width = GetStyleTransformWidth(EG_PART_MAIN);
-      EG_Coord_t Height = GetStyleTransformHeight(EG_PART_MAIN);
+      int32_t Width = GetStyleTransformWidth(EG_PART_MAIN);
+      int32_t Height = GetStyleTransformHeight(EG_PART_MAIN);
       EGRect Rect(m_Rect);
       Rect.Inflate(Width, Height);
-      EGDrawDiscriptor DrawDiscriptor;
-      DrawDiscriptor.m_pContext = pContext;
-      DrawDiscriptor.m_pClass = OBJ_CLASS;
-      DrawDiscriptor.m_Type = EG_OBJ_DRAW_PART_RECTANGLE;
-      DrawDiscriptor.m_pDrawRect = &DrawRect;
-      DrawDiscriptor.m_pRect = &Rect;
-      DrawDiscriptor.m_Part = EG_PART_MAIN;
-      EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
+			EGEventDC EventDC(pDC);
+		  EventDC.m_pClass = OBJ_CLASS;
+      EventDC.m_Type = EG_OBJ_DRAW_PART_RECTANGLE;
+      EventDC.m_pDrawRect = &DrawRect;
+      EventDC.m_pRect = &Rect;
+      EventDC.m_Part = EG_PART_MAIN;
+      EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC);
 #if EG_DRAW_COMPLEX
       // With clip corner enabled draw the background image separately to make it clipped
       bool ClipCorner = (GetStyleClipCorner(EG_PART_MAIN) && DrawRect.m_Radius != 0) ? true : false;
@@ -629,7 +637,7 @@ void EGObject::Draw(EGEvent *pEvent)
         DrawRect.m_pBackImageSource = nullptr;
       }
 #endif
-      DrawRect.Draw(pContext, &Rect);
+      DrawRect.Draw(pDC, &Rect);
 #if EG_DRAW_COMPLEX
       if(ClipCorner) {
         MaskRadiusParam_t *pRadiusMask = (MaskRadiusParam_t*)EG_GetBufferMem(sizeof(MaskRadiusParam_t));
@@ -642,16 +650,16 @@ void EGObject::Draw(EGEvent *pEvent)
           DrawRect.m_OutlineOPA = EG_OPA_TRANSP;
           DrawRect.m_ShadowOPA = EG_OPA_TRANSP;
           DrawRect.m_pBackImageSource = pBackImageSource;
-          DrawRect.Draw(pContext, &Rect);
+          DrawRect.Draw(pDC, &Rect);
         }
       }
 #endif
-      EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
+      EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
       break;
     }
     case EG_EVENT_DRAW_POST:{
-      EGDrawContext *pDrawContext = pEvent->GetDrawContext();
-      DrawScrollbar(pDrawContext);
+      EGDeviceContext *pDC = pEvent->GetDeviceContext();
+      DrawScrollbar(pDC);
 #if EG_DRAW_COMPLEX
       if(GetStyleClipCorner(EG_PART_MAIN)) {
         MaskRadiusParam_t *param = (MaskRadiusParam_t*)DrawMaskRemoveReferenced(this + 8);
@@ -668,20 +676,19 @@ void EGObject::Draw(EGEvent *pEvent)
         DrawRect.m_OutlineOPA = EG_OPA_TRANSP;
         DrawRect.m_ShadowOPA = EG_OPA_TRANSP;
         InititialseDrawRect(EG_PART_MAIN, &DrawRect);
-        EG_Coord_t Width = GetStyleTransformWidth(EG_PART_MAIN);
-        EG_Coord_t Height = GetStyleTransformHeight(EG_PART_MAIN);
+        int32_t Width = GetStyleTransformWidth(EG_PART_MAIN);
+        int32_t Height = GetStyleTransformHeight(EG_PART_MAIN);
         EGRect Rect(m_Rect);
         Rect.Inflate(Width, Height);
-        EGDrawDiscriptor DrawDiscriptor;
-        InitDrawDescriptor(&DrawDiscriptor, pDrawContext);
-        DrawDiscriptor.m_pClass = OBJ_CLASS;
-        DrawDiscriptor.m_Type = EG_OBJ_DRAW_PART_BORDER_POST;
-        DrawDiscriptor.m_pDrawRect = &DrawRect;
-        DrawDiscriptor.m_pRect = &Rect;
-        DrawDiscriptor.m_Part = EG_PART_MAIN;
-        EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
-        DrawRect.Draw(pDrawContext, &Rect);
-        EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
+				EGEventDC EventDC(pDC);
+        EventDC.m_pClass = OBJ_CLASS;
+        EventDC.m_Type = EG_OBJ_DRAW_PART_BORDER_POST;
+        EventDC.m_pDrawRect = &DrawRect;
+        EventDC.m_pRect = &Rect;
+        EventDC.m_Part = EG_PART_MAIN;
+        EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC);
+        DrawRect.Draw(pDC, &Rect);
+        EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
       }
       break;
     }
@@ -693,7 +700,7 @@ void EGObject::Draw(EGEvent *pEvent)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EGObject::DrawScrollbar(EGDrawContext *pDrawContext)
+void EGObject::DrawScrollbar(EGDeviceContext *pDC)
 {
 EGRect HorizontalArea, VerticalArea;
 EGDrawRect DrawRect;
@@ -702,70 +709,69 @@ EGDrawRect DrawRect;
 	if(HorizontalArea.GetSize() <= 0 && VerticalArea.GetSize() <= 0) return;
 	EG_Result_t sb_res = InitialiseScrollbarDrawDsc(&DrawRect);
 	if(sb_res != EG_RES_OK) return;
-	EGDrawDiscriptor DrawDiscriptor;
-	InitDrawDescriptor(&DrawDiscriptor, pDrawContext);
-	DrawDiscriptor.m_pClass = OBJ_CLASS;
-	DrawDiscriptor.m_Type = EG_OBJ_DRAW_PART_SCROLLBAR;
-	DrawDiscriptor.m_pDrawRect = &DrawRect;
-	DrawDiscriptor.m_Part = EG_PART_SCROLLBAR;
+	EGEventDC EventDC(pDC);
+	EventDC.m_pClass = OBJ_CLASS;
+	EventDC.m_Type = EG_OBJ_DRAW_PART_SCROLLBAR;
+	EventDC.m_pDrawRect = &DrawRect;
+	EventDC.m_Part = EG_PART_SCROLLBAR;
 	if(HorizontalArea.GetSize() > 0) {
-		DrawDiscriptor.m_pRect = &HorizontalArea;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
-		DrawRect.Draw(pDrawContext, &HorizontalArea);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
+		EventDC.m_pRect = &HorizontalArea;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC);
+		DrawRect.Draw(pDC, &HorizontalArea);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
 	}
 	if(VerticalArea.GetSize() > 0) {
-		DrawDiscriptor.m_pRect = &VerticalArea;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &DrawDiscriptor);
-		DrawDiscriptor.m_pRect = &VerticalArea;
-		DrawRect.Draw(pDrawContext, &VerticalArea);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &DrawDiscriptor);
+		EventDC.m_pRect = &VerticalArea;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &EventDC);
+		EventDC.m_pRect = &VerticalArea;
+		DrawRect.Draw(pDC, &VerticalArea);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &EventDC);
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGObject::InitialiseScrollbarDrawDsc(EGDrawRect *pDiscriptor)
+EG_Result_t EGObject::InitialiseScrollbarDrawDsc(EGDrawRect *pDescriptor)
 {
-	pDiscriptor->m_BackgroundOPA = GetStyleBckgroundOPA(EG_PART_SCROLLBAR);
-	if(pDiscriptor->m_BackgroundOPA > EG_OPA_MIN) {
-		pDiscriptor->m_BackgroundColor = GetStyleBackColor(EG_PART_SCROLLBAR);
+	pDescriptor->m_BackgroundOPA = GetStyleBckgroundOPA(EG_PART_SCROLLBAR);
+	if(pDescriptor->m_BackgroundOPA > EG_OPA_MIN) {
+		pDescriptor->m_BackgroundColor = GetStyleBackColor(EG_PART_SCROLLBAR);
 	}
-	pDiscriptor->m_BorderOPA = GetStyleBorderOPA(EG_PART_SCROLLBAR);
-	if(pDiscriptor->m_BorderOPA > EG_OPA_MIN) {
-		pDiscriptor->m_BorderWidth = GetStyleBorderWidth(EG_PART_SCROLLBAR);
-		if(pDiscriptor->m_BorderWidth > 0) {
-			pDiscriptor->m_BorderColor = GetStyleBorderColor(EG_PART_SCROLLBAR);
+	pDescriptor->m_BorderOPA = GetStyleBorderOPA(EG_PART_SCROLLBAR);
+	if(pDescriptor->m_BorderOPA > EG_OPA_MIN) {
+		pDescriptor->m_BorderWidth = GetStyleBorderWidth(EG_PART_SCROLLBAR);
+		if(pDescriptor->m_BorderWidth > 0) {
+			pDescriptor->m_BorderColor = GetStyleBorderColor(EG_PART_SCROLLBAR);
 		}
-		else pDiscriptor->m_BorderOPA = EG_OPA_TRANSP;
+		else pDescriptor->m_BorderOPA = EG_OPA_TRANSP;
 	}
 #if EG_DRAW_COMPLEX
-	pDiscriptor->m_ShadowOPA = GetStyleShadowOPA(EG_PART_SCROLLBAR);
-	if(pDiscriptor->m_ShadowOPA > EG_OPA_MIN) {
-		pDiscriptor->m_ShadowWidth = GetStyleShadowWidth(EG_PART_SCROLLBAR);
-		if(pDiscriptor->m_ShadowWidth > 0) {
-			pDiscriptor->m_ShadowSpread = GetStyleShadowSpread(EG_PART_SCROLLBAR);
-			pDiscriptor->m_ShadowColor = GetStyleShadowColor(EG_PART_SCROLLBAR);
+	pDescriptor->m_ShadowOPA = GetStyleShadowOPA(EG_PART_SCROLLBAR);
+	if(pDescriptor->m_ShadowOPA > EG_OPA_MIN) {
+		pDescriptor->m_ShadowWidth = GetStyleShadowWidth(EG_PART_SCROLLBAR);
+		if(pDescriptor->m_ShadowWidth > 0) {
+			pDescriptor->m_ShadowSpread = GetStyleShadowSpread(EG_PART_SCROLLBAR);
+			pDescriptor->m_ShadowColor = GetStyleShadowColor(EG_PART_SCROLLBAR);
 		}
 		else {
-			pDiscriptor->m_ShadowOPA = EG_OPA_TRANSP;
+			pDescriptor->m_ShadowOPA = EG_OPA_TRANSP;
 		}
 	}
 	EG_OPA_t OPA = GetOPARecursive(this, EG_PART_SCROLLBAR);
 	if(OPA < EG_OPA_MAX) {
-		pDiscriptor->m_BackgroundOPA = (pDiscriptor->m_BackgroundOPA * OPA) >> 8;
-		pDiscriptor->m_BorderOPA = (pDiscriptor->m_BackgroundOPA * OPA) >> 8;
-		pDiscriptor->m_ShadowOPA = (pDiscriptor->m_BackgroundOPA * OPA) >> 8;
+		pDescriptor->m_BackgroundOPA = (pDescriptor->m_BackgroundOPA * OPA) >> 8;
+		pDescriptor->m_BorderOPA = (pDescriptor->m_BackgroundOPA * OPA) >> 8;
+		pDescriptor->m_ShadowOPA = (pDescriptor->m_BackgroundOPA * OPA) >> 8;
 	}
-	if(pDiscriptor->m_BackgroundOPA != EG_OPA_TRANSP || pDiscriptor->m_BorderOPA != EG_OPA_TRANSP || pDiscriptor->m_ShadowOPA != EG_OPA_TRANSP) {
-		pDiscriptor->m_Radius = GetStyleRadius(EG_PART_SCROLLBAR);
+	if(pDescriptor->m_BackgroundOPA != EG_OPA_TRANSP || pDescriptor->m_BorderOPA != EG_OPA_TRANSP || pDescriptor->m_ShadowOPA != EG_OPA_TRANSP) {
+		pDescriptor->m_Radius = GetStyleRadius(EG_PART_SCROLLBAR);
 		return EG_RES_OK;
 	}
 	else {
 		return EG_RES_INVALID;
 	}
 #else
-	if(pDiscriptor->bg_opa != EG_OPA_TRANSP || pDiscriptor->border_opa != EG_OPA_TRANSP)
+	if(pDescriptor->bg_opa != EG_OPA_TRANSP || pDescriptor->border_opa != EG_OPA_TRANSP)
 		return EG_RES_OK;
 	else
 		return EG_RES_INVALID;
@@ -891,8 +897,8 @@ void EGObject::Event(EGEvent *pEvent)
       }
       else if(HasFlagSet(EG_OBJ_FLAG_SCROLLABLE | EG_OBJ_FLAG_SCROLL_WITH_ARROW) && !IsEditable()) {
         EG_AnimateEnable_e AnimateEnable = EG_ANIM_OFF;     // scroll by keypad or encoder
-        EG_Coord_t Left = GetScrollLeft();
-        EG_Coord_t Right = GetScrollRight();
+        int32_t Left = GetScrollLeft();
+        int32_t Right = GetScrollRight();
         switch(*((char *)pEvent->GetParam())){
           case EG_KEY_DOWN:{
             ScrollToY(GetScrollY() + GetHeight() / 4, AnimateEnable);
@@ -967,8 +973,8 @@ void EGObject::Event(EGEvent *pEvent)
       break;
     }
     case EG_EVENT_CHILD_CHANGED:{
-      EG_Coord_t Width = GetStyleWidth(EG_PART_MAIN);
-      EG_Coord_t Height = GetStyleHeight(EG_PART_MAIN);
+      int32_t Width = GetStyleWidth(EG_PART_MAIN);
+      int32_t Height = GetStyleHeight(EG_PART_MAIN);
       EG_AlignType_e Align = GetStyleAlign(EG_PART_MAIN);
       uint32_t Layout = GetStyleLayout(EG_PART_MAIN);
       if(Layout || Align || Width == EG_SIZE_CONTENT || Height == EG_SIZE_CONTENT) {
@@ -982,7 +988,7 @@ void EGObject::Event(EGEvent *pEvent)
       break;
     }
     case EG_EVENT_REFR_EXT_DRAW_SIZE:{
-      EG_Coord_t Size = CalculateExtDrawSize(EG_PART_MAIN);
+      int32_t Size = CalculateExtDrawSize(EG_PART_MAIN);
       pEvent->SetExtDrawSize(Size);
       break;
     }

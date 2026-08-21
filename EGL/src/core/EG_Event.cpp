@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -92,11 +93,11 @@ EGEvent *pEvent = m_pEventHead;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-struct EG_EventDiscriptor_t* EGEvent::AddEventCB(EGObject *pObj, EG_EventCB_t EventCB, EG_EventCode_e Filter, void *pParam)
+struct EG_EventDescriptor_t* EGEvent::AddEventCB(EGObject *pObj, EG_EventCB_t EventCB, EG_EventCode_e Filter, void *pParam)
 {
 	pObj->AllocateAttribute();
 	pObj->m_pAttributes->EventDescriptorCount++;
-	pObj->m_pAttributes->pEventDescriptor = (EG_EventDiscriptor_t*)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor, pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDiscriptor_t));
+	pObj->m_pAttributes->pEventDescriptor = (EG_EventDescriptor_t*)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor, pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDescriptor_t));
 	EG_ASSERT_MALLOC(pObj->m_pAttributes->pEventDescriptor);
 	pObj->m_pAttributes->pEventDescriptor[pObj->m_pAttributes->EventDescriptorCount - 1].EventCB = EventCB;
 	pObj->m_pAttributes->pEventDescriptor[pObj->m_pAttributes->EventDescriptorCount - 1].Filter = Filter;
@@ -117,7 +118,7 @@ int32_t i = 0;
 				pObj->m_pAttributes->pEventDescriptor[i] = pObj->m_pAttributes->pEventDescriptor[i + 1];
 			}
 			pObj->m_pAttributes->EventDescriptorCount--;
-			pObj->m_pAttributes->pEventDescriptor = (EG_EventDiscriptor_t *)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor, pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDiscriptor_t));
+			pObj->m_pAttributes->pEventDescriptor = (EG_EventDescriptor_t *)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor, pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDescriptor_t));
 			EG_ASSERT_MALLOC(pObj->m_pAttributes->pEventDescriptor);
 			return true;
 		}
@@ -139,8 +140,8 @@ bool EGEvent::RemoveEventCBWithUserData(EGObject *pObj, EG_EventCB_t EventCB, co
 				pObj->m_pAttributes->pEventDescriptor[i] = pObj->m_pAttributes->pEventDescriptor[i + 1];
 			}
 			pObj->m_pAttributes->EventDescriptorCount--;
-			pObj->m_pAttributes->pEventDescriptor = (EG_EventDiscriptor_t *)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor,
-																								pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDiscriptor_t));
+			pObj->m_pAttributes->pEventDescriptor = (EG_EventDescriptor_t *)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor,
+																								pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDescriptor_t));
 			EG_ASSERT_MALLOC(pObj->m_pAttributes->pEventDescriptor);
 			return true;
 		}
@@ -150,7 +151,7 @@ bool EGEvent::RemoveEventCBWithUserData(EGObject *pObj, EG_EventCB_t EventCB, co
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-bool EGEvent::RemoveEventDiscriptor(EGObject *pObj, struct EG_EventDiscriptor_t *pEventDescriptor)
+bool EGEvent::RemoveEventDescriptor(EGObject *pObj, struct EG_EventDescriptor_t *pEventDescriptor)
 {
 	if(pObj->m_pAttributes == nullptr) return false;
 	int32_t i = 0;
@@ -160,8 +161,8 @@ bool EGEvent::RemoveEventDiscriptor(EGObject *pObj, struct EG_EventDiscriptor_t 
 				pObj->m_pAttributes->pEventDescriptor[i] = pObj->m_pAttributes->pEventDescriptor[i + 1];
 			}
 			pObj->m_pAttributes->EventDescriptorCount--;
-			pObj->m_pAttributes->pEventDescriptor = (EG_EventDiscriptor_t *)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor,
-																							pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDiscriptor_t));
+			pObj->m_pAttributes->pEventDescriptor = (EG_EventDescriptor_t *)EG_ReallocMem(pObj->m_pAttributes->pEventDescriptor,
+																							pObj->m_pAttributes->EventDescriptorCount * sizeof(EG_EventDescriptor_t));
 			EG_ASSERT_MALLOC(pObj->m_pAttributes->pEventDescriptor);
 			return true;
 		}
@@ -171,7 +172,7 @@ bool EGEvent::RemoveEventDiscriptor(EGObject *pObj, struct EG_EventDiscriptor_t 
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_EventDiscriptor_t* EGEvent::GetDiscriptor(const EGObject *pObj, uint32_t Id)
+EG_EventDescriptor_t* EGEvent::GetDescriptor(const EGObject *pObj, uint32_t Id)
 {
 	if(pObj->m_pAttributes == nullptr) return nullptr;
 	if(Id >= pObj->m_pAttributes->EventDescriptorCount) return nullptr;
@@ -219,10 +220,28 @@ EGInputDevice* EGEvent::GetInputDevice(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawContext* EGEvent::GetDrawPartDiscriptor(void)
+EGLayerContext* EGEvent::GetLayerContext(void)
+{
+	if(m_EventCode == EG_EVENT_DRAW_MAIN ||
+		m_EventCode == EG_EVENT_DRAW_MAIN_BEGIN ||
+		m_EventCode == EG_EVENT_DRAW_MAIN_END ||
+		m_EventCode == EG_EVENT_DRAW_POST ||
+		m_EventCode == EG_EVENT_DRAW_POST_BEGIN ||
+		m_EventCode == EG_EVENT_DRAW_POST_END) {
+		return (EGLayerContext*)GetParam();
+	}
+	else {
+		EG_LOG_WARN("Not interpreted with this event code");
+		return NULL;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+EGEventDC* EGEvent::GetDrawContext(void)
 {
 	if(m_EventCode == EG_EVENT_DRAW_PART_BEGIN || m_EventCode == EG_EVENT_DRAW_PART_END) {
-		return (EGDrawContext*)GetParam();
+		return (EGEventDC*)GetParam();
 	}
 	else {
 		EG_LOG_WARN("Not interpreted with this event code");
@@ -232,7 +251,7 @@ EGDrawContext* EGEvent::GetDrawPartDiscriptor(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawContext* EGEvent::GetDrawContext(void)
+EGDeviceContext* EGEvent::GetDeviceContext(void)
 {
 	if(m_EventCode == EG_EVENT_DRAW_MAIN ||
 		 m_EventCode == EG_EVENT_DRAW_MAIN_BEGIN ||
@@ -240,7 +259,7 @@ EGDrawContext* EGEvent::GetDrawContext(void)
 		 m_EventCode == EG_EVENT_DRAW_POST ||
 		 m_EventCode == EG_EVENT_DRAW_POST_BEGIN ||
 		 m_EventCode == EG_EVENT_DRAW_POST_END) {
-		return (EGDrawContext*)GetParam();
+		return (EGDeviceContext*)GetParam();
 	}
 	else {
 		EG_LOG_WARN("Not interpreted with this event code");
@@ -291,10 +310,10 @@ EGAnimate* EGEvent::GetScrollAnimation(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGEvent::SetExtDrawSize(EG_Coord_t Size)
+void EGEvent::SetExtDrawSize(int32_t Size)
 {
 	if(m_EventCode == EG_EVENT_REFR_EXT_DRAW_SIZE) {
-		EG_Coord_t *pCurrentSize = (EG_Coord_t *)GetParam();
+		int32_t *pCurrentSize = (int32_t *)GetParam();
 		*pCurrentSize = EG_MAX(*pCurrentSize, Size);
 	}
 	else {
@@ -370,7 +389,7 @@ uint32_t i = 0;
 		if(m_Deleted) return EG_RES_INVALID;
 	}
 	EG_Result_t Result = EG_RES_OK;
-	EG_EventDiscriptor_t *pEventDescriptor = GetDiscriptor(m_pCurrentTarget, 0);
+	EG_EventDescriptor_t *pEventDescriptor = GetDescriptor(m_pCurrentTarget, 0);
 	while(pEventDescriptor && Result == EG_RES_OK) {
 		if(pEventDescriptor->EventCB && ((pEventDescriptor->Filter & EG_EVENT_PREPROCESS) == EG_EVENT_PREPROCESS) &&
         (pEventDescriptor->Filter == (EG_EVENT_ALL | EG_EVENT_PREPROCESS) ||
@@ -381,10 +400,10 @@ uint32_t i = 0;
 			if(m_Deleted) return EG_RES_INVALID;			// Stop if the object is deleted
 		}
 		i++;
-		pEventDescriptor = GetDiscriptor(m_pCurrentTarget, i);
+		pEventDescriptor = GetDescriptor(m_pCurrentTarget, i);
 	}
  	Result = Pump(nullptr); // Pump the event through the current and parent classes
-	pEventDescriptor = (Result == EG_RES_INVALID) ? nullptr : GetDiscriptor(m_pCurrentTarget, 0);
+	pEventDescriptor = (Result == EG_RES_INVALID) ? nullptr : GetDescriptor(m_pCurrentTarget, 0);
 	i = 0;
 	while(pEventDescriptor && Result == EG_RES_OK) {
 		if(pEventDescriptor->EventCB && ((pEventDescriptor->Filter & EG_EVENT_PREPROCESS) == 0) &&
@@ -395,7 +414,7 @@ uint32_t i = 0;
 			if(m_Deleted) return EG_RES_INVALID;			// Stop if the object is deleted
 		}
 		i++;
-		pEventDescriptor = GetDiscriptor(m_pCurrentTarget, i);
+		pEventDescriptor = GetDescriptor(m_pCurrentTarget, i);
 	}
 	if(Result == EG_RES_OK && m_pCurrentTarget->GetParent() && ShouldBubble()){
 		m_pCurrentTarget = m_pCurrentTarget->GetParent();

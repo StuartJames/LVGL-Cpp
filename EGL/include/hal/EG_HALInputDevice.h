@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -49,20 +50,20 @@ class EGObject;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Possible input device types
-typedef enum : uint8_t {
+enum EG_InDeviceType_e : uint8_t {
     EG_INDEV_TYPE_NONE,    // Uninitialized state
     EG_INDEV_TYPE_POINTER, // Touch pad, mouse, external button
     EG_INDEV_TYPE_KEYPAD,  // Keypad or keyboard
     EG_INDEV_TYPE_BUTTON,  // External (hardware button) which is assigned to a specific point of the screen
     EG_INDEV_TYPE_ENCODER, // Encoder with only Left, Right turn and a Button
-} EG_InDeviceType_e;
+};
 
 
 // States for input devices
-typedef enum : uint8_t {
+enum EG_InDeviceState_e : uint8_t {
     EG_INDEV_STATE_RELEASED = 0,
     EG_INDEV_STATE_PRESSED
-} EG_InDeviceState_e;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

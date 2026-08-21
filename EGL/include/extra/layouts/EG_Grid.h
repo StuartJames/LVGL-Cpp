@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -42,7 +43,7 @@ EG_EXPORT_CONST_INT(EG_GRID_TEMPLATE_LAST);
 
 class EGObject; // Can't include EG_Object.h because it includes this header file
 
-typedef enum : uint8_t {
+enum EG_GridAlign_e : uint8_t {
     EG_GRID_ALIGN_START,
     EG_GRID_ALIGN_STRETCH,
     EG_GRID_ALIGN_CENTER,
@@ -50,7 +51,7 @@ typedef enum : uint8_t {
     EG_GRID_ALIGN_SPACE_EVENLY,
     EG_GRID_ALIGN_SPACE_AROUND,
     EG_GRID_ALIGN_SPACE_BETWEEN,
-} EG_GridAlign_e;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,8 +60,8 @@ class EGGridLayout
 public:
                               EGGridLayout(void);
 
-  void                        SetStyleRowParams(EGStyle *pStyle, const EG_Coord_t Value[]);
-  void                        SetStyleColumnParams(EGStyle *pStyle, const EG_Coord_t Value[]);
+  void                        SetStyleRowParams(EGStyle *pStyle, const int32_t Value[]);
+  void                        SetStyleColumnParams(EGStyle *pStyle, const int32_t Value[]);
   void                        SetStyleRowAlign(EGStyle *pStyle, EG_GridAlign_e Value);
   void                        SetStyleColumnAlign(EGStyle *pStyle, EG_GridAlign_e Value);
   void                        SetStyleCellColumnPosition(EGStyle *pStyle, uint8_t Value);
@@ -73,12 +74,12 @@ public:
   static void                 Initialise(void);
   static void                 UpdateCB(EGObject *pObj, void *pUserData);
 
-  static void                 SetObjGridParams(EGObject *pObj, const EG_Coord_t ColumnProps[], const EG_Coord_t RowProps[]);
+  static void                 SetObjGridParams(EGObject *pObj, const int32_t ColumnProps[], const int32_t RowProps[]);
   static void                 SetObjAlign(EGObject *pObj, EG_GridAlign_e ColumnAlign, EG_GridAlign_e RowAlign);
   static void                 SetObjCell(EGObject *pObj, EG_GridAlign_e AlignX, uint8_t ColumnPosition, uint8_t ColumnSpan,
                                                          EG_GridAlign_e AlignY, uint8_t RowPosition, uint8_t RowSpan);
-  static void                 SetObjStyleRowParams(EGObject *pObj, const EG_Coord_t Value[], EG_StyleFlags_t SelectFlags);
-  static void                 SetObjStyleColumnParams(EGObject *pObj, const EG_Coord_t Value[], EG_StyleFlags_t SelectFlags);
+  static void                 SetObjStyleRowParams(EGObject *pObj, const int32_t Value[], EG_StyleFlags_t SelectFlags);
+  static void                 SetObjStyleColumnParams(EGObject *pObj, const int32_t Value[], EG_StyleFlags_t SelectFlags);
   static void                 SetObjStyleRowAlign(EGObject *pObj, EG_GridAlign_e Value, EG_StyleFlags_t SelectFlags);
   static void                 SetObjStyleColumnAlign(EGObject *pObj, EG_GridAlign_e Value, EG_StyleFlags_t SelectFlags);
   static void                 SetObjStyleCellColumnPosition(EGObject *pObj, uint8_t Value, EG_StyleFlags_t SelectFlags);
@@ -87,8 +88,8 @@ public:
   static void                 SetObjStyleCellRowSpan(EGObject *pObj, uint8_t Value, EG_StyleFlags_t SelectFlags);
   static void                 SetObjStyleCellAlignX(EGObject *pObj, uint8_t Value, EG_StyleFlags_t SelectFlags);
   static void                 SetObjStyleCellAlignY(EGObject *pObj, uint8_t Value, EG_StyleFlags_t SelectFlags);
-  static const EG_Coord_t*    GetObjRowParams(const EGObject *pObj, uint32_t Part);
-  static const EG_Coord_t*    GetObjColumnParams(const EGObject *pObj, uint32_t Part);
+  static const int32_t*    GetObjRowParams(const EGObject *pObj, uint32_t Part);
+  static const int32_t*    GetObjColumnParams(const EGObject *pObj, uint32_t Part);
   static EG_GridAlign_e       GetObjStyleRowAlign(const EGObject *pObj, uint32_t Part);
   static EG_GridAlign_e       GetObjStyleColumnAlign(const EGObject *pObj, uint32_t Part);
   static uint8_t              GetObjStyleCellColumnPosition(const EGObject *pObj, uint32_t Part);
@@ -98,7 +99,7 @@ public:
   static uint8_t              GetObjStyleCellAlignX(const EGObject *pObj, uint32_t Part);
   static uint8_t              GetObjStyleCellAlignY(const EGObject *pObj, uint32_t Part);
 
-  static inline EG_Coord_t    EGGridFR(uint8_t x){ return EG_GRID_FR(x);};
+  static inline int32_t    EGGridFR(uint8_t x){ return EG_GRID_FR(x);};
 
   static EGStyleProperty_e    STYLE_COLUMN_ARRAY_PROPS;
   static EGStyleProperty_e    STYLE_COLUMN_ALIGN;
@@ -118,11 +119,11 @@ private:
   void                        CalculateColumns(EGObject *pObj);
   void                        CalculateRows(EGObject *pObj);
   void                        RepositionItem(EGObject *pItem, EGPoint *pGridPosition);
-  EG_Coord_t                  GridAlign(EG_Coord_t ContentSize, bool AutoSize, uint8_t Alignment, EG_Coord_t Gap, uint32_t TrackCount,
-														            EG_Coord_t *pSizeArray, EG_Coord_t *pPositionArray, bool Reverse);
-  uint32_t                    CountTracks(const EG_Coord_t *pTracks);
-  const EG_Coord_t*           GetColumnParams(EGObject *pObj);
-  const EG_Coord_t*           GetRowParams(EGObject *pObj);
+  int32_t                  GridAlign(int32_t ContentSize, bool AutoSize, uint8_t Alignment, int32_t Gap, uint32_t TrackCount,
+														            int32_t *pSizeArray, int32_t *pPositionArray, bool Reverse);
+  uint32_t                    CountTracks(const int32_t *pTracks);
+  const int32_t*           GetColumnParams(EGObject *pObj);
+  const int32_t*           GetRowParams(EGObject *pObj);
   uint8_t                     GetColumnPosition(EGObject *pObj);
   uint8_t                     GetRowPosition(EGObject *pObj);
   uint8_t                     GetColumnSpan(EGObject *pObj);
@@ -135,14 +136,14 @@ private:
 
   inline int32_t              DivRoundClosest(int32_t Dividend, int32_t Divisor);
  
-  EG_Coord_t                 *m_pColumnPositions;
-	EG_Coord_t                 *m_pRowPositions;
-	EG_Coord_t                 *m_pColumnWidths;
-	EG_Coord_t                 *m_pRowHeights;
+  int32_t                 *m_pColumnPositions;
+	int32_t                 *m_pRowPositions;
+	int32_t                 *m_pColumnWidths;
+	int32_t                 *m_pRowHeights;
 	uint32_t                    m_ColumCount;
 	uint32_t                    m_RowCount;
-	EG_Coord_t                  m_GridWidth;
-	EG_Coord_t                  m_GridHeight;
+	int32_t                  m_GridWidth;
+	int32_t                  m_GridHeight;
 
 };
 
@@ -155,14 +156,14 @@ inline int32_t EGGridLayout::DivRoundClosest(int32_t Dividend, int32_t Divisor)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline const EG_Coord_t* EGGridLayout::GetColumnParams(EGObject *pObj)
+inline const int32_t* EGGridLayout::GetColumnParams(EGObject *pObj)
 {
 	return GetObjColumnParams(pObj, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline const EG_Coord_t* EGGridLayout::GetRowParams(EGObject *pObj)
+inline const int32_t* EGGridLayout::GetRowParams(EGObject *pObj)
 {
 	return GetObjRowParams(pObj, 0);
 }
@@ -225,18 +226,18 @@ inline uint8_t EGGridLayout::GetRowAlign(EGObject *pObj)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline const EG_Coord_t* EGGridLayout::GetObjRowParams(const EGObject *pObj, uint32_t Part)
+inline const int32_t* EGGridLayout::GetObjRowParams(const EGObject *pObj, uint32_t Part)
 {
   EG_StyleValue_t Value = pObj->GetProperty(Part, STYLE_ROW_ARRAY_PROPS);
-  return (const EG_Coord_t *)Value.pPtr;
+  return (const int32_t *)Value.pPtr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline const EG_Coord_t* EGGridLayout::GetObjColumnParams(const EGObject *pObj, uint32_t Part)
+inline const int32_t* EGGridLayout::GetObjColumnParams(const EGObject *pObj, uint32_t Part)
 {
   EG_StyleValue_t Value = pObj->GetProperty(Part, STYLE_COLUMN_ARRAY_PROPS);
-  return (const EG_Coord_t *)Value.pPtr;
+  return (const int32_t *)Value.pPtr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

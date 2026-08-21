@@ -1,23 +1,24 @@
 /*
- *        Copyright (Key) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -27,17 +28,17 @@
 #include "misc/EG_Assert.h"
 #include "core/EG_InputDevice.h"
 #include "core/EG_Group.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "core/EG_Refresh.h"
 #include "misc/EG_Text.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 #define BTN_EXTRA_CLICK_AREA_MAX (EG_DPI_DEF / 10)
 #define EG_BTNMATRIX_WIDTH_MASK 0x000F
 
-static const char *lv_btnmatrix_def_map[] = {"Btn1", "Btn2", "Btn3", "\n", "Btn4", "Btn5", ""};
+static const char *pDefMatrixMap[] = {"Btn1", "Btn2", "Btn3", "\n", "Btn4", "Btn5", ""};
 
 const EG_ClassType_t c_ButtonMatrixClass = {
   .pBaseClassType = &c_ObjectClass,
@@ -102,7 +103,7 @@ void EGButtonMatrix::Configure(void)
 	m_pControlBits = nullptr;
 	m_ppMap = nullptr;
 	m_OneCheck = 0;
-	SetMap(lv_btnmatrix_def_map);
+	SetMap(pDefMatrixMap);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -113,13 +114,13 @@ void EGButtonMatrix::SetMap(const char *pMap[])
 	AllocateMap(pMap);	// Analyze the map and create the required number of buttons
 	m_ppMap = pMap;
 	EG_BaseDirection_e Direction = GetStyleBaseDirection(EG_PART_MAIN);
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);	// Set size and positions of the buttons
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PadRow = GetStylePadRow(EG_PART_MAIN);
-	EG_Coord_t PadColumn = GetStylePadColumn(EG_PART_MAIN);
-	EG_Coord_t MaxWidth = GetContentWidth();
-	EG_Coord_t MaxHeight = GetContentHeight();
-	EG_Coord_t MaxHeightNoGap = MaxHeight - (PadRow * (m_RowCount - 1));	// Calculate the position of each Row
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);	// Set size and positions of the buttons
+	int32_t PadTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t PadRow = GetStylePadRow(EG_PART_MAIN);
+	int32_t PadColumn = GetStylePadColumn(EG_PART_MAIN);
+	int32_t MaxWidth = GetContentWidth();
+	int32_t MaxHeight = GetContentHeight();
+	int32_t MaxHeightNoGap = MaxHeight - (PadRow * (m_RowCount - 1));	// Calculate the position of each Row
 
 	// Count the units and the buttons in a line (A button can be 1,2,3... unit wide)
 	uint32_t txt_tot_i = 0; // Act. index in the str map
@@ -140,21 +141,21 @@ void EGButtonMatrix::SetMap(const char *pMap[])
 			ppMapRow = &ppMapRow[ButtonCount + 1]; // Set the map to the next Row
 			continue;
 		}
-		EG_Coord_t RowY1 = PadTop + (MaxHeightNoGap * Row) / m_RowCount + Row * PadRow;
-		EG_Coord_t RowY2 = PadTop + (MaxHeightNoGap * (Row + 1)) / m_RowCount + Row * PadRow - 1;
+		int32_t RowY1 = PadTop + (MaxHeightNoGap * Row) / m_RowCount + Row * PadRow;
+		int32_t RowY2 = PadTop + (MaxHeightNoGap * (Row + 1)) / m_RowCount + Row * PadRow - 1;
 
 		// Set the button size and positions
-		EG_Coord_t max_w_no_gap = MaxWidth - (PadColumn * (ButtonCount - 1));
+		int32_t max_w_no_gap = MaxWidth - (PadColumn * (ButtonCount - 1));
 		if(max_w_no_gap < 0) max_w_no_gap = 0;
 
 		uint32_t row_unit_cnt = 0; // The current unit position in the Row
 		uint32_t btn;
 		for(btn = 0; btn < ButtonCount; btn++, btn_tot_i++, txt_tot_i++) {
 			uint32_t btn_u = GetButtonWidth(m_pControlBits[btn_tot_i]);
-			EG_Coord_t btn_x1 = (max_w_no_gap * row_unit_cnt) / unit_cnt + btn * PadColumn;
-			EG_Coord_t btn_x2 = (max_w_no_gap * (row_unit_cnt + btn_u)) / unit_cnt + btn * PadColumn - 1;
+			int32_t btn_x1 = (max_w_no_gap * row_unit_cnt) / unit_cnt + btn * PadColumn;
+			int32_t btn_x2 = (max_w_no_gap * (row_unit_cnt + btn_u)) / unit_cnt + btn * PadColumn - 1;
 			if(Direction == EG_BASE_DIR_RTL) {			// If RTL start from the right
-				EG_Coord_t tmp = btn_x1;
+				int32_t tmp = btn_x1;
 				btn_x1 = btn_x2;
 				btn_x2 = tmp;
 				btn_x1 = MaxWidth - btn_x1;
@@ -306,7 +307,7 @@ EGPoint Point;
   switch(Code){
     case EG_EVENT_REFR_EXT_DRAW_SIZE: {
       if(HasPopoversInTopRow()) {	// reserve one Row worth of extra space to account for popovers in the top Row
-        EG_Coord_t Size = m_RowCount > 0 ? GetContentHeight() / m_RowCount : 0;
+        int32_t Size = m_RowCount > 0 ? GetContentHeight() / m_RowCount : 0;
         pEvent->SetExtDrawSize(Size);
       }
       break;
@@ -484,7 +485,7 @@ EGPoint Point;
           break;
         }
         case EG_KEY_DOWN: {
-          EG_Coord_t ColumnGap = GetStylePadColumn(EG_PART_MAIN);
+          int32_t ColumnGap = GetStylePadColumn(EG_PART_MAIN);
           if(m_SelectID == EG_BTNMATRIX_BTN_NONE) {        // Find the area below the current
             m_SelectID = 0;
             while(IsHidden(m_pControlBits[m_SelectID]) || IsInactive(m_pControlBits[m_SelectID])) {
@@ -497,7 +498,7 @@ EGPoint Point;
           }
           else {
             uint16_t Index;
-            EG_Coord_t PressPoint = m_pButtonRects[m_SelectID].GetX1() + (m_pButtonRects[m_SelectID].GetWidth() >> 1);
+            int32_t PressPoint = m_pButtonRects[m_SelectID].GetX1() + (m_pButtonRects[m_SelectID].GetWidth() >> 1);
             for(Index = m_SelectID; Index < m_ButtonCount; Index++) {
               if(m_pButtonRects[Index].GetY1() > m_pButtonRects[m_SelectID].GetY1() &&
                 PressPoint >= m_pButtonRects[Index].GetX1() &&
@@ -512,7 +513,7 @@ EGPoint Point;
           break;
         }
         case EG_KEY_UP: {
-          EG_Coord_t ColumnGap = GetStylePadColumn(EG_PART_MAIN);
+          int32_t ColumnGap = GetStylePadColumn(EG_PART_MAIN);
           if(m_SelectID == EG_BTNMATRIX_BTN_NONE) {			// Find the area below the current
             m_SelectID = 0;
             while(IsHidden(m_pControlBits[m_SelectID]) || IsInactive(m_pControlBits[m_SelectID])) {
@@ -525,7 +526,7 @@ EGPoint Point;
           }
           else {
             int16_t Index;
-            EG_Coord_t PressPoint = m_pButtonRects[m_SelectID].GetX1() + (m_pButtonRects[m_SelectID].GetWidth() >> 1);
+            int32_t PressPoint = m_pButtonRects[m_SelectID].GetX1() + (m_pButtonRects[m_SelectID].GetWidth() >> 1);
             for(Index = m_SelectID; Index >= 0; Index--) {
               if(m_pButtonRects[Index].GetY1() < m_pButtonRects[m_SelectID].GetY1() &&
                 PressPoint >= m_pButtonRects[Index].GetX1() - ColumnGap &&
@@ -562,7 +563,7 @@ EGDrawRect ActiveDrawRect, DefaultDrawRect;
 EGDrawLabel ActivDrawLabel, DefaultDrawLabel;
 
 	if(m_ButtonCount == 0) return;
-	EGDrawContext *pDrawContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	m_SkipTransition = 1;
 	EGState_t OriginalState = m_State;
 	m_State = EG_STATE_DEFAULT;
@@ -571,21 +572,20 @@ EGDrawLabel ActivDrawLabel, DefaultDrawLabel;
 	InititialseDrawLabel(EG_PART_ITEMS, &DefaultDrawLabel);
 	m_SkipTransition = 0;
 	m_State = OriginalState;
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t PadTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t PadRight = GetStylePadRight(EG_PART_MAIN);
 #if EG_USE_ARABIC_PERSIAN_CHARS
 	const size_t txt_ap_size = 256;
 	char *txt_ap = EG_GetBufferMem(txt_ap_size);
 #endif
-	EGDrawDiscriptor PartDrawDiscriptor;
-	InitDrawDescriptor(&PartDrawDiscriptor, pDrawContext);
-	PartDrawDiscriptor.m_Part = EG_PART_ITEMS;
-	PartDrawDiscriptor.m_pClass = m_pClass;
-	PartDrawDiscriptor.m_Type = EG_BTNMATRIX_DRAW_PART_BTN;
-	PartDrawDiscriptor.m_pDrawRect = &ActiveDrawRect;
-	PartDrawDiscriptor.m_pDrawLabel = &ActivDrawLabel;
+	EGEventDC PartDrawDescriptor(pDC);
+	PartDrawDescriptor.m_Part = EG_PART_ITEMS;
+	PartDrawDescriptor.m_pClass = m_pClass;
+	PartDrawDescriptor.m_Type = EG_BTNMATRIX_DRAW_PART_BTN;
+	PartDrawDescriptor.m_pDrawRect = &ActiveDrawRect;
+	PartDrawDescriptor.m_pDrawLabel = &ActivDrawLabel;
 	for(ButtonIndex = 0; ButtonIndex < m_ButtonCount; ButtonIndex++, TextIndex++) {
 		while(strcmp(m_ppMap[TextIndex], "\n") == 0) TextIndex++;		// Search the next valid text in the map
 		if(IsHidden(m_pControlBits[ButtonIndex])) continue;		// Skip hidden buttons
@@ -619,9 +619,9 @@ EGDrawLabel ActivDrawLabel, DefaultDrawLabel;
 		}
 		if(IsRecolor(m_pControlBits[ButtonIndex])) ActivDrawLabel.m_Flag |= EG_TEXT_FLAG_RECOLOR;
 		else ActivDrawLabel.m_Flag &= ~EG_TEXT_FLAG_RECOLOR;
-		PartDrawDiscriptor.m_pRect = &ButtonRect;
-		PartDrawDiscriptor.m_Index = ButtonIndex;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
+		PartDrawDescriptor.m_pRect = &ButtonRect;
+		PartDrawDescriptor.m_Index = ButtonIndex;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
 		if(ActiveDrawRect.m_BorderSide & EG_BORDER_SIDE_INTERNAL) {		// Remove borders on the edges if `EG_BORDER_SIDE_INTERNAL`
 			ActiveDrawRect.m_BorderSide = EG_BORDER_SIDE_FULL;
 			if(ButtonRect.GetX1() == m_Rect.GetX1() + PadLeft) ActiveDrawRect.m_BorderSide &= ~EG_BORDER_SIDE_LEFT;
@@ -629,14 +629,14 @@ EGDrawLabel ActivDrawLabel, DefaultDrawLabel;
 			if(ButtonRect.GetY1() == m_Rect.GetY1() + PadTop) ActiveDrawRect.m_BorderSide &= ~EG_BORDER_SIDE_TOP;
 			if(ButtonRect.GetY2() == m_Rect.GetY2() - PadBottom) ActiveDrawRect.m_BorderSide &= ~EG_BORDER_SIDE_BOTTOM;
 		}
-    EG_Coord_t ButtonHeight = ButtonRect.GetHeight();
+    int32_t ButtonHeight = ButtonRect.GetHeight();
 		if((State & EG_STATE_PRESSED) && (m_pControlBits[ButtonIndex] & EG_BTNMATRIX_CTRL_POPOVER)) {
 			ButtonRect.DecY1(ButtonRect.GetHeight());			// Push up the upper boundary of the btn area to create the popover
 		}
-		ActiveDrawRect.Draw(pDrawContext, &ButtonRect);		// Draw the background
+		ActiveDrawRect.Draw(pDC, &ButtonRect);		// Draw the background
 		const EG_Font_t *pFont = ActivDrawLabel.m_pFont;		// Calculate the size of the text
-		EG_Coord_t Kerning = ActivDrawLabel.m_Kerning;
-		EG_Coord_t LineSpace = ActivDrawLabel.m_LineSpace;
+		int32_t Kerning = ActivDrawLabel.m_Kerning;
+		int32_t LineSpace = ActivDrawLabel.m_LineSpace;
 		const char *pString = m_ppMap[TextIndex];
 #if EG_USE_ARABIC_PERSIAN_CHARS
 		size_t len_ap = _lv_txt_ap_calc_bytes_cnt(pString);		// Get the size of the Arabic text and process it
@@ -645,7 +645,7 @@ EGDrawLabel ActivDrawLabel, DefaultDrawLabel;
 			pString = txt_ap;
 		}
 #endif
-		EGPoint StringSize;
+		EGSize StringSize;
 		EG_GetTextSize(&StringSize, pString, pFont, Kerning,	LineSpace, ObjRect.GetWidth(), ActivDrawLabel.m_Flag);
 		ButtonRect.IncX1((ButtonRect.GetWidth() - StringSize.m_X) / 2);
 		ButtonRect.IncY1((ButtonRect.GetHeight() - StringSize.m_Y) / 2);
@@ -655,8 +655,8 @@ EGDrawLabel ActivDrawLabel, DefaultDrawLabel;
 			ButtonRect.DecY1(ButtonHeight / 2);			// Push up the button text into the popover
 			ButtonRect.DecY2(ButtonHeight / 2);
 		}
-		ActivDrawLabel.Draw(pDrawContext, &ButtonRect, pString, nullptr);		// Draw the text
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+		ActivDrawLabel.Draw(pDC, &ButtonRect, pString, nullptr);		// Draw the text
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 	}
 	m_SkipTransition = 0;
 #if EG_USE_ARABIC_PERSIAN_CHARS
@@ -772,14 +772,14 @@ uint16_t EGButtonMatrix::GetFromPoint(EGPoint *pPoint)
 uint16_t i;
 
 	EGRect ObjRect = m_Rect;
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t Height = GetHeight();
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t PadTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t PadRow = GetStylePadRow(EG_PART_MAIN);
-	EG_Coord_t PadColumn = GetStylePadColumn(EG_PART_MAIN);
+	int32_t Width = GetWidth();
+	int32_t Height = GetHeight();
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t PadRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t PadTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t PadBottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t PadRow = GetStylePadRow(EG_PART_MAIN);
+	int32_t PadColumn = GetStylePadColumn(EG_PART_MAIN);
 	PadRow = (PadRow / 2) + 1 + (PadRow & 1);	// Get the half gap. Button look larger with this value. (+1 for rounding error)
 	PadColumn = (PadColumn / 2) + 1 + (PadColumn & 1);
 	PadRow = EG_MIN(PadRow, BTN_EXTRA_CLICK_AREA_MAX);
@@ -813,9 +813,9 @@ void EGButtonMatrix::InvalidateButton(uint16_t Index)
 	m_Rect.Copy(&ObjRect);
 	/*The buttons might have outline and shadow so make the invalidation larger with the gaps between the buttons.
      *It assumes that the outline or shadow is smaller than the gaps*/
-	EG_Coord_t RowGap = GetStylePadRow(EG_PART_MAIN);
-	EG_Coord_t ColumnGap = GetStylePadColumn(EG_PART_MAIN);
-	EG_Coord_t DPI = EGDisplay::GetDPI(GetDisplay());	// Be sure to have a minimal extra space if Row/ColumnGap is small
+	int32_t RowGap = GetStylePadRow(EG_PART_MAIN);
+	int32_t ColumnGap = GetStylePadColumn(EG_PART_MAIN);
+	int32_t DPI = EGDisplay::GetDPI(GetDisplay());	// Be sure to have a minimal extra space if Row/ColumnGap is small
 	RowGap = EG_MAX(RowGap, DPI / 10);
 	ColumnGap = EG_MAX(ColumnGap, DPI / 10);
 	ButtonRect.IncX1(ObjRect.GetX1() - RowGap);	// Convert relative coordinates to absolute

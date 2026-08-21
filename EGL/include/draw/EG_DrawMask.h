@@ -1,25 +1,27 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
+
 
 #pragma once
 
@@ -40,7 +42,7 @@
 # define _EG_MASK_MAX_NUM     1
 #endif
 
-enum {
+enum EG_DrawMaskResult_e {
   EG_DRAW_MASK_RESULT_TRANSP,
   EG_DRAW_MASK_RESULT_FULL_COVER,
   EG_DRAW_MASK_RESULT_CHANGED,
@@ -74,7 +76,7 @@ typedef EG_DrawMaskList_t EG_DrawMaskListArray_t[_EG_MASK_MAX_NUM];
 
 #if EG_DRAW_COMPLEX
 
-enum {
+enum EG_DrawMaskType_e{
     EG_DRAW_MASK_TYPE_LINE = 0,
     EG_DRAW_MASK_TYPE_ANGLE,
     EG_DRAW_MASK_TYPE_RADIUS,
@@ -85,7 +87,7 @@ enum {
 
 typedef uint8_t EG_DrawMask_type_t;
 
-enum {
+enum EG_DrawMaskLine_e{
     EG_DRAW_MASK_LINE_SIDE_LEFT = 0,
     EG_DRAW_MASK_LINE_SIDE_RIGHT,
     EG_DRAW_MASK_LINE_SIDE_TOP,
@@ -94,7 +96,7 @@ enum {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-typedef DrawMaskRes_t (*DrawMaskCB)(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, void *pParam);
+typedef DrawMaskRes_t (*DrawMaskCB)(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, void *pParam);
 
 typedef uint8_t MaskLineSide_t;
 
@@ -126,8 +128,8 @@ typedef struct MaskAngleParam_t{
   MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
   struct {
       EGPoint Vertex;
-      EG_Coord_t StartAngle;
-      EG_Coord_t EndAngle;
+      int32_t StartAngle;
+      int32_t EndAngle;
   } Angle;
   MaskLineParam_t StartLine;
   MaskLineParam_t EndLine;
@@ -143,20 +145,20 @@ typedef struct MaskRadiusCircleDiscrpt_t{
   uint16_t        *pStartOPAonY;      // The index of `cir_opa` for each y value
   int32_t         Life;               // How many times the entry way used
   uint32_t        UsedCount;          // Like a semaphore to count the referencing masks
-  EG_Coord_t      Radius;          // The radius of the entry
+  int32_t         Radius;          // The radius of the entry
 } MaskRadiusCircleDiscrpt_t;
 
 typedef MaskRadiusCircleDiscrpt_t EG_DrawMaskCircleListArray_t[EG_CIRCLE_CACHE_SIZE];
 
 typedef struct MaskRadiusParam_t{
   MaskRadiusParam_t(void): pCircle(nullptr){ Radius.Radius = 0; Radius.Outer = 0;};
-MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
-struct {
-  EGRect        Area;
-  EG_Coord_t    Radius;
-  uint8_t       Outer: 1;  // Invert the mask. 0: Keep the pixels inside.
-} Radius;
-MaskRadiusCircleDiscrpt_t *pCircle;
+  MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
+  struct {
+    EGRect        Area;
+    int32_t       Radius;
+    uint8_t       Outer: 1;  // Invert the mask. 0: Keep the pixels inside.
+  } Radius;
+  MaskRadiusCircleDiscrpt_t *pCircle;
 } MaskRadiusParam_t;
 
 typedef struct MaskFadeParam_t{
@@ -164,8 +166,8 @@ typedef struct MaskFadeParam_t{
   MaskCommonDiscrpt_t Mask;    // The first element must be the common descriptor
   struct {
       EGRect      Area;
-      EG_Coord_t  TopY;
-      EG_Coord_t  BottomY;
+      int32_t     TopY;
+      int32_t     BottomY;
       EG_OPA_t    TopOPA;
       EG_OPA_t    BottomOPA;
   } Fade;
@@ -192,18 +194,18 @@ typedef struct MaskPolygonParam_t{
 /////////////////////////////////////////////////////////////////////////////////
 
   int16_t         DrawMaskAdd(void *pParam, void *pID);
-  DrawMaskRes_t   DrawMaskApply(EG_OPA_t *pMaskBuffer, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length);
-  DrawMaskRes_t   DrawMaskApplyIDs(EG_OPA_t *pMaskArray, EG_Coord_t AbsX, EG_Coord_t AbsY, EG_Coord_t Length, const int16_t *pIndexes, int16_t Count);
-  void*           DrawMaskRemove(int16_t Index);
+  DrawMaskRes_t   DrawMaskApply(EG_OPA_t *pMaskBuffer, int32_t AbsX, int32_t AbsY, int32_t Length);
+  DrawMaskRes_t   DrawMaskApplyIDs(EG_OPA_t *pMaskArray, int32_t AbsX, int32_t AbsY, int32_t Length, const int16_t *pIndexes, int16_t Count);
+  void*           DrawMaskRemoveID(int16_t Index);
   void*           DrawMaskRemoveReferenced(void *pReference);
   void            DrawMaskCleanup(void);
   uint8_t         DrawMaskGetCount(void);
   bool            HasAnyDrawMask(const EGRect *pRect);
   void            DrawMaskSetLineAngle(MaskLineParam_t *pParam, EGPoint Point, int16_t Angle,  MaskLineSide_t Side);
-  void            DrawMaskSetAngle(MaskAngleParam_t *pParam, EGPoint Vertex, EG_Coord_t start_angle, EG_Coord_t end_angle);
-  void            DrawMaskSetRadius(MaskRadiusParam_t *pParam, const EGRect *pRect, EG_Coord_t Radius, bool Invert);
-  void            DrawMaskSetFade(MaskFadeParam_t *pParam, const EGRect *pRect, EG_OPA_t TopOPA, EG_Coord_t TopY,
-                                                            EG_OPA_t BottomOPA, EG_Coord_t BottomY);
+  void            DrawMaskSetAngle(MaskAngleParam_t *pParam, EGPoint Vertex, int32_t start_angle, int32_t end_angle);
+  void            DrawMaskSetRadius(MaskRadiusParam_t *pParam, const EGRect *pRect, int32_t Radius, bool Invert);
+  void            DrawMaskSetFade(MaskFadeParam_t *pParam, const EGRect *pRect, EG_OPA_t TopOPA, int32_t TopY,
+                                                            EG_OPA_t BottomOPA, int32_t BottomY);
   void            DrawMaskSetMap(MaskMapParam_t *pParam, const EGRect *pRect, const EG_OPA_t *pMap);
   void            DrawMaskSetPolygon(MaskPolygonParam_t *pParam, const EGPoint *pPoints, uint16_t PointCount);
   void            DrawMaskFreeParam(void *pParam);

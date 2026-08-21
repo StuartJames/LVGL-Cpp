@@ -16,14 +16,14 @@
 #define EG_BIDI_LRO  "\xE2\x80\xAD" /*U+202D*/
 #define EG_BIDI_RLO  "\xE2\x80\xAE" /*U+202E*/
 
-typedef enum EG_BaseDirection_e : uint8_t{
+enum EG_BaseDirection_e : uint8_t{
     EG_BASE_DIR_LTR      = 0x00,
     EG_BASE_DIR_RTL      = 0x01,
     EG_BASE_DIR_AUTO     = 0x02,
 
-    LV_BASE_DIR_NEUTRAL  = 0x20,
-    LV_BASE_DIR_WEAK     = 0x21,
-} EG_BaseDirection_e;
+    EG_BASE_DIR_NEUTRAL  = 0x20,
+    EG_BASE_DIR_WEAK     = 0x21,
+};
 
 #if EG_USE_BIDI
 
@@ -89,7 +89,7 @@ void _lv_bidi_process_paragraph(const char * str_in, char * str_out, uint32_t le
 /**
  * Get the real text alignment from the a text alignment, base direction and a text.
  * @param align     EG_TEXT_ALIGN_..., write back the calculated align here (EG_TEXT_ALIGN_LEFT/RIGHT/CENTER)
- * @param base_dir  LV_BASE_DIR_..., write the calculated base dir here (EG_BASE_DIR_LTR/RTL)
+ * @param base_dir  EG_BASE_DIR_..., write the calculated base dir here (EG_BASE_DIR_LTR/RTL)
  * @param txt       a text, used with EG_BASE_DIR_AUTO to determine the base direction
  */
 void lv_bidi_calculate_align(EG_TextAlignment_t * align, EG_BaseDirection_e * base_dir, const char * txt);

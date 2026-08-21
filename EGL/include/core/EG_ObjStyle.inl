@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -51,7 +52,7 @@ inline void* EGObject::GetExtData(void)
  * It ensures that e.g. `eg_dpx(100)` will have the same physical size regardless to the
  * DPI of the display. */
 
-inline EG_Coord_t EGObject::DPX(EGObject *pObj, EG_Coord_t DPI)
+inline int32_t EGObject::DPX(EGObject *pObj, int32_t DPI)
 {
   return _EG_DPX_CALC(EGDisplay::GetDPI(pObj->GetDisplay()), DPI);
 }
@@ -59,7 +60,7 @@ inline EG_Coord_t EGObject::DPX(EGObject *pObj, EG_Coord_t DPI)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGObject::SetPaddingAll(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+inline void EGObject::SetPaddingAll(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   SetStylePadLeft(Value, SelectFlags);
   SetStylePadRight(Value, SelectFlags);
@@ -69,7 +70,7 @@ inline void EGObject::SetPaddingAll(EG_Coord_t Value, EG_StyleFlags_t SelectFlag
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGObject::SetHorizontalPadding(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+inline void EGObject::SetHorizontalPadding(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   SetStylePadLeft(Value, SelectFlags);
   SetStylePadRight(Value, SelectFlags);
@@ -77,7 +78,7 @@ inline void EGObject::SetHorizontalPadding(EG_Coord_t Value, EG_StyleFlags_t Sel
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGObject::SetVerticalPadding(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+inline void EGObject::SetVerticalPadding(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   SetStylePadTop(Value, SelectFlags);
   SetStylePadBottom(Value, SelectFlags);
@@ -85,7 +86,7 @@ inline void EGObject::SetVerticalPadding(EG_Coord_t Value, EG_StyleFlags_t Selec
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGObject::SetPaddingGap(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+inline void EGObject::SetPaddingGap(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   SetStylePadRow(Value, SelectFlags);
   SetStylePadColumn(Value, SelectFlags);
@@ -93,7 +94,7 @@ inline void EGObject::SetPaddingGap(EG_Coord_t Value, EG_StyleFlags_t SelectFlag
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void EGObject::SetStyleSize(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+inline void EGObject::SetStyleSize(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   SetStyleWidth(Value, SelectFlags);
   SetStyleHeight(Value, SelectFlags);
@@ -101,7 +102,7 @@ inline void EGObject::SetStyleSize(EG_Coord_t Value, EG_StyleFlags_t SelectFlags
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EGObject::GetTransformZoomSafe(const uint32_t Part)
+inline int32_t EGObject::GetTransformZoomSafe(const uint32_t Part)
 {
   int16_t Zoom = GetStyleTransformZoom(Part);
   return Zoom != 0 ? Zoom : 1;
@@ -130,52 +131,52 @@ inline void EGObject::Center(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EGObject::GetStyleWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleMinWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleMinWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_MIN_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleMaxWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleMaxWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_MAX_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleHeight(uint32_t Part)
+inline int32_t EGObject::GetStyleHeight(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_HEIGHT);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleMinHeight(uint32_t Part)
+inline int32_t EGObject::GetStyleMinHeight(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_MIN_HEIGHT);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleMaxHeight(uint32_t Part)
+inline int32_t EGObject::GetStyleMaxHeight(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_MAX_HEIGHT);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleX(uint32_t Part)
+inline int32_t EGObject::GetStyleX(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_X);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleY(uint32_t Part)
+inline int32_t EGObject::GetStyleY(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_Y);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_AlignType_e EGObject::GetStyleAlign(uint32_t Part)
@@ -184,88 +185,88 @@ inline EG_AlignType_e EGObject::GetStyleAlign(uint32_t Part)
   return (EG_AlignType_e)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTransformWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleTransformWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSFORM_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTransformHeight(uint32_t Part)
+inline int32_t EGObject::GetStyleTransformHeight(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSFORM_HEIGHT);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTranslateX(uint32_t Part)
+inline int32_t EGObject::GetStyleTranslateX(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSLATE_X);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTranslateY(uint32_t Part)
+inline int32_t EGObject::GetStyleTranslateY(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSLATE_Y);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTransformZoom(uint32_t Part)
+inline int32_t EGObject::GetStyleTransformZoom(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSFORM_ZOOM);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTransformAngle(uint32_t Part)
+inline int32_t EGObject::GetStyleTransformAngle(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSFORM_ANGLE);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTransformPivotX(uint32_t Part)
+inline int32_t EGObject::GetStyleTransformPivotX(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSFORM_PIVOT_X);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTransformPivotY(uint32_t Part)
+inline int32_t EGObject::GetStyleTransformPivotY(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSFORM_PIVOT_Y);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePadTop(uint32_t Part)
+inline int32_t EGObject::GetStylePadTop(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_PAD_TOP);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePadBottom(uint32_t Part)
+inline int32_t EGObject::GetStylePadBottom(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_PAD_BOTTOM);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePadLeft(uint32_t Part)
+inline int32_t EGObject::GetStylePadLeft(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_PAD_LEFT);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePadRight(uint32_t Part)
+inline int32_t EGObject::GetStylePadRight(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_PAD_RIGHT);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePadRow(uint32_t Part)
+inline int32_t EGObject::GetStylePadRow(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_PAD_ROW);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePadColumn(uint32_t Part)
+inline int32_t EGObject::GetStylePadColumn(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_PAD_COLUMN);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_Color_t EGObject::GetStyleBackColor(uint32_t Part)
@@ -304,16 +305,16 @@ inline EG_GradDirection_e EGObject::GetStyleBackGradientDirection(uint32_t Part)
   return (EG_GradDirection_e)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleBackMainStop(uint32_t Part)
+inline int32_t EGObject::GetStyleBackMainStop(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_BG_MAIN_STOP);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleBackGradientStop(uint32_t Part)
+inline int32_t EGObject::GetStyleBackGradientStop(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_BG_GRAD_STOP);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline const EG_GradDescriptor_t * EGObject::GetStyleBackGradient(uint32_t Part)
@@ -382,10 +383,10 @@ inline EG_OPA_t EGObject::GetStyleBorderOPA(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleBorderWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleBorderWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_BORDER_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_BorderSide_t EGObject::GetStyleBorderSide(uint32_t Part)
@@ -400,10 +401,10 @@ inline bool EGObject::GetStyleBorderPost(uint32_t Part)
   return (bool)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleOutlineWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleOutlineWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_OUTLINE_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_Color_t EGObject::GetStyleOutlineColor(uint32_t Part)
@@ -424,34 +425,34 @@ inline EG_OPA_t EGObject::GetStyleOutlineOPA(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleOutlinePadding(uint32_t Part)
+inline int32_t EGObject::GetStyleOutlinePadding(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_OUTLINE_PAD);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleShadowWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleShadowWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_SHADOW_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleShadowOffsetX(uint32_t Part)
+inline int32_t EGObject::GetStyleShadowOffsetX(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_SHADOW_OFS_X);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleShadowOffsetY(uint32_t Part)
+inline int32_t EGObject::GetStyleShadowOffsetY(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_SHADOW_OFS_Y);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleShadowSpread(uint32_t Part)
+inline int32_t EGObject::GetStyleShadowSpread(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_SHADOW_SPREAD);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_Color_t EGObject::GetStyleShadowColor(uint32_t Part)
@@ -496,22 +497,22 @@ inline EG_OPA_t EGObject::GetStyleImageRecolorOPA(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleLineWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleLineWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_LINE_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleLineDashWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleLineDashWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_LINE_DASH_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleLineDashGap(uint32_t Part)
+inline int32_t EGObject::GetStyleLineDashGap(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_LINE_DASH_GAP);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline bool EGObject::GetStyleLineRounded(uint32_t Part)
@@ -538,10 +539,10 @@ inline EG_OPA_t EGObject::GetStyleLineOPA(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleArcWidth(uint32_t Part)
+inline int32_t EGObject::GetStyleArcWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_ARC_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline bool EGObject::GetStyleArcRounded(uint32_t Part)
@@ -568,10 +569,10 @@ inline EG_OPA_t EGObject::GetStyleArcOPA(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStylePolyWidth(uint32_t Part)
+inline int32_t EGObject::GetStylePolyWidth(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_POLY_WIDTH);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_Color_t EGObject::GetStylePolyColor(uint32_t Part)
@@ -640,16 +641,16 @@ inline const EG_Font_t * EGObject::GetStyleTextFont(uint32_t Part)
   return (const EG_Font_t *)Value.pPtr;
 }
 
-inline EG_Coord_t EGObject::GetStyleTextKerning(uint32_t Part)
+inline int32_t EGObject::GetStyleTextKerning(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TEXT_LETTER_SPACE);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleTextLineSpace(uint32_t Part)
+inline int32_t EGObject::GetStyleTextLineSpace(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TEXT_LINE_SPACE);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline EG_TextDecor_e EGObject::GetStyleTextDecoration(uint32_t Part)
@@ -664,10 +665,10 @@ inline EG_TextAlignment_t EGObject::GetStyleTextAlign(uint32_t Part)
   return (EG_TextAlignment_t)Value.Number;
 }
 
-inline EG_Coord_t EGObject::GetStyleRadius(uint32_t Part)
+inline int32_t EGObject::GetStyleRadius(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_RADIUS);
-  return (EG_Coord_t)Value.Number;
+  return (int32_t)Value.Number;
 }
 
 inline bool EGObject::GetStyleClipCorner(uint32_t Part)
@@ -688,7 +689,7 @@ inline EG_OPA_t EGObject::GetStyleOPALayered(uint32_t Part)
   return (EG_OPA_t)Value.Number;
 }
 
-inline const EG_ColorFilterProps_t* EGObject::GetStyleColorFilterDiscriptor(uint32_t Part)
+inline const EG_ColorFilterProps_t* EGObject::GetStyleColorFilterDescriptor(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_COLOR_FILTER_DSC);
   return (const EG_ColorFilterProps_t *)Value.pPtr;
@@ -718,10 +719,10 @@ inline uint32_t EGObject::GetStyleAnimationSpeed(uint32_t Part)
   return (uint32_t)Value.Number;
 }
 
-inline const EG_StyleTransitionDiscriptor_t* EGObject::GetStyleTransition(uint32_t Part)
+inline const EG_StyleTransitionDescriptor_t* EGObject::GetStyleTransition(uint32_t Part)
 {
   EG_StyleValue_t Value = GetProperty(Part, EG_STYLE_TRANSITION);
-  return (const EG_StyleTransitionDiscriptor_t *)Value.pPtr;
+  return (const EG_StyleTransitionDescriptor_t *)Value.pPtr;
 }
 
 inline EG_BlendMode_e EGObject::GetStyleBlendMode(uint32_t Part)

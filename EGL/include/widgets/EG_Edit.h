@@ -1,23 +1,24 @@
-/* 
+/*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -29,7 +30,7 @@
 
 // Testing of dependencies
 #if EG_USE_LABEL == 0
-#error "lv_ta: lv_label is required. Enable it in EG_Config.h (EG_USE_LABEL 1)"
+#error "EDEdit: EGLabel are required. Enable it in EG_Config.h (EG_USE_LABEL 1)"
 #endif
 
 #include "../core/EG_Object.h"
@@ -62,7 +63,7 @@ public:
   void                DeleteCharForward(void);
   void                SetEditText(const char *pText);
   void                SetPromptText(const char *pText);
-  void                SetCursorPosition(int32_t Position);
+  void                SetCursorPosition(uint32_t Position);
   void                SetCursorClickPos(bool Enable);
   void                SetPasswordMode(bool Enable);
   void                SetPasswordBullet(const char *pBullet);
@@ -106,7 +107,7 @@ public:
   uint16_t            m_PasswordShowTime; // Time to show characters in password mode before change them to '*'
   EGRect              m_BlinkRect;
   struct {
-      EG_Coord_t      ValidX;             // Used when stepping up/down to a shorter line. (Used by the library)
+      int32_t      ValidX;             // Used when stepping up/down to a shorter line. (Used by the library)
       uint32_t        Position;           // The current cursor position (0: before 1st letter; 1: before 2nd letter ...)
       EGRect          Rect;               // Cursor area relative to the Text Area
       uint32_t        Index;              // Byte index of the letter after (on) the cursor

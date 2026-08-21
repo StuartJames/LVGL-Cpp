@@ -1,29 +1,29 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
-  
 
 #include "draw/sw/EG_SoftContext.h"
-#include "draw/sw/EG_DrawSoftBlend.h"     // lv_draw_sw_blend
+#include "draw/sw/EG_DrawSoftBlend.h"
 #include "hal/EG_HALDisplay.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Assert.h"
@@ -35,18 +35,18 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-const uint8_t _lv_bpp1_opa_table[2] = {0, 255};          // Opacity mapping with BitsPerPixel = 1 (Just for compatibility) 
-const uint8_t _lv_bpp2_opa_table[4] = {0, 85, 170, 255}; // Opacity mapping with BitsPerPixel = 2 
+const uint8_t EG_BPP1_OPA_Table[2] = {0, 255};          // Opacity mapping with BitsPerPixel = 1 (Just for compatibility) 
+const uint8_t EG_BPP2_OPA_Table[4] = {0, 85, 170, 255}; // Opacity mapping with BitsPerPixel = 2 
 
-const uint8_t _lv_bpp3_opa_table[8] = {0, 36, 73, 109, // Opacity mapping with BitsPerPixel = 3 
+const uint8_t EG_BPP3_OPA_Table[8] = {0, 36, 73, 109, // Opacity mapping with BitsPerPixel = 3 
 																			 146, 182, 219, 255};
 
-const uint8_t _lv_bpp4_opa_table[16] = {0, 17, 34, 51, // Opacity mapping with BitsPerPixel = 4 
+const uint8_t EG_BPP4_OPA_Table[16] = {0, 17, 34, 51, // Opacity mapping with BitsPerPixel = 4 
 																				68, 85, 102, 119,
 																				136, 153, 170, 187,
 																				204, 221, 238, 255};
 
-const uint8_t _lv_bpp8_opa_table[256] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+const uint8_t EG_BPP8_OPA_Table[256] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 																				 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
 																				 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
 																				 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
@@ -69,69 +69,67 @@ void EG_ATTRIBUTE_FAST_MEM EGSoftContext::DrawCharacter(const EGDrawLabel *pDraw
 {
 EG_FontGlyphProps_t Glyph;
 
-	bool g_ret = EG_FontGetGlyphProps(pDrawLabel->m_pFont, &Glyph, Character, '\0');
+  EGSoftContext *pDC = (EGSoftContext*)pDrawLabel->m_pContext;
+  bool g_ret = EG_FontGetGlyphProps(pDrawLabel->m_pFont, &Glyph, Character, '\0');
 	if(g_ret == false) {
-		// Add warning if the pDrawLabel is not found but do not print warning for non printable ASCII chars 
+		// Add warning if the pDrawLabel is not found but do not print warning for non printable ASCII chars
 		if(Character >= 0x20 &&
-			 Character != 0xf8ff && // EG_SYMBOL_DUMMY 
-			 Character != 0x200c) { // ZERO WIDTH NON-JOINER 
+			 Character != 0xf8ff && // EG_SYMBOL_DUMMY
+			 Character != 0x200c) { // ZERO WIDTH NON-JOINER
 			EG_LOG_WARN("DrawCharacter: glyph discriptor not found for U+%" EG_PRIX32, Character);
 
 #if EG_USE_FONT_PLACEHOLDER
-			//  draw placeholder  
-			EGRect GlyphArea;
-			EGDrawRect GlyphRect;
-			EG_Coord_t begin_x = pPosition->m_X + Glyph.OffsetX;
-			EG_Coord_t begin_y = pPosition->m_Y + Glyph.OffsetY;
-			GlyphArea.Set(begin_x, begin_y, begin_x + Glyph.BoxWidth, begin_y + Glyph.BoxHeight);
-			GlyphRect.m_BackgroundOPA = EG_OPA_MIN;
-			GlyphRect.m_OutlineOPA = EG_OPA_MIN;
-			GlyphRect.m_ShadowOPA = EG_OPA_MIN;
-			GlyphRect.m_BackImageOPA = EG_OPA_MIN;
-			GlyphRect.m_BorderColor = pDrawLabel->m_Color;
-			GlyphRect.m_BorderWidth = 1;
-			GlyphRect.Draw(pDrawLabel->m_pContext, &GlyphArea);
+			//  draw placeholder
+			EGRect GlyphRect;
+			EGDrawRect Border;
+			EGPoint Start(pPosition->m_X + Glyph.OffsetX, pPosition->m_Y + Glyph.OffsetY);
+			GlyphRect.Set(Start.m_X, Start.m_Y, Start.m_X + Glyph.BoxWidth, Start.m_Y + Glyph.BoxHeight);
+			Border.m_BackgroundOPA = EG_OPA_MIN;
+			Border.m_OutlineOPA = EG_OPA_MIN;
+			Border.m_ShadowOPA = EG_OPA_MIN;
+			Border.m_BackImageOPA = EG_OPA_MIN;
+			Border.m_BorderColor = pDrawLabel->m_Color;
+			Border.m_BorderWidth = 1;
+			Border.Draw(pDrawLabel->m_pContext, &GlyphRect);
 #endif
 		}
 		return;
 	}
-	// Don't draw anything if the character is empty. E.Glyph. space 
+	// Don't draw anything if the character is empty. E.Glyph. space
 	if((Glyph.BoxHeight == 0) || (Glyph.BoxWidth == 0)) return;
-	EGPoint gpos;
-	gpos.m_X = pPosition->m_X + Glyph.OffsetX;
-	gpos.m_Y = pPosition->m_Y + (pDrawLabel->m_pFont->LineHeight - pDrawLabel->m_pFont->BaseLine) - Glyph.BoxHeight - Glyph.OffsetY;
-	// If the Character is completely out of mask don't draw it 
-	if(gpos.m_X + Glyph.BoxWidth < pDrawLabel->m_pContext->m_pClipRect->GetX1() ||
-		 gpos.m_X > pDrawLabel->m_pContext->m_pClipRect->GetX2() ||
-		 gpos.m_Y + Glyph.BoxHeight < pDrawLabel->m_pContext->m_pClipRect->GetY1() ||
-		 gpos.m_Y > pDrawLabel->m_pContext->m_pClipRect->GetY2()) {
-		return;
+	EGPoint GlyphPos(pPosition->m_X + Glyph.OffsetX, pPosition->m_Y + (pDrawLabel->m_pFont->LineHeight - pDrawLabel->m_pFont->BaseLine) - Glyph.BoxHeight - Glyph.OffsetY);
+	// If the Character is completely out of mask don't draw it
+	if(GlyphPos.m_X + Glyph.BoxWidth < pDrawLabel->m_pContext->m_pClipRect->GetX1() ||
+    GlyphPos.m_X > pDrawLabel->m_pContext->m_pClipRect->GetX2() ||
+    GlyphPos.m_Y + Glyph.BoxHeight < pDrawLabel->m_pContext->m_pClipRect->GetY1() ||
+    GlyphPos.m_Y > pDrawLabel->m_pContext->m_pClipRect->GetY2()) {
+		  return;
 	}
 	const uint8_t *pMap = EG_FontGetGlyphBitmap(Glyph.ResolvedFont, Character);
-	if(pMap == NULL) {
+	if(pMap == nullptr) {
 		EG_LOG_WARN("Label: Character bitmap not found");
 		return;
 	}
 	if(Glyph.ResolvedFont->SubPixel) {
 #if EG_DRAW_COMPLEX && EG_USE_FONT_SUBPX
-		draw_letter_subpx(pDrawLabel, pDrawLabel, &gpos, &Glyph, pMap);
+		pDC->DrawSubpixel(pDrawLabel, pDrawLabel, &GlyphPos, &Glyph, pMap);
 #else
 		EG_LOG_WARN("Can't draw sub-pixel rendered Character because EG_USE_FONT_SUBPX == 0 in EG_Config.h");
 #endif
 	}
-	else DrawNormal(pDrawLabel, &gpos, &Glyph, pMap);
+	else pDC->DrawNormal(pDrawLabel, &GlyphPos, &Glyph, pMap);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
 void EGSoftContext::DrawNormal(const EGDrawLabel *pDrawLabel, const EGPoint *pPos, EG_FontGlyphProps_t *pGlyph, const uint8_t *pMap)
 {
-const uint8_t *bpp_opa_table_p;
-uint32_t bitmask_init;
-uint32_t bitmask;
+const uint8_t *pBPP_OPATable;
+uint32_t InitialBitMask;
+uint32_t BitMask;
 uint32_t BitsPerPixel = pGlyph->BitsPerPixel;
-EG_OPA_t opa = pDrawLabel->m_OPA;
-uint32_t shades;
+EG_OPA_t OPA = pDrawLabel->m_OPA;
+uint32_t Shades;
 
 	if(BitsPerPixel == 3) BitsPerPixel = 4;
 #if EG_USE_IMGFONT
@@ -148,24 +146,24 @@ uint32_t shades;
 #endif
 	switch(BitsPerPixel) {
 		case 1:
-			bpp_opa_table_p = _lv_bpp1_opa_table;
-			bitmask_init = 0x80;
-			shades = 2;
+			pBPP_OPATable = EG_BPP1_OPA_Table;
+			InitialBitMask = 0x80;
+			Shades = 2;
 			break;
 		case 2:
-			bpp_opa_table_p = _lv_bpp2_opa_table;
-			bitmask_init = 0xC0;
-			shades = 4;
+			pBPP_OPATable = EG_BPP2_OPA_Table;
+			InitialBitMask = 0xC0;
+			Shades = 4;
 			break;
 		case 4:
-			bpp_opa_table_p = _lv_bpp4_opa_table;
-			bitmask_init = 0xF0;
-			shades = 16;
+			pBPP_OPATable = EG_BPP4_OPA_Table;
+			InitialBitMask = 0xF0;
+			Shades = 16;
 			break;
 		case 8:
-			bpp_opa_table_p = _lv_bpp8_opa_table;
-			bitmask_init = 0xFF;
-			shades = 256;
+			pBPP_OPATable = EG_BPP8_OPA_Table;
+			InitialBitMask = 0xFF;
+			Shades = 256;
 			break; // No opa table, pixel value will be used directly 
 		default:
 			EG_LOG_WARN("DrawNormal: invalid BitsPerPixel");
@@ -174,43 +172,43 @@ uint32_t shades;
 	static EG_OPA_t opa_table[256];
 	static EG_OPA_t prev_opa = EG_OPA_TRANSP;
 	static uint32_t prev_bpp = 0;
-	if(opa < EG_OPA_MAX) {
-		if(prev_opa != opa || prev_bpp != BitsPerPixel) {
+	if(OPA < EG_OPA_MAX) {
+		if(prev_opa != OPA || prev_bpp != BitsPerPixel) {
 			uint32_t i;
-			for(i = 0; i < shades; i++) {
-				opa_table[i] = bpp_opa_table_p[i] == EG_OPA_COVER ? opa : ((bpp_opa_table_p[i] * opa) >> 8);
+			for(i = 0; i < Shades; i++) {
+				opa_table[i] = pBPP_OPATable[i] == EG_OPA_COVER ? OPA : ((pBPP_OPATable[i] * OPA) >> 8);
 			}
 		}
-		bpp_opa_table_p = opa_table;
-		prev_opa = opa;
+		pBPP_OPATable = opa_table;
+		prev_opa = OPA;
 		prev_bpp = BitsPerPixel;
 	}
 	int32_t Column, Row;
 	int32_t BoxWidth = pGlyph->BoxWidth;
 	int32_t BoxHeight = pGlyph->BoxHeight;
-	int32_t width_bit = BoxWidth * BitsPerPixel; // Letter width in bits 
-	// Calculate the col/row start/end on the map 
-	int32_t StartColumn = pPos->m_X >= pDrawLabel->m_pContext->m_pClipRect->GetX1() ? 0 : pDrawLabel->m_pContext->m_pClipRect->GetX1() - pPos->m_X;
-	int32_t EndColumn = pPos->m_X + BoxWidth <= pDrawLabel->m_pContext->m_pClipRect->GetX2() ? BoxWidth : pDrawLabel->m_pContext->m_pClipRect->GetX2() - pPos->m_X + 1;
-	int32_t StartRow = pPos->m_Y >= pDrawLabel->m_pContext->m_pClipRect->GetY1() ? 0 : pDrawLabel->m_pContext->m_pClipRect->GetY1() - pPos->m_Y;
-	int32_t EndRow = pPos->m_Y + BoxHeight <= pDrawLabel->m_pContext->m_pClipRect->GetY2() ? BoxHeight : pDrawLabel->m_pContext->m_pClipRect->GetY2() - pPos->m_Y + 1;
-	uint32_t bit_ofs = (StartRow * width_bit) + (StartColumn * BitsPerPixel);	// Move on the map too 
+	int32_t width_bit = BoxWidth * BitsPerPixel; // Letter width in bits
+	// Calculate the col/row start/end on the map
+	int32_t StartColumn = pPos->m_X >= m_pClipRect->GetX1() ? 0 : m_pClipRect->GetX1() - pPos->m_X;
+	int32_t EndColumn = pPos->m_X + BoxWidth <= m_pClipRect->GetX2() ? BoxWidth : m_pClipRect->GetX2() - pPos->m_X + 1;
+	int32_t StartRow = pPos->m_Y >= m_pClipRect->GetY1() ? 0 : m_pClipRect->GetY1() - pPos->m_Y;
+	int32_t EndRow = pPos->m_Y + BoxHeight <= m_pClipRect->GetY2() ? BoxHeight : m_pClipRect->GetY2() - pPos->m_Y + 1;
+	uint32_t bit_ofs = (StartRow * width_bit) + (StartColumn * BitsPerPixel);	// Move on the map too
 	pMap += bit_ofs >> 3;
 	uint8_t CharIndex;
 	uint32_t col_bit;
-	col_bit = bit_ofs & 0x7; // "& 0x7" equals to "% 8" just faster 
-	EGSoftBlend BlendObj((EGSoftContext*)pDrawLabel->m_pContext);
+	col_bit = bit_ofs & 0x7; // "& 0x7" equals to "% 8" just faster
+	EGSoftBlend BlendObj(this);
 	BlendObj.m_Color = pDrawLabel->m_Color;
 	BlendObj.m_OPA = pDrawLabel->m_OPA;
 	BlendObj.m_BlendMode = pDrawLabel->m_BlendMode;
-	EG_Coord_t HorizontalRes = GetRefreshingDisplay()->GetHorizontalRes();
+	int32_t HorizontalRes = GetRefreshingDisplay()->GetHorizontalRes();
 	uint32_t MaskBufferSize = BoxWidth * BoxHeight > HorizontalRes ? HorizontalRes : BoxWidth * BoxHeight;
 	EG_OPA_t *MaskBuffer = (EG_OPA_t *)EG_GetBufferMem(MaskBufferSize);
 	BlendObj.m_pMaskBuffer = MaskBuffer;
 	int32_t MaskIndex = 0;
 	EGRect FillRect(StartColumn + pPos->m_X, StartRow + pPos->m_Y, EndColumn + pPos->m_X - 1, StartRow + pPos->m_Y);
 #if EG_DRAW_COMPLEX
-	EG_Coord_t FillWidth = FillRect.GetWidth();
+	int32_t FillWidth = FillRect.GetWidth();
 	EGRect MaskRect(FillRect);
 	MaskRect.SetY2(MaskRect.GetY1() + EndRow);
 	bool MaskAny = HasAnyDrawMask(&MaskRect);
@@ -222,29 +220,29 @@ uint32_t shades;
 //  ESP_LOGI("[DrwLbl]", "Pos: %d,%d - %d,%d.", FillRect.GetX1(), FillRect.GetY1(), FillRect.GetX2(), FillRect.GetY2());
 	for(Row = StartRow; Row < EndRow; Row++) {
 #if EG_DRAW_COMPLEX
-		int32_t mask_p_start = MaskIndex;
+		int32_t pMaskStart = MaskIndex;
 #endif
-		bitmask = bitmask_init >> col_bit;
+		BitMask = InitialBitMask >> col_bit;
 		for(Column = StartColumn; Column < EndColumn; Column++) {
-			CharIndex = (*pMap & bitmask) >> (col_bit_max - col_bit);			// Load the pixel's opacity into the mask 
-			if(CharIndex)	MaskBuffer[MaskIndex] = bpp_opa_table_p[CharIndex];
+			CharIndex = (*pMap & BitMask) >> (col_bit_max - col_bit);			// Load the pixel's opacity into the mask 
+			if(CharIndex)	MaskBuffer[MaskIndex] = pBPP_OPATable[CharIndex];
 			else MaskBuffer[MaskIndex] = 0;
 			if(col_bit < col_bit_max) {		                   // Go to the next column 
 				col_bit += BitsPerPixel;
-				bitmask = bitmask >> BitsPerPixel;
+				BitMask = BitMask >> BitsPerPixel;
 			}
 			else {
 				col_bit = 0;
-				bitmask = bitmask_init;
+				BitMask = InitialBitMask;
 				pMap++;
 			}
 			MaskIndex++;			                              // Next mask byte 
 		}
 #if EG_DRAW_COMPLEX
 		if(MaskAny) {		                                  // Apply masks if any 
-			BlendObj.m_MaskResult = DrawMaskApply(MaskBuffer + mask_p_start, FillRect.GetX1(), FillRect.GetY2(), FillWidth);
+			BlendObj.m_MaskResult = DrawMaskApply(MaskBuffer + pMaskStart, FillRect.GetX1(), FillRect.GetY2(), FillWidth);
 			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
-				EG_ZeroMem(MaskBuffer + mask_p_start, FillWidth);
+				EG_ZeroMem(MaskBuffer + pMaskStart, FillWidth);
 			}
 		}
 #endif
@@ -277,217 +275,172 @@ uint32_t shades;
 #if EG_DRAW_COMPLEX && EG_USE_FONT_SUBPX
 void EGSoftContext::DrawSubpixel(EGDrawLabel *pDrawLabel, const EGPoint *pPos, EG_FontGlyphProps_t *pGlyph, const uint8_t *pMap)
 {
-	const uint8_t *bpp_opa_table;
-	uint32_t bitmask_init;
-	uint32_t bitmask;
-	uint32_t BitsPerPixel = pGlyph->BitsPerPixel;
-	EG_OPA_t opa = pDrawLabel->m_OPA;
-	if(BitsPerPixel == 3) BitsPerPixel = 4;
+const uint8_t *pBPP_OPATable;
+uint32_t InitialBitMask;
+uint32_t BitMask;
+uint32_t BitsPerPixel = pGlyph->BitsPerPixel;
+EG_OPA_t OPA = pDrawLabel->m_OPA;
 
+	if(BitsPerPixel == 3) BitsPerPixel = 4;
 	switch(BitsPerPixel) {
 		case 1:
-			bpp_opa_table = _lv_bpp1_opa_table;
-			bitmask_init = 0x80;
+			pBPP_OPATable = EG_BPP1_OPA_Table;
+			InitialBitMask = 0x80;
 			break;
 		case 2:
-			bpp_opa_table = _lv_bpp2_opa_table;
-			bitmask_init = 0xC0;
+			pBPP_OPATable = EG_BPP2_OPA_Table;
+			InitialBitMask = 0xC0;
 			break;
 		case 4:
-			bpp_opa_table = _lv_bpp4_opa_table;
-			bitmask_init = 0xF0;
+			pBPP_OPATable = EG_BPP4_OPA_Table;
+			InitialBitMask = 0xF0;
 			break;
 		case 8:
-			bpp_opa_table = _lv_bpp8_opa_table;
-			bitmask_init = 0xFF;
-			break; // No opa table, pixel value will be used directly 
+			pBPP_OPATable = EG_BPP8_OPA_Table;
+			InitialBitMask = 0xFF;
+			break; // No opa table, pixel value will be used directly
 		default:
-			EG_LOG_WARN("lv_draw_letter: invalid BitsPerPixel not found");
-			return; // Invalid BitsPerPixel. Can't render the Character 
+			EG_LOG_WARN("DrawSubpixel: invalid BitsPerPixel not found");
+			return; // Invalid BitsPerPixel. Can't render the Character
 	}
-
 	int32_t Column, Row;
-
 	int32_t BoxWidth = pGlyph->BoxWidth;
 	int32_t BoxHeight = pGlyph->BoxHeight;
-	int32_t width_bit = BoxWidth * BitsPerPixel; // Letter width in bits 
-
-	// Calculate the col/row start/end on the map 
-	int32_t StartColumn = pPos->m_X >= pDrawLabel->m_pClipRect->GetX1() ? 0 : (pDrawLabel->m_pClipRect->GetX1() - pPos->m_X) * 3;
-	int32_t EndColumn = pPos->m_X + BoxWidth / 3 <= pDrawLabel->m_pClipRect->GetX2() ? BoxWidth : (pDrawLabel->m_pClipRect->GetX2() - pPos->m_X + 1) * 3;
-	int32_t StartRow = pPos->m_Y >= pDrawLabel->m_pClipRect->GetY1() ? 0 : pDrawLabel->m_pClipRect->GetY1() - pPos->m_Y;
-	int32_t EndRow = pPos->m_Y + BoxHeight <= pDrawLabel->m_pClipRect->GetY2() ? BoxHeight : pDrawLabel->m_pClipRect->GetY2() - pPos->m_Y + 1;
-
-	// Move on the map too 
+	int32_t width_bit = BoxWidth * BitsPerPixel; // Letter width in bits
+	// Calculate the col/row start/end on the map
+	int32_t StartColumn = pPos->m_X >= m_pClipRect->GetX1() ? 0 : (m_pClipRect->GetX1() - pPos->m_X) * 3;
+	int32_t EndColumn = pPos->m_X + BoxWidth / 3 <= m_pClipRect->GetX2() ? BoxWidth : (m_pClipRect->GetX2() - pPos->m_X + 1) * 3;
+	int32_t StartRow = pPos->m_Y >= m_pClipRect->GetY1() ? 0 : m_pClipRect->GetY1() - pPos->m_Y;
+	int32_t EndRow = pPos->m_Y + BoxHeight <= m_pClipRect->GetY2() ? BoxHeight : m_pClipRect->GetY2() - pPos->m_Y + 1;
+	// Move on the map too
 	int32_t bit_ofs = (StartRow * width_bit) + (StartColumn * BitsPerPixel);
 	pMap += bit_ofs >> 3;
-
 	uint8_t CharIndex;
 	EG_OPA_t px_opa;
 	int32_t col_bit;
-	col_bit = bit_ofs & 0x7; // "& 0x7" equals to "% 8" just faster 
-
-	EGRect map_area;
-	map_area.GetX1() = StartColumn / 3 + pPos->m_X;
-	map_area.GetX2() = EndColumn / 3 + pPos->m_X - 1;
-	map_area.GetY1() = StartRow + pPos->m_Y;
-	map_area.GetY2() = map_area.GetY1();
-
-	if(map_area.GetX2() <= map_area.GetX1()) return;
-
-	EG_Coord_t HorizontalRes = lv_disp_get_hor_res(_lv_refr_get_disp_refreshing());
+	col_bit = bit_ofs & 0x7; // "& 0x7" equals to "% 8" just faster
+	EGRect MapRect;
+	MapRect.GetX1() = StartColumn / 3 + pPos->m_X;
+	MapRect.GetX2() = EndColumn / 3 + pPos->m_X - 1;
+	MapRect.GetY1() = StartRow + pPos->m_Y;
+	MapRect.GetY2() = MapRect.GetY1();
+	if(MapRect.GetX2() <= MapRect.GetX1()) return;
+	int32_t HorizontalRes = GetRefreshingDisplay()->GetHorizontalRes();
 	int32_t MaskBufferSize = BoxWidth * BoxHeight > HorizontalRes ? HorizontalRes : pGlyph->BoxWidth * pGlyph->BoxHeight;
 	EG_OPA_t *MaskBuffer = EG_GetBufferMem(MaskBufferSize);
 	int32_t MaskIndex = 0;
-
-	EG_Color_t *color_buf = EG_GetBufferMem(MaskBufferSize * sizeof(EG_Color_t));
-
-	int32_t dest_buf_stride = EG_Rect_get_width(pDrawLabel->buf_area);
-	EG_Color_t *dest_buf_tmp = pDrawLabel->buf;
-
-	// Set a pointer on draw_buf to the first pixel of the Character 
-	dest_buf_tmp += ((pPos->m_Y - pDrawLabel->buf_area->GetY1()) * dest_buf_stride) + pPos->m_X - pDrawLabel->buf_area->GetX1();
-
-	// If the Character is partially out of mask the move there on draw_buf 
-	dest_buf_tmp += (StartRow * dest_buf_stride) + StartColumn / 3;
-
+	EG_Color_t *pColorBuffer = EG_GetBufferMem(MaskBufferSize * sizeof(EG_Color_t));
+	int32_t DestBufferStep = m_pRect->GetWidth();
+	EG_Color_t *pDestTempBuffer = m_pSourceBuffer;
+	// Set a pointer on draw_buf to the first pixel of the Character
+	pDestTempBuffer += ((pPos->m_Y - m_pRect->GetY1()) * DestBufferStep) + pPos->m_X - m_pRect->GetX1();
+	// If the Character is partially out of mask the move there on draw_buf
+	pDestTempBuffer += (StartRow * DestBufferStep) + StartColumn / 3;
 	EGRect MaskRect;
-	EG_Rect_copy(&MaskRect, &map_area);
+	EG_Rect_copy(&MaskRect, &MapRect);
 	MaskRect.GetY2() = MaskRect.GetY1() + EndRow;
-	bool MaskAny = lv_draw_mask_is_any(&map_area);
-	uint8_t font_rgb[3];
-
-	EG_Color_t color = pDrawLabel->color;
+	bool MaskAny = HasAnyDrawMask(&MapRect);
+	uint8_t FontRGB[3];
+	EG_Color_t Color = m_Color;
 #if EG_COLOR_16_SWAP == 0
-	uint8_t txt_rgb[3] = {color.ch.red, color.ch.green, color.ch.blue};
+	uint8_t TextRGB[3] = {Color.ch.red, Color.ch.green, Color.ch.blue};
 #else
-	uint8_t txt_rgb[3] = {color.ch.red, (color.ch.green_h << 3) + color.ch.green_l, color.ch.blue};
+	uint8_t TextRGB[3] = {Color.ch.red, (Color.ch.green_h << 3) + Color.ch.green_l, Color.ch.blue};
 #endif
-
-  EGSoftBlend BlendObj((EGSoftContext*)pDrawLabel->m_pContext);
-	BlendObj.blend_area = &map_area;
-	BlendObj.MaskRect = &map_area;
-	BlendObj.src_buf = color_buf;
-	BlendObj.MaskBuffer = MaskBuffer;
-	BlendObj.m_OPA = opa;
-	BlendObj.blend_mode = pDrawLabel->blend_mode;
-
+  EGSoftBlend BlendObj(this);
+	BlendObj.m_pRect = &MapRect;
+	BlendObj.MaskRect = &MapRect;
+	BlendObj.m_pSourceBuffer = pColorBuffer;
+	BlendObj.m_pMaskBuffer = MaskBuffer;
+	BlendObj.m_OPA = OPA;
+	BlendObj.blend_mode = m_BlendMode;
 	for(Row = StartRow; Row < EndRow; Row++) {
 		uint32_t subpx_cnt = 0;
-		bitmask = bitmask_init >> col_bit;
-		int32_t mask_p_start = MaskIndex;
-
+		BitMask = InitialBitMask >> col_bit;
+		int32_t pMaskStart = MaskIndex;
 		for(Column = StartColumn; Column < EndColumn; Column++) {
-			// Load the pixel's opacity into the mask 
-			CharIndex = (*pMap & bitmask) >> (8 - col_bit - BitsPerPixel);
+			// Load the pixel's opacity into the mask
+			CharIndex = (*pMap & BitMask) >> (8 - col_bit - BitsPerPixel);
 			if(CharIndex != 0) {
-				if(opa >= EG_OPA_MAX) {
-					px_opa = BitsPerPixel == 8 ? CharIndex : bpp_opa_table[CharIndex];
-				}
-				else {
-					px_opa = BitsPerPixel == 8 ? (uint32_t)((uint32_t)CharIndex * opa) >> 8 : (uint32_t)((uint32_t)bpp_opa_table[CharIndex] * opa) >> 8;
-				}
+				if(OPA >= EG_OPA_MAX) px_opa = BitsPerPixel == 8 ? CharIndex : pBPP_OPATable[CharIndex];
+				else px_opa = BitsPerPixel == 8 ? (uint32_t)((uint32_t)CharIndex * OPA) >> 8 : (uint32_t)((uint32_t)pBPP_OPATable[CharIndex] * OPA) >> 8;
 			}
-			else {
-				px_opa = 0;
-			}
-
-			font_rgb[subpx_cnt] = px_opa;
-
+			else px_opa = 0;
+			FontRGB[subpx_cnt] = px_opa;
 			subpx_cnt++;
 			if(subpx_cnt == 3) {
 				subpx_cnt = 0;
-
-				EG_Color_t res_color;
+				EG_Color_t ResultColor;
 #if EG_COLOR_16_SWAP == 0
-				uint8_t bg_rgb[3] = {dest_buf_tmp->ch.red, dest_buf_tmp->ch.green, dest_buf_tmp->ch.blue};
+				uint8_t BackRGB[3] = {pDestTempBuffer->ch.red, pDestTempBuffer->ch.green, pDestTempBuffer->ch.blue};
 #else
-				uint8_t bg_rgb[3] = {dest_buf_tmp->ch.red,
-														 (dest_buf_tmp->ch.green_h << 3) + dest_buf_tmp->ch.green_l,
-														 dest_buf_tmp->ch.blue};
+				uint8_t BackRGB[3] = {pDestTempBuffer->ch.red,
+														 (pDestTempBuffer->ch.green_h << 3) + pDestTempBuffer->ch.green_l,
+														 pDestTempBuffer->ch.blue};
 #endif
-
 #if EG_FONT_SUBPX_BGR
-				res_color.ch.red = (uint32_t)((uint16_t)txt_rgb[0] * font_rgb[2] + (bg_rgb[0] * (255 - font_rgb[2]))) >> 8;
-				res_color.ch.blue = (uint32_t)((uint16_t)txt_rgb[2] * font_rgb[0] + (bg_rgb[2] * (255 - font_rgb[0]))) >> 8;
+				ResultColor.ch.red = (uint32_t)((uint16_t)TextRGB[0] * FontRGB[2] + (BackRGB[0] * (255 - FontRGB[2]))) >> 8;
+				ResultColor.ch.blue = (uint32_t)((uint16_t)TextRGB[2] * FontRGB[0] + (BackRGB[2] * (255 - FontRGB[0]))) >> 8;
 #else
-				res_color.ch.red = (uint32_t)((uint16_t)txt_rgb[0] * font_rgb[0] + (bg_rgb[0] * (255 - font_rgb[0]))) >> 8;
-				res_color.ch.blue = (uint32_t)((uint16_t)txt_rgb[2] * font_rgb[2] + (bg_rgb[2] * (255 - font_rgb[2]))) >> 8;
+				ResultColor.ch.red = (uint32_t)((uint16_t)TextRGB[0] * FontRGB[0] + (BackRGB[0] * (255 - FontRGB[0]))) >> 8;
+				ResultColor.ch.blue = (uint32_t)((uint16_t)TextRGB[2] * FontRGB[2] + (BackRGB[2] * (255 - FontRGB[2]))) >> 8;
 #endif
-
 #if EG_COLOR_16_SWAP == 0
-				res_color.ch.green = (uint32_t)((uint32_t)txt_rgb[1] * font_rgb[1] + (bg_rgb[1] * (255 - font_rgb[1]))) >> 8;
+				ResultColor.ch.green = (uint32_t)((uint32_t)TextRGB[1] * FontRGB[1] + (BackRGB[1] * (255 - FontRGB[1]))) >> 8;
 #else
-				uint8_t green = (uint32_t)((uint32_t)txt_rgb[1] * font_rgb[1] + (bg_rgb[1] * (255 - font_rgb[1]))) >> 8;
-				res_color.ch.green_h = green >> 3;
-				res_color.ch.green_l = green & 0x7;
+				uint8_t green = (uint32_t)((uint32_t)TextRGB[1] * FontRGB[1] + (BackRGB[1] * (255 - FontRGB[1]))) >> 8;
+				ResultColor.ch.green_h = green >> 3;
+				ResultColor.ch.green_l = green & 0x7;
 #endif
-
 #if EG_COLOR_DEPTH == 32
-				res_color.ch.alpha = 0xff;
+				ResultColor.ch.alpha = 0xff;
 #endif
-
-				if(font_rgb[0] == 0 && font_rgb[1] == 0 && font_rgb[2] == 0)
-					MaskBuffer[MaskIndex] = EG_OPA_TRANSP;
-				else
-					MaskBuffer[MaskIndex] = EG_OPA_COVER;
-				color_buf[MaskIndex] = res_color;
-
-				// Next mask byte 
+				if(FontRGB[0] == 0 && FontRGB[1] == 0 && FontRGB[2] == 0) MaskBuffer[MaskIndex] = EG_OPA_TRANSP;
+				else MaskBuffer[MaskIndex] = EG_OPA_COVER;
+				pColorBuffer[MaskIndex] = ResultColor;
+				// Next mask byte
 				MaskIndex++;
-				dest_buf_tmp++;
+				pDestTempBuffer++;
 			}
-
-			// Go to the next column 
+			// Go to the next column
 			if(col_bit < (int32_t)(8 - BitsPerPixel)) {
 				col_bit += BitsPerPixel;
-				bitmask = bitmask >> BitsPerPixel;
+				BitMask = BitMask >> BitsPerPixel;
 			}
 			else {
 				col_bit = 0;
-				bitmask = bitmask_init;
+				BitMask = InitialBitMask;
 				pMap++;
 			}
 		}
-
-		// Apply masks if any 
+		// Apply masks if any
 		if(MaskAny) {
-			BlendObj.mask_res = lv_draw_mask_apply(MaskBuffer + mask_p_start, map_area.GetX1(), map_area.GetY2(),
-																							EG_Rect_get_width(&map_area));
-			if(BlendObj.mask_res == EG_DRAW_MASK_RESULT_TRANSP) {
-				EG_ZeroMem(MaskBuffer + mask_p_start, EG_Rect_get_width(&map_area));
+			BlendObj.m_MaskResult = DrawMaskApply(MaskBuffer + pMaskStart, MapRect.GetX1(), MapRect.GetY2(),	MapRect.GetWidth());
+			if(BlendObj.m_MaskResult == EG_DRAW_MASK_RESULT_TRANSP) {
+				EG_ZeroMem(MaskBuffer + pMaskStart, MapRect.GetWidth());
 			}
 		}
-
-		if((int32_t)MaskIndex + (EndColumn - StartColumn) < MaskBufferSize) {
-			map_area.GetY2()++;
-		}
+		if((int32_t)MaskIndex + (EndColumn - StartColumn) < MaskBufferSize) MapRect.GetY2()++;
 		else {
-			BlendObj.mask_res = EG_DRAW_MASK_RESULT_CHANGED;
+			BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
       BlendObj.DoBlend();
-
-			map_area.GetY1() = map_area.GetY2() + 1;
-			map_area.GetY2() = map_area.GetY1();
+			MapRect.GetY1() = MapRect.GetY2() + 1;
+			MapRect.GetY2() = MapRect.GetY1();
 			MaskIndex = 0;
 		}
-
 		col_bit += ((BoxWidth - EndColumn) + StartColumn) * BitsPerPixel;
-
 		pMap += (col_bit >> 3);
 		col_bit = col_bit & 0x7;
-
-		// Next row in draw_buf 
-		dest_buf_tmp += dest_buf_stride - (EndColumn - StartColumn) / 3;
+		// Next row in draw_buf
+		pDestTempBuffer += DestBufferStep - (EndColumn - StartColumn) / 3;
 	}
-
-	// Flush the last part 
-	if(map_area.GetY1() != map_area.GetY2()) {
-		map_area.GetY2()--;
-		BlendObj.mask_res = EG_DRAW_MASK_RESULT_CHANGED;
+	// Flush the last part
+	if(MapRect.GetY1() != MapRect.GetY2()) {
+		MapRect.GetY2()--;
+		BlendObj.m_MaskResult = EG_DRAW_MASK_RESULT_CHANGED;
     BlendObj.DoBlend()
 	}
-
 	EG_ReleaseBufferMem(MaskBuffer);
-	EG_ReleaseBufferMem(color_buf);
+	EG_ReleaseBufferMem(pColorBuffer);
 }
-#endif 
+#endif

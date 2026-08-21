@@ -18,7 +18,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -30,16 +31,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-static uint32_t EG_LRU_Hash(lv_lru_t *cache, const void *key, uint32_t key_length);
+static uint32_t EG_LRU_Hash(EG_LRU_t *cache, const void *key, uint32_t key_length);
 
 /** compare a key against an existing item's key */
 static int EG_LRU_CompareKeys(EG_LRU_Item_t *item, const void *key, uint32_t key_length);
 
 /** remove an item and push it to the free items queue */
-static void EG_LRU_RemoveItem(lv_lru_t *cache, EG_LRU_Item_t *prev, EG_LRU_Item_t *item, uint32_t hash_index);
+static void EG_LRU_RemoveItem(EG_LRU_t *cache, EG_LRU_Item_t *prev, EG_LRU_Item_t *item, uint32_t hash_index);
 
 /** pop an existing item off the free queue, or create a new one */
-static EG_LRU_Item_t *EG_LRU_PopOrCreateItem(lv_lru_t *cache);
+static EG_LRU_Item_t *EG_LRU_PopOrCreateItem(EG_LRU_t *cache);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -55,10 +56,10 @@ static EG_LRU_Item_t *EG_LRU_PopOrCreateItem(lv_lru_t *cache);
 
 /////////////////////////////////////////////////////////////////////////////
 
-lv_lru_t *EG_LRUCreate(size_t cache_size, size_t average_length, lv_lru_free_t *value_free, lv_lru_free_t *key_free)
+EG_LRU_t *EG_LRUCreate(size_t cache_size, size_t average_length, EG_LRU_Free_t *value_free, EG_LRU_Free_t *key_free)
 {
-	lv_lru_t *cache = (lv_lru_t *)EG_AllocMem(sizeof(lv_lru_t));
-	EG_ZeroMem(cache, sizeof(lv_lru_t));
+	EG_LRU_t *cache = (EG_LRU_t *)EG_AllocMem(sizeof(EG_LRU_t));
+	EG_ZeroMem(cache, sizeof(EG_LRU_t));
 	if(!cache) {
 		EG_LOG_WARN("LRU Cache unable to create cache object");
 		return NULL;
@@ -83,7 +84,7 @@ lv_lru_t *EG_LRUCreate(size_t cache_size, size_t average_length, lv_lru_free_t *
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EG_LRUDelete(lv_lru_t *cache)
+void EG_LRUDelete(EG_LRU_t *cache)
 {
 	EG_ASSERT_NULL(cache);
 	// free each of the cached items, and the hash table
@@ -116,7 +117,7 @@ void EG_LRUDelete(lv_lru_t *cache)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_LRU_Res_e EG_LRUSet(lv_lru_t *cache, const void *key, size_t key_length, void *value, size_t value_length)
+EG_LRU_Res_e EG_LRUSet(EG_LRU_t *cache, const void *key, size_t key_length, void *value, size_t value_length)
 {
 	test_for_missing_cache();
 	test_for_missing_key();
@@ -161,7 +162,7 @@ EG_LRU_Res_e EG_LRUSet(lv_lru_t *cache, const void *key, size_t key_length, void
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_LRU_Res_e EG_LRUGet(lv_lru_t *cache, const void *key, size_t key_size, void **value)
+EG_LRU_Res_e EG_LRUGet(EG_LRU_t *cache, const void *key, size_t key_size, void **value)
 {
 	test_for_missing_cache();
 	test_for_missing_key();
@@ -179,7 +180,7 @@ EG_LRU_Res_e EG_LRUGet(lv_lru_t *cache, const void *key, size_t key_size, void *
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_LRU_Res_e EG_LRURemove(lv_lru_t *cache, const void *key, size_t key_size)
+EG_LRU_Res_e EG_LRURemove(EG_LRU_t *cache, const void *key, size_t key_size)
 {
 	test_for_missing_cache();
 	test_for_missing_key();
@@ -199,7 +200,7 @@ EG_LRU_Res_e EG_LRURemove(lv_lru_t *cache, const void *key, size_t key_size)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EG_RemoveLRUItem(lv_lru_t *cache)
+void EG_RemoveLRUItem(EG_LRU_t *cache)
 {
 EG_LRU_Item_t *min_item = NULL, *min_prev = NULL;
 EG_LRU_Item_t *item = NULL, *prev = NULL;
@@ -227,7 +228,7 @@ uint64_t min_access_count = -1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-static uint32_t EG_LRU_Hash(lv_lru_t *cache, const void *key, uint32_t key_length)
+static uint32_t EG_LRU_Hash(EG_LRU_t *cache, const void *key, uint32_t key_length)
 {
 uint32_t m = 0x5bd1e995;
 uint32_t r = 24;
@@ -270,7 +271,7 @@ static int EG_LRU_CompareKeys(EG_LRU_Item_t *item, const void *key, uint32_t key
 
 /////////////////////////////////////////////////////////////////////////////
 
-static void EG_LRU_RemoveItem(lv_lru_t *cache, EG_LRU_Item_t *prev, EG_LRU_Item_t *item, uint32_t hash_index)
+static void EG_LRU_RemoveItem(EG_LRU_t *cache, EG_LRU_Item_t *prev, EG_LRU_Item_t *item, uint32_t hash_index)
 {
 	if(prev) prev->next = item->next;
 	else cache->items[hash_index] = (EG_LRU_Item_t *)item->next;
@@ -286,7 +287,7 @@ static void EG_LRU_RemoveItem(lv_lru_t *cache, EG_LRU_Item_t *prev, EG_LRU_Item_
 
 /////////////////////////////////////////////////////////////////////////////
 
-static EG_LRU_Item_t* EG_LRU_PopOrCreateItem(lv_lru_t *cache)
+static EG_LRU_Item_t* EG_LRU_PopOrCreateItem(EG_LRU_t *cache)
 {
 	EG_LRU_Item_t *item = NULL;
 	if(cache->free_items) {

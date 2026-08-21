@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -49,12 +50,12 @@ typedef struct {
 } EG_FontFmtTextGlyphProps_t;
 
 // Format of font character map.
-typedef enum : uint8_t {
+enum EG_FontFmtTextCmapType_t : uint8_t {
     EG_FONT_FMT_TXT_CMAP_FORMAT0_FULL,
     EG_FONT_FMT_TXT_CMAP_SPARSE_FULL,
     EG_FONT_FMT_TXT_CMAP_FORMAT0_TINY,
     EG_FONT_FMT_TXT_CMAP_SPARSE_TINY,
-} EG_FontFmtTextCmapType_t;
+};
 
 
 /**
@@ -129,11 +130,11 @@ typedef struct {
 } EG_FontFmtKernClasses_t;
 
 // Bitmap formats
-typedef enum : uint8_t {
+enum EG_FontBitmapFormat_e : uint8_t {
     EG_FONT_FMT_TXT_PLAIN      = 0,
     EG_FONT_FMT_TXT_COMPRESSED = 1,
     EG_FONT_FMT_TXT_COMPRESSED_NO_PREFILTER = 1,
-} EG_FontBitmapFormat_e;
+};
 
 typedef struct {
     uint32_t last_letter;

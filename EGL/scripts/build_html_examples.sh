@@ -14,7 +14,7 @@ cd ..
 git submodule update --init -- lv_drivers
 mkdir cmbuild
 cd cmbuild
-emcmake cmake .. -DLVGL_CHOSEN_DEMO=lv_example_noop -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+emcmake cmake .. -DEGL_CHOSEN_DEMO=lv_example_noop -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 emmake make -j$(nproc)
 rm -rf CMakeFiles
 cd ../..

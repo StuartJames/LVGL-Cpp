@@ -1,23 +1,24 @@
 /*
- *        Copyright (Center) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -26,11 +27,11 @@
 #include "core/EG_Object.h"
 #include "misc/EG_Assert.h"
 #include "core/EG_Group.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "misc/EG_Color.h"
 #include "misc/EG_Math.h"
 #include "misc/lv_bidi.h"
-#include "misc/lv_txt_ap.h"
+#include "misc/EG_ArabicPersianText.h"
 #include "misc/lv_printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -303,12 +304,12 @@ void EGLabel::GetCharacterPosition(uint32_t Index, EGPoint *pPosition)
 	EGRect TextRect;
 	GetContentArea(&TextRect);
 	uint32_t LineStart = 0, NewLineStart = 0;
-	EG_Coord_t MaxWidth = TextRect.GetWidth();
+	int32_t MaxWidth = TextRect.GetWidth();
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-	EG_Coord_t CharHeight = EG_FontGetLineHeight(pFont);
-	EG_Coord_t PosY = 0;
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+	int32_t CharHeight = EG_FontGetLineHeight(pFont);
+	int32_t PosY = 0;
 	EG_TextFlag_t Flags = EG_TEXT_FLAG_NONE;
 	if(m_Recolor != 0) Flags |= EG_TEXT_FLAG_RECOLOR;
 	if(m_Expand != 0) Flags |= EG_TEXT_FLAG_EXPAND;
@@ -354,14 +355,14 @@ void EGLabel::GetCharacterPosition(uint32_t Index, EGPoint *pPosition)
 	visual_byte_pos = ByteIndex - LineStart;
 #endif
 	// Calculate the x coordinate
-	EG_Coord_t PosX = EG_GetTextWidth(pBiDiText, visual_byte_pos, pFont, Kerning, Flags);
+	int32_t PosX = EG_GetTextWidth(pBiDiText, visual_byte_pos, pFont, Kerning, Flags);
 	if(Index != LineStart) PosX += Kerning;
 	if(Align == EG_TEXT_ALIGN_CENTER) {
-		EG_Coord_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
+		int32_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
 		PosX += TextRect.GetWidth() / 2 - LineWidth / 2;
 	}
 	else if(Align == EG_TEXT_ALIGN_RIGHT) {
-		EG_Coord_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
+		int32_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
 		PosX += TextRect.GetWidth() - LineWidth;
 	}
 	pPosition->m_X = PosX;
@@ -384,12 +385,12 @@ uint32_t EGLabel::GetCharacterAt(EGPoint *pPosition)
 	const char *pText = GetText();
 	uint32_t LineStart = 0;
 	uint32_t NewLineStart = 0;
-	EG_Coord_t MaxWidth = TextRect.GetWidth();
+	int32_t MaxWidth = TextRect.GetWidth();
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-	EG_Coord_t CharHeight = EG_FontGetLineHeight(pFont);
-	EG_Coord_t PosY = 0;
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+	int32_t CharHeight = EG_FontGetLineHeight(pFont);
+	int32_t PosY = 0;
 	EG_TextFlag_t Flags = EG_TEXT_FLAG_NONE;
 	uint32_t logical_pos;
 	char *pBiDiText;
@@ -418,13 +419,13 @@ uint32_t EGLabel::GetCharacterAt(EGPoint *pPosition)
 #else
 	pBiDiText = (char *)pText + LineStart;
 #endif
-	EG_Coord_t PosX = 0;	// Calculate the x coordinate
+	int32_t PosX = 0;	// Calculate the x coordinate
 	if(Align == EG_TEXT_ALIGN_CENTER) {
-		EG_Coord_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
+		int32_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
 		PosX += TextRect.GetWidth() / 2 - LineWidth / 2;
 	}
 	else if(Align == EG_TEXT_ALIGN_RIGHT) {
-		EG_Coord_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
+		int32_t LineWidth = EG_GetTextWidth(pBiDiText, NewLineStart - LineStart, pFont, Kerning, Flags);
 		PosX += TextRect.GetWidth() - LineWidth;
 	}
 	EG_TextCommandState_t cmd_state = EG_TEXT_CMD_STATE_WAIT;
@@ -439,7 +440,7 @@ uint32_t EGLabel::GetCharacterAt(EGPoint *pPosition)
 					continue; // Skip the letter if it is part of a command
 				}
 			}
-			EG_Coord_t gw = EG_FontGetGlyphWidth(pFont, letter, letter_next);
+			int32_t gw = EG_FontGetGlyphWidth(pFont, letter, letter_next);
 			// Finish if the x position or the last char of the next line is reached
 			if(Point.m_X < PosX + gw || i + LineStart == NewLineStart || pText[i_act + LineStart] == '\0') {
 				i = i_act;
@@ -481,13 +482,13 @@ bool EGLabel::IsCharacterAt(EGPoint *pPosition)
 	const char *pText = GetText();
 	uint32_t LineStart = 0;
 	uint32_t NewLineStart = 0;
-	EG_Coord_t MaxWidth = TextRect.GetWidth();
+	int32_t MaxWidth = TextRect.GetWidth();
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-	EG_Coord_t CharHeight = EG_FontGetLineHeight(pFont);
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+	int32_t CharHeight = EG_FontGetLineHeight(pFont);
 	EG_TextAlignment_t Align = CalculateTextAlignment(EG_PART_MAIN, m_pText);
-	EG_Coord_t PosY = 0;
+	int32_t PosY = 0;
 	EG_TextFlag_t Flags = EG_TEXT_FLAG_NONE;
 	if(m_Recolor != 0) Flags |= EG_TEXT_FLAG_RECOLOR;
 	if(m_Expand != 0) Flags |= EG_TEXT_FLAG_EXPAND;
@@ -498,14 +499,14 @@ bool EGLabel::IsCharacterAt(EGPoint *pPosition)
 		PosY += CharHeight + LineSpace;
 		LineStart = NewLineStart;
 	}
-	EG_Coord_t PosX = 0;	// Calculate the x coordinate
-	EG_Coord_t last_x = 0;
+	int32_t PosX = 0;	// Calculate the x coordinate
+	int32_t last_x = 0;
 	if(Align == EG_TEXT_ALIGN_CENTER) {
-		EG_Coord_t LineWidth = EG_GetTextWidth(&pText[LineStart], NewLineStart - LineStart, pFont, Kerning, Flags);
+		int32_t LineWidth = EG_GetTextWidth(&pText[LineStart], NewLineStart - LineStart, pFont, Kerning, Flags);
 		PosX += TextRect.GetWidth() / 2 - LineWidth / 2;
 	}
 	else if(Align == EG_TEXT_ALIGN_RIGHT) {
-		EG_Coord_t LineWidth = EG_GetTextWidth(&pText[LineStart], NewLineStart - LineStart, pFont, Kerning, Flags);
+		int32_t LineWidth = EG_GetTextWidth(&pText[LineStart], NewLineStart - LineStart, pFont, Kerning, Flags);
 		PosX += TextRect.GetWidth() - LineWidth;
 	}
 	EG_TextCommandState_t cmd_state = EG_TEXT_CMD_STATE_WAIT;
@@ -616,7 +617,7 @@ void EGLabel::Event(EGEvent *pEvent)
     // Italic or other non-typical letters can be drawn of out of the object. It happens if BoxWidth
     // + m_OffsetX > adw_w in the glyph. To avoid this add some extra draw area. font_h / 4 is an empirical value. 
       const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-      EG_Coord_t LineHeight = EG_FontGetLineHeight(pFont);
+      int32_t LineHeight = EG_FontGetLineHeight(pFont);
       pEvent->SetExtDrawSize(LineHeight / 4);
       break;
     }
@@ -626,14 +627,14 @@ void EGLabel::Event(EGEvent *pEvent)
       break;
     }
     case EG_EVENT_GET_SELF_SIZE: {
-  		EGPoint Size;
+  		EGSize Size;
       const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-      EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-      EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+      int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+      int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
       EG_TextFlag_t Flags = EG_TEXT_FLAG_NONE;
       if(m_Recolor != 0) Flags |= EG_TEXT_FLAG_RECOLOR;
       if(m_Expand != 0) Flags |= EG_TEXT_FLAG_EXPAND;
-      EG_Coord_t Width = GetContentWidth();
+      int32_t Width = GetContentWidth();
       if((GetStyleWidth(EG_PART_MAIN) == EG_SIZE_CONTENT) && !m_WidthLayout) Width = EG_COORD_MAX;
       else Width = GetContentWidth();
   		EG_GetTextSize(&Size, m_pText, pFont, Kerning, LineSpace, Width, Flags);
@@ -656,7 +657,7 @@ void EGLabel::Event(EGEvent *pEvent)
 
 void EGLabel::DrawMain(EGEvent *pEvent)
 {
-	EGDrawContext *pContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	EGRect TextRect;
 	GetContentArea(&TextRect);
 	EG_TextFlag_t Flags = EG_TEXT_FLAG_NONE;
@@ -679,7 +680,7 @@ void EGLabel::DrawMain(EGEvent *pEvent)
      * (In addition, they will create misalignment in this situation)*/
 	if((m_LongMode == EG_LABEL_LONG_SCROLL || m_LongMode == EG_LABEL_LONG_SCROLL_CIRCULAR) &&
 		 (DrawLabel.m_Align == EG_TEXT_ALIGN_CENTER || DrawLabel.m_Align == EG_TEXT_ALIGN_RIGHT)) {
-		EGPoint Size;
+		EGSize Size;
 		EG_GetTextSize(&Size, m_pText, DrawLabel.m_pFont, DrawLabel.m_Kerning, DrawLabel.m_LineSpace,	EG_COORD_MAX, Flags);
 		if(Size.m_X > TextRect.GetWidth()) {
 			DrawLabel.m_Align = EG_TEXT_ALIGN_LEFT;
@@ -692,38 +693,38 @@ void EGLabel::DrawMain(EGEvent *pEvent)
 	EG_DrawLabelHint_t *pHint = NULL;	// Just for compatibility
 #endif
 	EGRect TextClip;
-	if(!TextClip.Intersect(&TextRect, pContext->m_pClipRect)) return;
+	if(!TextClip.Intersect(&TextRect, pDC->m_pClipRect)) return;
 	if(m_LongMode == EG_LABEL_LONG_WRAP) {
-		EG_Coord_t ScrollTop = GetScrollTop();
+		int32_t ScrollTop = GetScrollTop();
 		TextRect.Move(0, -ScrollTop);
 		TextRect.SetY2(m_Rect.GetY2());
 	}
 	if(m_LongMode == EG_LABEL_LONG_SCROLL || m_LongMode == EG_LABEL_LONG_SCROLL_CIRCULAR) {
-		const EGRect *pClipRect = pContext->m_pClipRect;
-		pContext->m_pClipRect = &TextClip;
-		DrawLabel.Draw(pContext, &TextRect, m_pText, pHint);
-		pContext->m_pClipRect = pClipRect;
+		const EGRect *pClipRect = pDC->m_pClipRect;
+		pDC->m_pClipRect = &TextClip;
+		DrawLabel.Draw(pDC, &TextRect, m_pText, pHint);
+		pDC->m_pClipRect = pClipRect;
 	}
 	else {
-		DrawLabel.Draw(pContext, &TextRect, m_pText, pHint);
+		DrawLabel.Draw(pDC, &TextRect, m_pText, pHint);
 	}
-	const EGRect *pClipRect = pContext->m_pClipRect;
-	pContext->m_pClipRect = &TextClip;
+	const EGRect *pClipRect = pDC->m_pClipRect;
+	pDC->m_pClipRect = &TextClip;
 	if(m_LongMode == EG_LABEL_LONG_SCROLL_CIRCULAR) {
-		EGPoint Size;
+		EGSize Size;
 		EG_GetTextSize(&Size, m_pText, DrawLabel.m_pFont, DrawLabel.m_Kerning, DrawLabel.m_LineSpace,	EG_COORD_MAX, Flags);
 		if(Size.m_X > TextRect.GetWidth()) {	// Draw the text again on label to the original to make a circular effect 
 			DrawLabel.m_OffsetX = m_Offset.m_X + Size.m_X +	EG_FontGetGlyphWidth(DrawLabel.m_pFont, ' ', ' ') * EG_LABEL_WAIT_CHAR_COUNT;
 			DrawLabel.m_OffsetY = m_Offset.m_Y;
-			DrawLabel.Draw(pContext, &TextRect, m_pText, pHint);
+			DrawLabel.Draw(pDC, &TextRect, m_pText, pHint);
 		}
 		if(Size.m_Y > TextRect.GetHeight()) {// Draw the text again below the original to make a circular effect 
 			DrawLabel.m_OffsetX = m_Offset.m_X;
 			DrawLabel.m_OffsetY = m_Offset.m_Y + Size.m_Y + EG_FontGetLineHeight(DrawLabel.m_pFont);
-			DrawLabel.Draw(pContext, &TextRect, m_pText, pHint);
+			DrawLabel.Draw(pDC, &TextRect, m_pText, pHint);
 		}
 	}
-	pContext->m_pClipRect = pClipRect;
+	pDC->m_pClipRect = pClipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -736,11 +737,11 @@ void EGLabel::RefreshText(void)
 #endif
 	EGRect TextRect;
 	GetContentArea(&TextRect);
-	EG_Coord_t MaxWidth = TextRect.GetWidth();
+	int32_t MaxWidth = TextRect.GetWidth();
 	const EG_Font_t *pFont = GetStyleTextFont(EG_PART_MAIN);
-	EG_Coord_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
-	EG_Coord_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
-	EGPoint Size;	// Calc. the height and longest line
+	int32_t LineSpace = GetStyleTextLineSpace(EG_PART_MAIN);
+	int32_t Kerning = GetStyleTextKerning(EG_PART_MAIN);
+	EGSize Size;	// Calc. the height and longest line
 	EG_TextFlag_t Flags = EG_TEXT_FLAG_NONE;
 	if(m_Recolor != 0) Flags |= EG_TEXT_FLAG_RECOLOR;
 	if(m_Expand != 0) Flags |= EG_TEXT_FLAG_EXPAND;
@@ -926,7 +927,7 @@ void EGLabel::RefreshText(void)
 		}
 		else {
 			EGPoint Point;
-			EG_Coord_t y_overed;
+			int32_t y_overed;
 			Point.m_X = TextRect.GetWidth() -	(EG_FontGetGlyphWidth(pFont, '.', '.') + Kerning) *	EG_LABEL_DOT_NUM; // Shrink with dots
 			Point.m_Y = TextRect.GetHeight();
 			y_overed = Point.m_Y % (EG_FontGetLineHeight(pFont) + LineSpace); // Round down to the last line

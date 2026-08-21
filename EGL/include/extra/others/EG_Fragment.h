@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -93,7 +94,7 @@ public:
 	EGFragmentExec            *m_pChildManager;
 	EGObject                  *m_pContainer;	    // Container object the fragment adding view to
 	bool                      m_ContentCreated;       // true between `create_obj_cb` and `obj_deleted_cb`
-	bool                      m_DestroyingContent;	  // true before `lv_fragment_del_obj` is called. Don't touch any object if this is true
+	bool                      m_DestroyingContent;	  // true before `DeletingContentj` is called. Don't touch any object if this is true
 	bool                      m_InStack;          // true if this fragment is in navigation stack that can be popped
 
 private:

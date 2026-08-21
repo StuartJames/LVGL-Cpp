@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -330,10 +331,10 @@ EG_ArcMode_e EGArc::GetMode(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGArc::AlignToAngle(EGObject *pObj, EG_Coord_t Offset)
+void EGArc::AlignToAngle(EGObject *pObj, int32_t Offset)
 {
 EGPoint Center;
-EG_Coord_t Radius;
+int32_t Radius;
 
 	EG_ASSERT_NULL(pObj);
   UpdateLayout();
@@ -341,17 +342,17 @@ EG_Coord_t Radius;
 	Radius -= GetStyleArcWidth(EG_PART_INDICATOR) / 2;
 	Radius += Offset;
 	uint16_t Angle = GetAngle();
-	EG_Coord_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> EG_TRIGO_SHIFT;
-	EG_Coord_t KnobY = (Radius * EG_TrigoSin(Angle)) >> EG_TRIGO_SHIFT;
+	int32_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> EG_TRIGO_SHIFT;
+	int32_t KnobY = (Radius * EG_TrigoSin(Angle)) >> EG_TRIGO_SHIFT;
 	pObj->AlignTo(this, EG_ALIGN_CENTER, KnobX, KnobY);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGArc::RotateToAngle(EGObject *pObj, EG_Coord_t Offset)
+void EGArc::RotateToAngle(EGObject *pObj, int32_t Offset)
 {
 EGPoint Center;
-EG_Coord_t Radius;
+int32_t Radius;
 
 	EG_ASSERT_NULL(pObj);
 	UpdateLayout();
@@ -361,8 +362,8 @@ EG_Coord_t Radius;
 	pObj->AlignTo(this, EG_ALIGN_CENTER, 0, -Radius);
 	UpdateLayout();
 	uint16_t Angle = GetAngle();
-	EG_Coord_t PivotX = pObj->m_Rect.GetX1() - Center.m_X;
-	EG_Coord_t PivotY = pObj->m_Rect.GetY1() - Center.m_Y;
+	int32_t PivotX = pObj->m_Rect.GetX1() - Center.m_X;
+	int32_t PivotY = pObj->m_Rect.GetY1() - Center.m_Y;
 	pObj->SetStyleTransformPivotX(-PivotX, 0);
 	pObj->SetStyleTransformPivotY(-PivotY, 0);
 	pObj->SetStyleTransformAngle(Angle * 10 + 900, 0);
@@ -392,12 +393,12 @@ void EGArc::Event(EGEvent *pEvent)
       EGPoint Point;
       pInputDevice->GetPoint(&Point);
       EGPoint Center;		// Make point relative to the pArc's Center
-      EG_Coord_t Radius;
+      int32_t Radius;
       GetCenter(&Center, &Radius);
       Point.m_X -= Center.m_X;
       Point.m_Y -= Center.m_Y;
       if(m_Dragging == false) {		// Enter dragging mode if pressed out of the knob
-        EG_Coord_t IndicWidth = GetStyleArcWidth(EG_PART_INDICATOR);
+        int32_t IndicWidth = GetStyleArcWidth(EG_PART_INDICATOR);
         Radius -= IndicWidth;
         // Add some more sensitive area if there is no advanced git testing. (Advanced hit testing is more precise)
         if(HasFlagSet(EG_OBJ_FLAG_ADV_HITTEST)) Radius -= IndicWidth;
@@ -494,11 +495,11 @@ void EGArc::Event(EGEvent *pEvent)
     case EG_EVENT_HIT_TEST: {
       EG_HitTestState_t *pInfo = (EG_HitTestState_t*)pEvent->GetParam();
       EGPoint Point;
-      EG_Coord_t Radius;
+      int32_t Radius;
       GetCenter(&Point, &Radius);
-      EG_Coord_t ExtendedClickArea = 0;
+      int32_t ExtendedClickArea = 0;
       if(m_pAttributes) ExtendedClickArea = m_pAttributes->ExtendedClickPadding;
-      EG_Coord_t Width = GetStyleArcWidth(EG_PART_MAIN);
+      int32_t Width = GetStyleArcWidth(EG_PART_MAIN);
       Radius -= Width + ExtendedClickArea;
       EGRect Rect;
       // Invalid if clicked inside
@@ -512,19 +513,19 @@ void EGArc::Event(EGEvent *pEvent)
       break;
     }
     case EG_EVENT_REFR_EXT_DRAW_SIZE:{
-      EG_Coord_t BackgroundLeft = GetStylePadLeft(EG_PART_MAIN);
-      EG_Coord_t BackgroundRight = GetStylePadRight(EG_PART_MAIN);
-      EG_Coord_t BackgroundTop = GetStylePadTop(EG_PART_MAIN);
-      EG_Coord_t BackgroundBottom = GetStylePadBottom(EG_PART_MAIN);
-      EG_Coord_t BackgroundPadding = EG_MAX4(BackgroundLeft, BackgroundRight, BackgroundTop, BackgroundBottom);
-      EG_Coord_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
-      EG_Coord_t KnobRight = GetStylePadRight(EG_PART_KNOB);
-      EG_Coord_t KnobTop = GetStylePadTop(EG_PART_KNOB);
-      EG_Coord_t KnobBottom = GetStylePadBottom(EG_PART_KNOB);
-      EG_Coord_t KnobPadding = EG_MAX4(KnobLeft, KnobRight, KnobTop, KnobBottom) + 2;
-      EG_Coord_t KnobExtraSize = KnobPadding - BackgroundPadding;
+      int32_t BackgroundLeft = GetStylePadLeft(EG_PART_MAIN);
+      int32_t BackgroundRight = GetStylePadRight(EG_PART_MAIN);
+      int32_t BackgroundTop = GetStylePadTop(EG_PART_MAIN);
+      int32_t BackgroundBottom = GetStylePadBottom(EG_PART_MAIN);
+      int32_t BackgroundPadding = EG_MAX4(BackgroundLeft, BackgroundRight, BackgroundTop, BackgroundBottom);
+      int32_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
+      int32_t KnobRight = GetStylePadRight(EG_PART_KNOB);
+      int32_t KnobTop = GetStylePadTop(EG_PART_KNOB);
+      int32_t KnobBottom = GetStylePadBottom(EG_PART_KNOB);
+      int32_t KnobPadding = EG_MAX4(KnobLeft, KnobRight, KnobTop, KnobBottom) + 2;
+      int32_t KnobExtraSize = KnobPadding - BackgroundPadding;
       KnobExtraSize += KnobGetExtraSize();
-      EG_Coord_t *pSize = (EG_Coord_t*)pEvent->GetParam();
+      int32_t *pSize = (int32_t*)pEvent->GetParam();
       *pSize = EG_MAX(*pSize, KnobExtraSize);
       break;
     }
@@ -542,57 +543,56 @@ void EGArc::Event(EGEvent *pEvent)
 
 void EGArc::Draw(EGEvent *pEvent)
 {
-	EGDrawContext *pDrawContext = pEvent->GetDrawContext();
+	EGDeviceContext *pDC = pEvent->GetDeviceContext();
 	EGPoint Center;
-	EG_Coord_t Radius;
+	int32_t Radius;
 	GetCenter(&Center, &Radius);
-	EGDrawDiscriptor PartDrawDiscriptor;
-	InitDrawDescriptor(&PartDrawDiscriptor, pDrawContext);
+	EGEventDC PartDrawDescriptor(pDC);
 	if(Radius > 0) {
   	EGDrawArc DrawArc;	// Draw the background pArc
 		InititialseDrawArc(EG_PART_MAIN, &DrawArc);
-		PartDrawDiscriptor.m_Part = EG_PART_MAIN;
-		PartDrawDiscriptor.m_pClass = &c_ArcClass;
-		PartDrawDiscriptor.m_Type = EG_ARC_DRAW_PART_BACKGROUND;
-		PartDrawDiscriptor.m_pPoint1 = &Center;
-		PartDrawDiscriptor.m_Radius = Radius;
-		PartDrawDiscriptor.m_pDrawArc = &DrawArc;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-		DrawArc.Draw(pDrawContext, &Center, PartDrawDiscriptor.m_Radius, m_BackgroundAngleStart + m_Rotation,	m_BackgroundAngleEnd + m_Rotation);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+		PartDrawDescriptor.m_Part = EG_PART_MAIN;
+		PartDrawDescriptor.m_pClass = &c_ArcClass;
+		PartDrawDescriptor.m_Type = EG_ARC_DRAW_PART_BACKGROUND;
+		PartDrawDescriptor.m_pPoint1 = &Center;
+		PartDrawDescriptor.m_Radius = Radius;
+		PartDrawDescriptor.m_pDrawArc = &DrawArc;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+		DrawArc.Draw(pDC, &Center, PartDrawDescriptor.m_Radius, m_BackgroundAngleStart + m_Rotation,	m_BackgroundAngleEnd + m_Rotation);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 	}
 	// Make the indicator arc smaller or larger according to its greatest padding value
-	EG_Coord_t IndicLeft = GetStylePadLeft(EG_PART_INDICATOR);
-	EG_Coord_t IndicRight = GetStylePadRight(EG_PART_INDICATOR);
-	EG_Coord_t IndicTop = GetStylePadTop(EG_PART_INDICATOR);
-	EG_Coord_t IndicBottom = GetStylePadBottom(EG_PART_INDICATOR);
-	EG_Coord_t IndicRadius = Radius - EG_MAX4(IndicLeft, IndicRight, IndicTop, IndicBottom);
+	int32_t IndicLeft = GetStylePadLeft(EG_PART_INDICATOR);
+	int32_t IndicRight = GetStylePadRight(EG_PART_INDICATOR);
+	int32_t IndicTop = GetStylePadTop(EG_PART_INDICATOR);
+	int32_t IndicBottom = GetStylePadBottom(EG_PART_INDICATOR);
+	int32_t IndicRadius = Radius - EG_MAX4(IndicLeft, IndicRight, IndicTop, IndicBottom);
 	if(IndicRadius > 0) {
   	EGDrawArc DrawArc;	// Draw the indicator pArc
 		InititialseDrawArc(EG_PART_INDICATOR, &DrawArc);
-		PartDrawDiscriptor.m_Part = EG_PART_INDICATOR;
-		PartDrawDiscriptor.m_pClass = &c_ArcClass;
-		PartDrawDiscriptor.m_Type = EG_ARC_DRAW_PART_FOREGROUND;
-		PartDrawDiscriptor.m_pPoint1 = &Center;
-		PartDrawDiscriptor.m_Radius = IndicRadius;
-		PartDrawDiscriptor.m_pDrawArc = &DrawArc;
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-		if(DrawArc.m_Width > PartDrawDiscriptor.m_Radius) DrawArc.m_Width = PartDrawDiscriptor.m_Radius;
-		DrawArc.Draw(pDrawContext, &Center, PartDrawDiscriptor.m_Radius, m_IndicAngleStart + m_Rotation,	m_IndicAngleEnd + m_Rotation);
-		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+		PartDrawDescriptor.m_Part = EG_PART_INDICATOR;
+		PartDrawDescriptor.m_pClass = &c_ArcClass;
+		PartDrawDescriptor.m_Type = EG_ARC_DRAW_PART_FOREGROUND;
+		PartDrawDescriptor.m_pPoint1 = &Center;
+		PartDrawDescriptor.m_Radius = IndicRadius;
+		PartDrawDescriptor.m_pDrawArc = &DrawArc;
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+		if(DrawArc.m_Width > PartDrawDescriptor.m_Radius) DrawArc.m_Width = PartDrawDescriptor.m_Radius;
+		DrawArc.Draw(pDC, &Center, PartDrawDescriptor.m_Radius, m_IndicAngleStart + m_Rotation,	m_IndicAngleEnd + m_Rotation);
+		EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 	}
 	EGRect KnobRect;
 	GetKnobArea(&Center, Radius, &KnobRect);
 	EGDrawRect DrawRect;
 	InititialseDrawRect(EG_PART_KNOB, &DrawRect);
-	PartDrawDiscriptor.m_Part = EG_PART_KNOB;
-	PartDrawDiscriptor.m_pClass = &c_ArcClass;
-	PartDrawDiscriptor.m_Type = EG_ARC_DRAW_PART_KNOB;
-	PartDrawDiscriptor.m_pRect = &KnobRect;
-	PartDrawDiscriptor.m_pDrawRect = &DrawRect;
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDiscriptor);
-	DrawRect.Draw(pDrawContext, &KnobRect);
-	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDiscriptor);
+	PartDrawDescriptor.m_Part = EG_PART_KNOB;
+	PartDrawDescriptor.m_pClass = &c_ArcClass;
+	PartDrawDescriptor.m_Type = EG_ARC_DRAW_PART_KNOB;
+	PartDrawDescriptor.m_pRect = &KnobRect;
+	PartDrawDescriptor.m_pDrawRect = &DrawRect;
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_BEGIN, &PartDrawDescriptor);
+	DrawRect.Draw(pDC, &KnobRect);
+	EGEvent::EventSend(this, EG_EVENT_DRAW_PART_END, &PartDrawDescriptor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -605,11 +605,11 @@ void EGArc::InvalidateArcArea(uint16_t StartAngle, uint16_t EndAngle, EGPart_t P
 	EndAngle += m_Rotation;
 	StartAngle = StartAngle % 360;
 	EndAngle = EndAngle % 360;
-	EG_Coord_t Radius;
+	int32_t Radius;
 	EGPoint Center;
 	GetCenter(&Center, &Radius);
-	EG_Coord_t Width = GetStyleArcWidth(Part);
-	EG_Coord_t Rounded = GetStyleArcRounded(Part);
+	int32_t Width = GetStyleArcWidth(Part);
+	int32_t Rounded = GetStyleArcRounded(Part);
 	EGRect Rect;
 	EGDrawArc::GetArcRect(Center.m_X, Center.m_Y, Radius, StartAngle, EndAngle, Width, Rounded, &Rect);
 	InvalidateArea(&Rect);
@@ -621,11 +621,11 @@ void EGArc::InvalidateKnobArea(void)
 {
 EGRect Rect;
 EGPoint Center;
-EG_Coord_t Radius;
+int32_t Radius;
 
 	GetCenter(&Center, &Radius);
 	GetKnobArea(&Center, Radius, &Rect);
-	EG_Coord_t KnobExtraSize = KnobGetExtraSize();
+	int32_t KnobExtraSize = KnobGetExtraSize();
 	if(KnobExtraSize > 0) {
 		Rect.Inflate(KnobExtraSize, KnobExtraSize);
 	}
@@ -634,13 +634,13 @@ EG_Coord_t Radius;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGArc::GetCenter(EGPoint *pCenter, EG_Coord_t *pRadius)
+void EGArc::GetCenter(EGPoint *pCenter, int32_t *pRadius)
 {
-	EG_Coord_t BackgroundLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t BackgroundRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t BackgroundTop = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t BackgroundBottom = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t Radius = (EG_MIN(GetWidth() - BackgroundLeft - BackgroundRight, GetHeight() - BackgroundTop - BackgroundBottom)) /	2;
+	int32_t BackgroundLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t BackgroundRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t BackgroundTop = GetStylePadTop(EG_PART_MAIN);
+	int32_t BackgroundBottom = GetStylePadBottom(EG_PART_MAIN);
+	int32_t Radius = (EG_MIN(GetWidth() - BackgroundLeft - BackgroundRight, GetHeight() - BackgroundTop - BackgroundBottom)) /	2;
 	pCenter->m_X = m_Rect.GetX1() + Radius + BackgroundLeft;
 	pCenter->m_Y = m_Rect.GetY1() + Radius + BackgroundTop;
 	if(pRadius) *pRadius = Radius;
@@ -648,7 +648,7 @@ void EGArc::GetCenter(EGPoint *pCenter, EG_Coord_t *pRadius)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGArc::GetAngle(void)
+int32_t EGArc::GetAngle(void)
 {
 	uint16_t Angle = m_Rotation;
 	if(m_Type == EG_ARC_MODE_NORMAL) {
@@ -672,18 +672,18 @@ EG_Coord_t EGArc::GetAngle(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGArc::GetKnobArea(const EGPoint *Center, EG_Coord_t Radius, EGRect *KnobRect)
+void EGArc::GetKnobArea(const EGPoint *Center, int32_t Radius, EGRect *KnobRect)
 {
-	EG_Coord_t IndicWidth = GetStyleArcWidth(EG_PART_INDICATOR);
-	EG_Coord_t IndicHalfWidth = IndicWidth / 2;
+	int32_t IndicWidth = GetStyleArcWidth(EG_PART_INDICATOR);
+	int32_t IndicHalfWidth = IndicWidth / 2;
 	Radius -= IndicHalfWidth;
-	EG_Coord_t Angle = GetAngle();
-	EG_Coord_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> EG_TRIGO_SHIFT;
-	EG_Coord_t KnobY = (Radius * EG_TrigoSin(Angle)) >> EG_TRIGO_SHIFT;
-	EG_Coord_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
-	EG_Coord_t KnobRight = GetStylePadRight(EG_PART_KNOB);
-	EG_Coord_t KnobTop = GetStylePadTop(EG_PART_KNOB);
-	EG_Coord_t KnobBottom = GetStylePadBottom(EG_PART_KNOB);
+	int32_t Angle = GetAngle();
+	int32_t KnobX = (Radius * EG_TrigoSin(Angle + 90)) >> EG_TRIGO_SHIFT;
+	int32_t KnobY = (Radius * EG_TrigoSin(Angle)) >> EG_TRIGO_SHIFT;
+	int32_t KnobLeft = GetStylePadLeft(EG_PART_KNOB);
+	int32_t KnobRight = GetStylePadRight(EG_PART_KNOB);
+	int32_t KnobTop = GetStylePadTop(EG_PART_KNOB);
+	int32_t KnobBottom = GetStylePadBottom(EG_PART_KNOB);
 	KnobRect->SetX1(Center->m_X + KnobX - KnobLeft - IndicHalfWidth);
 	KnobRect->SetX2(Center->m_X + KnobX + KnobRight + IndicHalfWidth);
 	KnobRect->SetY1(Center->m_Y + KnobY - KnobTop - IndicHalfWidth);
@@ -735,9 +735,9 @@ void EGArc::ValueUpdate(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGArc::KnobGetExtraSize(void)
+int32_t EGArc::KnobGetExtraSize(void)
 {
-EG_Coord_t knob_shadow_size = 0, knob_outline_size = 0;
+int32_t knob_shadow_size = 0, knob_outline_size = 0;
 
 	knob_shadow_size += GetStyleShadowWidth(EG_PART_KNOB);
 	knob_shadow_size += GetStyleShadowSpread(EG_PART_KNOB);

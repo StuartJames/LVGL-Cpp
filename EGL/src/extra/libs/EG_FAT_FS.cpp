@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -166,7 +167,7 @@ EG_UNUSED(pDriver);
  * @param pDriver pointer to a driver where this function belongs
  * @param pFile pointer to a FIL variable. (opened with fs_open )
  * @param Pos the new position of read write pointer
- * @param Mode only LV_SEEK_SET is supported
+ * @param Mode only EG_SEEK_SET is supported
  * @return EG_FS_RES_OK: no error, the file is read
  *         any error from EG_FSResult_e enum
  */

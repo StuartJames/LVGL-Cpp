@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -50,13 +51,12 @@ typedef struct {
 } EG_FontGlyphProps_t;
 
 // The bitmaps might be upscaled by 3 to achieve subpixel rendering.
-typedef enum : uint8_t {
+enum EG_SubPixelMode_e : uint8_t {
     EG_FONT_SUBPX_NONE,
     EG_FONT_SUBPX_HOR,
     EG_FONT_SUBPX_VER,
     EG_FONT_SUBPX_BOTH,
-} EG_SubPixelMode_e;
-
+};
 typedef uint8_t EG_FontSubPixel_t;
 
 // Describe the properties of a font
@@ -64,8 +64,8 @@ typedef struct EG_Font_t {
     bool (*GetGlyphPropsCB)(const struct EG_Font_t *, EG_FontGlyphProps_t *, uint32_t , uint32_t);  // Get a glyph's properties from a font
     const uint8_t * (*GetGlyphBitmapCB)(const struct EG_Font_t *, uint32_t);   // Get a glyph's bitmap from a font
     // Pointer to the font in a font pack (must have the same line height)
-    EG_Coord_t  LineHeight;             //  The real line height where any text fits
-    EG_Coord_t  BaseLine;               //  Base line measured from the top of the LineHeight
+    int32_t  LineHeight;             //  The real line height where any text fits
+    int32_t  BaseLine;               //  Base line measured from the top of the LineHeight
     uint8_t     SubPixel  : 2;          //  An element of `EG_FontSubPixel_t`
 
     int8_t UnderlinePosition;           //  Distance between the top of the underline and base line (< 0 means below the base line)
@@ -89,7 +89,7 @@ bool EG_FontGetGlyphProps(const EG_Font_t *pFont, EG_FontGlyphProps_t *pProps, u
 uint16_t EG_FontGetGlyphWidth(const EG_Font_t *pFont, uint32_t Character, uint32_t NextCharacter);
 
 // Get the line height of a font. All characters fit into this height
- static inline EG_Coord_t EG_FontGetLineHeight(const EG_Font_t *pFont)
+ static inline int32_t EG_FontGetLineHeight(const EG_Font_t *pFont)
 {
     return pFont->LineHeight;
 }

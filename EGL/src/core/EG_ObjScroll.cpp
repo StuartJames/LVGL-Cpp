@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
  
@@ -104,7 +105,7 @@ EG_ScrollSnap_e EGObject::GetScrollSnapY(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetScrollX(void)
+int32_t EGObject::GetScrollX(void)
 {
 	if(m_pAttributes == nullptr) return 0;
 	return -m_pAttributes->pScroll->m_X;
@@ -112,7 +113,7 @@ EG_Coord_t EGObject::GetScrollX(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetScrollY(void)
+int32_t EGObject::GetScrollY(void)
 {
 	if(m_pAttributes == nullptr) return 0;
 	return -m_pAttributes->pScroll->m_Y;
@@ -120,7 +121,7 @@ EG_Coord_t EGObject::GetScrollY(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetScrollTop(void)
+int32_t EGObject::GetScrollTop(void)
 {
 	if(m_pAttributes == nullptr) return 0;
 	return -m_pAttributes->pScroll->m_Y;
@@ -128,9 +129,9 @@ EG_Coord_t EGObject::GetScrollTop(void)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetScrollBottom(void)
+int32_t EGObject::GetScrollBottom(void)
 {
-EG_Coord_t ChildRes = EG_COORD_MIN;
+int32_t ChildRes = EG_COORD_MIN;
 uint32_t i;
 
 	uint32_t ChildCount = GetChildCount();
@@ -139,13 +140,13 @@ uint32_t i;
 		if(pChild->HasAnyFlagSet(EG_OBJ_FLAG_HIDDEN | EG_OBJ_FLAG_FLOATING)) continue;
 		ChildRes = EG_MAX(ChildRes, pChild->m_Rect.GetY2());
 	}
-	EG_Coord_t TopPad = GetStylePadTop(EG_PART_MAIN);
-	EG_Coord_t BottomPad = GetStylePadBottom(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t TopPad = GetStylePadTop(EG_PART_MAIN);
+	int32_t BottomPad = GetStylePadBottom(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	if(ChildRes != EG_COORD_MIN){
 		ChildRes -= (m_Rect.GetY2() - BottomPad - BorderWidth);
 	}
-	EG_Coord_t self_h = GetSelfHeight();
+	int32_t self_h = GetSelfHeight();
 	self_h = self_h - (GetHeight() - TopPad - BottomPad - 2 * BorderWidth);
 	self_h -= GetScrollY();
 	return EG_MAX(ChildRes, self_h);
@@ -153,9 +154,9 @@ uint32_t i;
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetScrollLeft(void)
+int32_t EGObject::GetScrollLeft(void)
 {
-EG_Coord_t ChildRes = 0;
+int32_t ChildRes = 0;
 
 	// Normally can't scroll the object out on the left. So simply use the current scroll position as "left size"
 	if(GetStyleBaseDirection(EG_PART_MAIN) != EG_BASE_DIR_RTL) {
@@ -163,10 +164,10 @@ EG_Coord_t ChildRes = 0;
 		return -m_pAttributes->pScroll->m_X;
 	}
 	// With RTL base direction scrolling the left is normal so find the left most coordinate
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t x1 = EG_COORD_MAX;
+	int32_t PadRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t x1 = EG_COORD_MAX;
 	uint32_t ChildCount = GetChildCount();
 	for(uint32_t i = 0; i < ChildCount; i++) {
 		EGObject *pChild = m_pAttributes->ppChildren[i];
@@ -178,7 +179,7 @@ EG_Coord_t ChildRes = 0;
 		ChildRes = (m_Rect.GetX1() + PadLeft + BorderWidth) - ChildRes;
 	}
 	else ChildRes = EG_COORD_MIN;
-	EG_Coord_t self_w = GetSelfWidth();
+	int32_t self_w = GetSelfWidth();
 	self_w = self_w - (GetWidth() - PadRight - PadLeft - 2 * BorderWidth);
 	self_w += GetScrollX();
 	return EG_MAX(ChildRes, self_w);
@@ -186,7 +187,7 @@ EG_Coord_t ChildRes = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGObject::GetScrollRight(void)
+int32_t EGObject::GetScrollRight(void)
 {
 	// With RTL base Direction can't scroll to the object out on the right. So simply use the current scroll position as "right size"
 	if(GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) {
@@ -194,7 +195,7 @@ EG_Coord_t EGObject::GetScrollRight(void)
 		return m_pAttributes->pScroll->m_X;
 	}
 	//With other base direction (LTR) scrolling to the right is normal so find the right most coordinate
-	EG_Coord_t ChildRes = EG_COORD_MIN;
+	int32_t ChildRes = EG_COORD_MIN;
 	uint32_t i;
 	uint32_t ChildCount = GetChildCount();
 	for(i = 0; i < ChildCount; i++) {
@@ -202,11 +203,11 @@ EG_Coord_t EGObject::GetScrollRight(void)
 		if(pChild->HasAnyFlagSet(EG_OBJ_FLAG_HIDDEN | EG_OBJ_FLAG_FLOATING)) continue;
 		ChildRes = EG_MAX(ChildRes, pChild->m_Rect.GetX2());
 	}
-	EG_Coord_t PadRight = GetStylePadRight(EG_PART_MAIN);
-	EG_Coord_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
-	EG_Coord_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t PadRight = GetStylePadRight(EG_PART_MAIN);
+	int32_t PadLeft = GetStylePadLeft(EG_PART_MAIN);
+	int32_t BorderWidth = GetStyleBorderWidth(EG_PART_MAIN);
 	if(ChildRes != EG_COORD_MIN) ChildRes -= (m_Rect.GetX2() - PadRight - BorderWidth);
-	EG_Coord_t SelfWidth = GetSelfWidth();
+	int32_t SelfWidth = GetSelfWidth();
 	SelfWidth = SelfWidth - (GetWidth() - PadRight - PadLeft - 2 * BorderWidth);
 	SelfWidth -= GetScrollX();
 	return EG_MAX(ChildRes, SelfWidth);
@@ -226,17 +227,17 @@ EGAnimate *pAnimate;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollByBounded(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEnable_e AnimateEnable)
+void EGObject::ScrollByBounded(int32_t SizeX, int32_t SizeY, EG_AnimateEnable_e AnimateEnable)
 {
 	if(SizeX == 0 && SizeY == 0) return;
 	UpdateLayout();	                                  // We need to know the final sizes for bound check
-	EG_Coord_t CurrentX = -GetScrollX();	// Don't let scroll more then naturally possible by the size of the content
-	EG_Coord_t BoundedX = CurrentX + SizeX;
+	int32_t CurrentX = -GetScrollX();	// Don't let scroll more then naturally possible by the size of the content
+	int32_t BoundedX = CurrentX + SizeX;
 
 	if(GetStyleBaseDirection(EG_PART_MAIN) != EG_BASE_DIR_RTL) {
 		if(BoundedX > 0) BoundedX = 0;
 		if(BoundedX < 0) {
-			EG_Coord_t scroll_max = GetScrollLeft() + GetScrollRight();
+			int32_t scroll_max = GetScrollLeft() + GetScrollRight();
 			if(scroll_max < 0) scroll_max = 0;
 			if(BoundedX < -scroll_max) BoundedX = -scroll_max;
 		}
@@ -244,17 +245,17 @@ void EGObject::ScrollByBounded(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEna
 	else {
 		if(BoundedX < 0) BoundedX = 0;
 		if(BoundedX > 0) {
-			EG_Coord_t scroll_max = GetScrollLeft() + GetScrollRight();
+			int32_t scroll_max = GetScrollLeft() + GetScrollRight();
 			if(scroll_max < 0) scroll_max = 0;
 			if(BoundedX > scroll_max) BoundedX = scroll_max;
 		}
 	}
-	EG_Coord_t CurrentY = -GetScrollY();	// Don't let scroll more then naturally possible by the size of the content
-	EG_Coord_t BoundedY = CurrentY + SizeY;
+	int32_t CurrentY = -GetScrollY();	// Don't let scroll more then naturally possible by the size of the content
+	int32_t BoundedY = CurrentY + SizeY;
 
 	if(BoundedY > 0) BoundedY = 0;
 	if(BoundedY < 0) {
-		EG_Coord_t ScrollMax = GetScrollTop() + GetScrollBottom();
+		int32_t ScrollMax = GetScrollTop() + GetScrollBottom();
 		if(ScrollMax < 0) ScrollMax = 0;
 		if(BoundedY < -ScrollMax) BoundedY = -ScrollMax;
 	}
@@ -265,7 +266,7 @@ void EGObject::ScrollByBounded(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEna
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollBy(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEnable_e AnimateEnable)
+void EGObject::ScrollBy(int32_t SizeX, int32_t SizeY, EG_AnimateEnable_e AnimateEnable)
 {
 	if(SizeX == 0 && SizeY == 0) return;
 	if(AnimateEnable == EG_ANIM_ON){
@@ -278,7 +279,7 @@ void EGObject::ScrollBy(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEnable_e A
 			if(Time < SCROLL_ANIM_TIME_MIN) Time = SCROLL_ANIM_TIME_MIN;
 			if(Time > SCROLL_ANIM_TIME_MAX) Time = SCROLL_ANIM_TIME_MAX;
 			Animate.SetTime(Time);
-			EG_Coord_t ScrollX = GetScrollX();
+			int32_t ScrollX = GetScrollX();
 			Animate.SetValues(-ScrollX, -ScrollX + SizeX);
 			Animate.SetExcCB(ScrollAnimatedX);
 			Animate.SetPathCB(EGAnimate::PathEaseOut);
@@ -290,7 +291,7 @@ void EGObject::ScrollBy(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEnable_e A
 			if(Time < SCROLL_ANIM_TIME_MIN) Time = SCROLL_ANIM_TIME_MIN;
 			if(Time > SCROLL_ANIM_TIME_MAX) Time = SCROLL_ANIM_TIME_MAX;
 			Animate.SetTime(Time);
-			EG_Coord_t ScrollX = GetScrollY();
+			int32_t ScrollX = GetScrollY();
 			Animate.SetValues(-ScrollX, -ScrollX + SizeY);
 			Animate.SetExcCB(ScrollAnimatedY);
 			Animate.SetPathCB(EGAnimate::PathEaseOut);
@@ -309,7 +310,7 @@ void EGObject::ScrollBy(EG_Coord_t SizeX, EG_Coord_t SizeY, EG_AnimateEnable_e A
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollTo(EG_Coord_t PosX, EG_Coord_t PosY, EG_AnimateEnable_e AnimateEnable)
+void EGObject::ScrollTo(int32_t PosX, int32_t PosY, EG_AnimateEnable_e AnimateEnable)
 {
 	ScrollToX(PosX, AnimateEnable);
 	ScrollToY(PosY, AnimateEnable);
@@ -317,21 +318,21 @@ void EGObject::ScrollTo(EG_Coord_t PosX, EG_Coord_t PosY, EG_AnimateEnable_e Ani
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollToX(EG_Coord_t PosX, EG_AnimateEnable_e AnimateEnable)
+void EGObject::ScrollToX(int32_t PosX, EG_AnimateEnable_e AnimateEnable)
 {
 	EGAnimate::Delete(this, ScrollAnimatedX);
-	EG_Coord_t ScrollX = GetScrollX();
-	EG_Coord_t Diff = -PosX + ScrollX;
+	int32_t ScrollX = GetScrollX();
+	int32_t Diff = -PosX + ScrollX;
 	ScrollByBounded(Diff, 0, AnimateEnable);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void EGObject::ScrollToY(EG_Coord_t PosY, EG_AnimateEnable_e AnimateEnable)
+void EGObject::ScrollToY(int32_t PosY, EG_AnimateEnable_e AnimateEnable)
 {
 	EGAnimate::Delete(this, ScrollAnimatedY);
-	EG_Coord_t ScrollY = GetScrollY();
-	EG_Coord_t Diff = -PosY + ScrollY;
+	int32_t ScrollY = GetScrollY();
+	int32_t Diff = -PosY + ScrollY;
 	ScrollByBounded(0, Diff, AnimateEnable);
 }
 
@@ -361,7 +362,7 @@ void EGObject::ScrollToViewRecursive(EG_AnimateEnable_e AnimateEnable)
 
 /////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGObject::ScrollByRaw(EG_Coord_t PosX, EG_Coord_t PosY)
+EG_Result_t EGObject::ScrollByRaw(int32_t PosX, int32_t PosY)
 {
 	if(PosX == 0 && PosY == 0) return EG_RES_OK;
 	AllocateAttribute();
@@ -402,7 +403,7 @@ EGPoint Point;
 void EGObject::GetScrollbarArea(EGRect *pHorizontalArea, EGRect *pVerticalArea)
 {
 bool DrawVirtical = false, DrawHorizontal = false;
-EG_Coord_t Remaining;
+int32_t Remaining;
 
 	pHorizontalArea->Set(0, 0, -1, -1);
 	pVerticalArea->Set(0, 0, -1, -1);
@@ -417,10 +418,10 @@ EG_Coord_t Remaining;
 		}
 		if(pIndev == nullptr) return;
 	}
-	EG_Coord_t ScrollTop = GetScrollTop();
-	EG_Coord_t ScrollBottom = GetScrollBottom();
-	EG_Coord_t Scrollleft = GetScrollLeft();
-	EG_Coord_t ScrollRight = GetScrollRight();
+	int32_t ScrollTop = GetScrollTop();
+	int32_t ScrollBottom = GetScrollBottom();
+	int32_t Scrollleft = GetScrollLeft();
+	int32_t ScrollRight = GetScrollRight();
 	EG_DirType_e Direction = GetScrollDirection();
 	if((Direction & EG_DIR_VER) &&
 		 ((ScrollMode == EG_SCROLLBAR_MODE_ON) ||
@@ -436,17 +437,17 @@ EG_Coord_t Remaining;
 	}
 	if(!DrawHorizontal && !DrawVirtical) return;
 	bool RightToleft = GetStyleBaseDirection(EG_PART_SCROLLBAR) == EG_BASE_DIR_RTL ? true : false;
-	EG_Coord_t TopSpace = GetStylePadTop(EG_PART_SCROLLBAR);
-	EG_Coord_t BottomSpace = GetStylePadBottom(EG_PART_SCROLLBAR);
-	EG_Coord_t LeftSpace = GetStylePadLeft(EG_PART_SCROLLBAR);
-	EG_Coord_t RightSpace = GetStylePadRight(EG_PART_SCROLLBAR);
-	EG_Coord_t Thickness = GetStyleWidth(EG_PART_SCROLLBAR);
-	EG_Coord_t Height = GetHeight();
-	EG_Coord_t Width = GetWidth();
-	EG_Coord_t SpaceReqVertical = DrawVirtical ? Thickness : 0;	// Space required for the vertical and horizontal scrollbars
-	EG_Coord_t SpaceReqHorizontal = DrawHorizontal ? Thickness : 0;
+	int32_t TopSpace = GetStylePadTop(EG_PART_SCROLLBAR);
+	int32_t BottomSpace = GetStylePadBottom(EG_PART_SCROLLBAR);
+	int32_t LeftSpace = GetStylePadLeft(EG_PART_SCROLLBAR);
+	int32_t RightSpace = GetStylePadRight(EG_PART_SCROLLBAR);
+	int32_t Thickness = GetStyleWidth(EG_PART_SCROLLBAR);
+	int32_t Height = GetHeight();
+	int32_t Width = GetWidth();
+	int32_t SpaceReqVertical = DrawVirtical ? Thickness : 0;	// Space required for the vertical and horizontal scrollbars
+	int32_t SpaceReqHorizontal = DrawHorizontal ? Thickness : 0;
 	if(GetStyleBckgroundOPA(EG_PART_SCROLLBAR) < EG_OPA_MIN && GetStyleBorderOPA(EG_PART_SCROLLBAR) < EG_OPA_MIN) return;
-	EG_Coord_t ContentHeight = Height + ScrollTop + ScrollBottom;	// Draw vertical scrollbar if the mode is ON or can be scrolled in this direction
+	int32_t ContentHeight = Height + ScrollTop + ScrollBottom;	// Draw vertical scrollbar if the mode is ON or can be scrolled in this direction
 	if(DrawVirtical && ContentHeight){
 		pVerticalArea->SetY1(m_Rect.GetY1());
 		pVerticalArea->SetY2(m_Rect.GetY2());
@@ -458,16 +459,16 @@ EG_Coord_t Remaining;
 			pVerticalArea->SetX2(m_Rect.GetX2() - RightSpace);
 			pVerticalArea->SetX1(pVerticalArea->GetX2() - Thickness + 1);
 		}
-		EG_Coord_t ScrollbarHeight = ((Height - TopSpace - BottomSpace - SpaceReqHorizontal) * Height) / ContentHeight;
+		int32_t ScrollbarHeight = ((Height - TopSpace - BottomSpace - SpaceReqHorizontal) * Height) / ContentHeight;
 		ScrollbarHeight = EG_MAX(ScrollbarHeight, SCROLLBAR_MIN_SIZE);
 		Remaining = (Height - TopSpace - BottomSpace - SpaceReqHorizontal) -	ScrollbarHeight; // Remaining size from the scrollbar track that is not the scrollbar itself
-		EG_Coord_t ScrollHeight = ContentHeight - Height; // The size of the content which can be really scrolled
+		int32_t ScrollHeight = ContentHeight - Height; // The size of the content which can be really scrolled
 		if(ScrollHeight <= 0) {
 			pVerticalArea->SetY1(m_Rect.GetY1() + TopSpace);
 			pVerticalArea->SetY2(m_Rect.GetY2() - BottomSpace - SpaceReqHorizontal - 1);
 		}
 		else {
-			EG_Coord_t ScrollbarY = (Remaining * ScrollBottom) / ScrollHeight;
+			int32_t ScrollbarY = (Remaining * ScrollBottom) / ScrollHeight;
 			ScrollbarY = Remaining - ScrollbarY;
 			pVerticalArea->SetY1(m_Rect.GetY1() + ScrollbarY + TopSpace);
 			pVerticalArea->SetY2(pVerticalArea->GetY1() + ScrollbarHeight - 1);
@@ -486,17 +487,17 @@ EG_Coord_t Remaining;
 		}
 	}
 	//Draw horizontal scrollbar if the mode is ON or can be scrolled in this direction
-	EG_Coord_t ContentWidth = Width + Scrollleft + ScrollRight;
+	int32_t ContentWidth = Width + Scrollleft + ScrollRight;
 	if(DrawHorizontal && ContentWidth) {
 		pHorizontalArea->SetY2(m_Rect.GetY2() - BottomSpace);
 		pHorizontalArea->SetY1(pHorizontalArea->GetY2() - Thickness + 1);
 		pHorizontalArea->SetX1(m_Rect.GetX1());
 		pHorizontalArea->SetX2(m_Rect.GetX2());
 
-		EG_Coord_t ScrollbarWidth = ((Width - LeftSpace - RightSpace - SpaceReqVertical) * Width) / ContentWidth;
+		int32_t ScrollbarWidth = ((Width - LeftSpace - RightSpace - SpaceReqVertical) * Width) / ContentWidth;
 		ScrollbarWidth = EG_MAX(ScrollbarWidth, SCROLLBAR_MIN_SIZE);
 		Remaining = (Width - LeftSpace - RightSpace - SpaceReqVertical) -	ScrollbarWidth; // Remaining size from the scrollbar track that is not the scrollbar itself
-		EG_Coord_t ScrollWidth = ContentWidth - Width; //The size of the content which can be really scrolled
+		int32_t ScrollWidth = ContentWidth - Width; //The size of the content which can be really scrolled
 		if(ScrollWidth <= 0) {
 			if(RightToleft) {
 				pHorizontalArea->SetX1(m_Rect.GetX1() + LeftSpace + SpaceReqVertical - 1);
@@ -508,7 +509,7 @@ EG_Coord_t Remaining;
 			}
 		}
 		else {
-			EG_Coord_t ScrollbarX = (Remaining * ScrollRight) / ScrollWidth;
+			int32_t ScrollbarX = (Remaining * ScrollRight) / ScrollWidth;
 			ScrollbarX = Remaining - ScrollbarX;
 			if(RightToleft) {
 				pHorizontalArea->SetX1(m_Rect.GetX1() + ScrollbarX + LeftSpace + SpaceReqVertical);
@@ -563,8 +564,8 @@ EGRect HorizontalArea, VerticalArea;
 void EGObject::ReadjustScroll(EG_AnimateEnable_e AnimateEnable)
 {
 	if(GetScrollSnapY() == EG_SCROLL_SNAP_NONE) {
-		EG_Coord_t ScrollTop = GetScrollTop();
-		EG_Coord_t ScrollBottom = GetScrollBottom();
+		int32_t ScrollTop = GetScrollTop();
+		int32_t ScrollBottom = GetScrollBottom();
 		if(ScrollBottom < 0 && ScrollTop > 0) {
 			ScrollBottom = EG_MIN(ScrollTop, -ScrollBottom);
 			ScrollBy(0, ScrollBottom, AnimateEnable);
@@ -572,8 +573,8 @@ void EGObject::ReadjustScroll(EG_AnimateEnable_e AnimateEnable)
 	}
 
 	if(GetScrollSnapX() == EG_SCROLL_SNAP_NONE) {
-		EG_Coord_t Scrollleft = GetScrollLeft();
-		EG_Coord_t ScrollRight = GetScrollRight();
+		int32_t Scrollleft = GetScrollLeft();
+		int32_t ScrollRight = GetScrollRight();
 		if(GetStyleBaseDirection(EG_PART_MAIN) != EG_BASE_DIR_RTL) {
 			if(ScrollRight < 0 && Scrollleft > 0) {		// Be sure the left side is not remains scrolled in
 				ScrollRight = EG_MIN(Scrollleft, -ScrollRight);
@@ -614,9 +615,9 @@ void EGObject::ScrollAnimatedEndCB(EGAnimate *pAnimate)
 
 void EGObject::ScrollAreaIntoView(const EGRect *pRect, EGObject *pChild, EGPoint *pScrollValue, EG_AnimateEnable_e AnimateEnable)
 {
-EG_Coord_t ScrollY = 0, ScrollX = 0;
+int32_t ScrollY = 0, ScrollX = 0;
 const EGRect *pRectTmp;
-EG_Coord_t SnapGoal = 0;
+int32_t SnapGoal = 0;
 
 	EGObject *pParent = pChild->GetParent();
 	if(!pParent->HasFlagSet(EG_OBJ_FLAG_SCROLLABLE)) return;
@@ -624,21 +625,21 @@ EG_Coord_t SnapGoal = 0;
 	EG_ScrollSnap_e SnapY = pParent->GetScrollSnapY();
 	if(SnapY != EG_SCROLL_SNAP_NONE) pRectTmp = &pChild->m_Rect;
 	else pRectTmp = pRect;
-	EG_Coord_t BorderWidth = pParent->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t PadTop = pParent->GetStylePadTop(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t PadBottom = pParent->GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t TopDifference = pParent->m_Rect.GetY1() + PadTop - pRectTmp->GetY1() - pScrollValue->m_Y;
-	EG_Coord_t BottomDifference = -(pParent->m_Rect.GetY2() - PadBottom - pRectTmp->GetY2() - pScrollValue->m_Y);
-	EG_Coord_t ParentHeight = pParent->GetHeight() - PadTop - PadBottom;
+	int32_t BorderWidth = pParent->GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t PadTop = pParent->GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+	int32_t PadBottom = pParent->GetStylePadBottom(EG_PART_MAIN) + BorderWidth;
+	int32_t TopDifference = pParent->m_Rect.GetY1() + PadTop - pRectTmp->GetY1() - pScrollValue->m_Y;
+	int32_t BottomDifference = -(pParent->m_Rect.GetY2() - PadBottom - pRectTmp->GetY2() - pScrollValue->m_Y);
+	int32_t ParentHeight = pParent->GetHeight() - PadTop - PadBottom;
 	if((TopDifference >= 0) && (BottomDifference >= 0))	ScrollY = 0;
 	else if(TopDifference > 0){
 		ScrollY = TopDifference;
-		EG_Coord_t ScrollTop = pParent->GetScrollTop();		// Do not let scrolling in
+		int32_t ScrollTop = pParent->GetScrollTop();		// Do not let scrolling in
 		if(ScrollTop - ScrollY < 0) ScrollY = 0;
 	}
 	else if(BottomDifference > 0){
 		ScrollY = -BottomDifference;
-		EG_Coord_t ScrollBottom = pParent->GetScrollBottom();		// Do not let scrolling in
+		int32_t ScrollBottom = pParent->GetScrollBottom();		// Do not let scrolling in
 		if(ScrollBottom + ScrollY < 0) ScrollY = 0;
 	}
 	switch((uint8_t)SnapY) {
@@ -658,22 +659,22 @@ EG_Coord_t SnapGoal = 0;
 	EG_ScrollSnap_e SnapX = pParent->GetScrollSnapX();
 	if(SnapX != EG_SCROLL_SNAP_NONE)	pRectTmp = &pChild->m_Rect;
 	else pRectTmp = pRect;
-	EG_Coord_t PadLeft = pParent->GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t PadRight = pParent->GetStylePadRight(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t LeftDifference = pParent->m_Rect.GetX1() + PadLeft - pRectTmp->GetX1() - pScrollValue->m_X;
-	EG_Coord_t RightDifference = -(pParent->m_Rect.GetX2() - PadRight - pRectTmp->GetX2() - pScrollValue->m_X);
+	int32_t PadLeft = pParent->GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
+	int32_t PadRight = pParent->GetStylePadRight(EG_PART_MAIN) + BorderWidth;
+	int32_t LeftDifference = pParent->m_Rect.GetX1() + PadLeft - pRectTmp->GetX1() - pScrollValue->m_X;
+	int32_t RightDifference = -(pParent->m_Rect.GetX2() - PadRight - pRectTmp->GetX2() - pScrollValue->m_X);
 	if((LeftDifference >= 0 && RightDifference >= 0)) ScrollX = 0;
 	else if(LeftDifference > 0) {
 		ScrollX = LeftDifference;
-		EG_Coord_t Scrollleft = pParent->GetScrollLeft();		// Do not let scrolling in
+		int32_t Scrollleft = pParent->GetScrollLeft();		// Do not let scrolling in
 		if(Scrollleft - ScrollX < 0) ScrollX = 0;
 	}
 	else if(RightDifference > 0) {
 		ScrollX = -RightDifference;
-		EG_Coord_t ScrollRight = pParent->GetScrollRight();		// Do not let scrolling in
+		int32_t ScrollRight = pParent->GetScrollRight();		// Do not let scrolling in
 		if(ScrollRight + ScrollX < 0) ScrollX = 0;
 	}
-	EG_Coord_t parent_w = pParent->GetWidth() - PadLeft - PadRight;
+	int32_t parent_w = pParent->GetWidth() - PadLeft - PadRight;
 	switch((uint8_t)SnapX) {
 		case EG_SCROLL_SNAP_START:
 			SnapGoal = pParent->m_Rect.GetX1() + PadLeft;

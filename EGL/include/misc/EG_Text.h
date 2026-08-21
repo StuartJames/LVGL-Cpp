@@ -1,23 +1,24 @@
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -82,8 +83,8 @@ typedef uint8_t EG_TextAlignment_t;
  * @param max_width max width of the text (break the lines to fit this size). Set COORD_MAX to avoid
  * line breaks
  */
-void EG_GetTextSize(EGPoint * size_res, const char * text, const EG_Font_t * font, EG_Coord_t letter_space,
-                     EG_Coord_t line_space, EG_Coord_t max_width, EG_TextFlag_t flag);
+void EG_GetTextSize(EGSize * size_res, const char * text, const EG_Font_t * font, int32_t letter_space,
+                     int32_t line_space, int32_t max_width, EG_TextFlag_t flag);
 
 /**
  * Get the next line of text. Check line length and break chars too.
@@ -98,8 +99,8 @@ void EG_GetTextSize(EGPoint * size_res, const char * text, const EG_Font_t * fon
  * @return the index of the first char of the new line (in byte index not letter index. With UTF-8
  * they are different)
  */
-uint32_t EG_GetNextTextLine(const char * txt, const EG_Font_t * font, EG_Coord_t letter_space,
-                               EG_Coord_t max_width, EG_Coord_t * used_width, EG_TextFlag_t flag);
+uint32_t EG_GetNextTextLine(const char * txt, const EG_Font_t * font, int32_t letter_space,
+                               int32_t max_width, int32_t * used_width, EG_TextFlag_t flag);
 
 /**
  * Give the length of a text with a given font
@@ -111,7 +112,7 @@ uint32_t EG_GetNextTextLine(const char * txt, const EG_Font_t * font, EG_Coord_t
  * @param flags settings for the text from 'txt_flag_t' enum
  * @return length of a char_num long text
  */
-EG_Coord_t EG_GetTextWidth(const char * txt, uint32_t length, const EG_Font_t * font, EG_Coord_t letter_space,
+int32_t EG_GetTextWidth(const char * txt, uint32_t length, const EG_Font_t * font, int32_t letter_space,
                             EG_TextFlag_t flag);
 
 /**

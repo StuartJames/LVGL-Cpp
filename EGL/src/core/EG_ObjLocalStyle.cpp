@@ -17,7 +17,7 @@
 *
 * Edit     Date     Version       Edit Description
 * ====  ==========  ======= =====================================================
-* SJ    2025/08/18   1.a.1    Original by LVGL Kft
+* SJ    2025/08/18   8.4.0    Original by LVGL Kft
 *
 */
 
@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-void EGObject::SetStyleWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -33,7 +33,7 @@ void EGObject::SetStyleWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleMinWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleMinWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -41,7 +41,7 @@ void EGObject::SetStyleMinWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_MIN_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleMaxWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleMaxWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -49,7 +49,7 @@ void EGObject::SetStyleMaxWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_MAX_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleHeight(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -57,7 +57,7 @@ void EGObject::SetStyleHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_HEIGHT, v, SelectFlags);
 }
 
-void EGObject::SetStyleMinHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleMinHeight(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -65,7 +65,7 @@ void EGObject::SetStyleMinHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_MIN_HEIGHT, v, SelectFlags);
 }
 
-void EGObject::SetStyleMaxHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleMaxHeight(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -73,7 +73,7 @@ void EGObject::SetStyleMaxHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_MAX_HEIGHT, v, SelectFlags);
 }
 
-void EGObject::SetStyleX(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleX(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -81,7 +81,7 @@ void EGObject::SetStyleX(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_X, v, SelectFlags);
 }
 
-void EGObject::SetStyleY(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleY(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -97,7 +97,7 @@ void EGObject::SetStyleAlign(EG_AlignType_e Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_ALIGN, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransformWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransformWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -105,7 +105,7 @@ void EGObject::SetStyleTransformWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFl
   SetLocalStyleProperty(EG_STYLE_TRANSFORM_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransformHeight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransformHeight(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -113,7 +113,7 @@ void EGObject::SetStyleTransformHeight(EG_Coord_t Value, EG_StyleFlags_t SelectF
   SetLocalStyleProperty(EG_STYLE_TRANSFORM_HEIGHT, v, SelectFlags);
 }
 
-void EGObject::SetStyleTranslateX(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTranslateX(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -121,7 +121,7 @@ void EGObject::SetStyleTranslateX(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_TRANSLATE_X, v, SelectFlags);
 }
 
-void EGObject::SetStyleTranslateY(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTranslateY(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -129,7 +129,7 @@ void EGObject::SetStyleTranslateY(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_TRANSLATE_Y, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransformZoom(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransformZoom(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -137,7 +137,7 @@ void EGObject::SetStyleTransformZoom(EG_Coord_t Value, EG_StyleFlags_t SelectFla
   SetLocalStyleProperty(EG_STYLE_TRANSFORM_ZOOM, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransformAngle(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransformAngle(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -145,7 +145,7 @@ void EGObject::SetStyleTransformAngle(EG_Coord_t Value, EG_StyleFlags_t SelectFl
   SetLocalStyleProperty(EG_STYLE_TRANSFORM_ANGLE, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransformPivotX(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransformPivotX(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -153,7 +153,7 @@ void EGObject::SetStyleTransformPivotX(EG_Coord_t Value, EG_StyleFlags_t SelectF
   SetLocalStyleProperty(EG_STYLE_TRANSFORM_PIVOT_X, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransformPivotY(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransformPivotY(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -161,7 +161,7 @@ void EGObject::SetStyleTransformPivotY(EG_Coord_t Value, EG_StyleFlags_t SelectF
   SetLocalStyleProperty(EG_STYLE_TRANSFORM_PIVOT_Y, v, SelectFlags);
 }
 
-void EGObject::SetStylePadTop(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePadTop(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -169,7 +169,7 @@ void EGObject::SetStylePadTop(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_PAD_TOP, v, SelectFlags);
 }
 
-void EGObject::SetStylePadBottom(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePadBottom(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -177,7 +177,7 @@ void EGObject::SetStylePadBottom(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_PAD_BOTTOM, v, SelectFlags);
 }
 
-void EGObject::SetStylePadLeft(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePadLeft(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -185,7 +185,7 @@ void EGObject::SetStylePadLeft(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_PAD_LEFT, v, SelectFlags);
 }
 
-void EGObject::SetStylePadRight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePadRight(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -193,7 +193,7 @@ void EGObject::SetStylePadRight(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_PAD_RIGHT, v, SelectFlags);
 }
 
-void EGObject::SetStylePadRow(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePadRow(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -201,7 +201,7 @@ void EGObject::SetStylePadRow(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_PAD_ROW, v, SelectFlags);
 }
 
-void EGObject::SetStylePadColumn(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePadColumn(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -241,7 +241,7 @@ void EGObject::SetStyleBackGradientDirection(EG_GradDirection_e Value, EG_StyleF
   SetLocalStyleProperty(EG_STYLE_BG_GRAD_DIR, v, SelectFlags);
 }
 
-void EGObject::SetStyleBackMainStop(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleBackMainStop(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -249,7 +249,7 @@ void EGObject::SetStyleBackMainStop(EG_Coord_t Value, EG_StyleFlags_t SelectFlag
   SetLocalStyleProperty(EG_STYLE_BG_MAIN_STOP, v, SelectFlags);
 }
 
-void EGObject::SetStyleBackGradientStop(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleBackGradientStop(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -329,7 +329,7 @@ void EGObject::SetStyleBorderOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_BORDER_OPA, v, SelectFlags);
 }
 
-void EGObject::SetStyleBorderWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleBorderWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -353,7 +353,7 @@ void EGObject::SetStyleBorderPost(bool Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_BORDER_POST, v, SelectFlags);
 }
 
-void EGObject::SetStyleOutlineWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleOutlineWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -377,7 +377,7 @@ void EGObject::SetStyleOutlineOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_OUTLINE_OPA, v, SelectFlags);
 }
 
-void EGObject::SetStyleOutlinePad(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleOutlinePad(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -385,7 +385,7 @@ void EGObject::SetStyleOutlinePad(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_OUTLINE_PAD, v, SelectFlags);
 }
 
-void EGObject::SetStyleShadowWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleShadowWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -393,7 +393,7 @@ void EGObject::SetStyleShadowWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags
   SetLocalStyleProperty(EG_STYLE_SHADOW_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleShadowOffsetX(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleShadowOffsetX(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -401,7 +401,7 @@ void EGObject::SetStyleShadowOffsetX(EG_Coord_t Value, EG_StyleFlags_t SelectFla
   SetLocalStyleProperty(EG_STYLE_SHADOW_OFS_X, v, SelectFlags);
 }
 
-void EGObject::SetStyleShadowOffsetY(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleShadowOffsetY(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -409,7 +409,7 @@ void EGObject::SetStyleShadowOffsetY(EG_Coord_t Value, EG_StyleFlags_t SelectFla
   SetLocalStyleProperty(EG_STYLE_SHADOW_OFS_Y, v, SelectFlags);
 }
 
-void EGObject::SetStyleShadowSpread(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleShadowSpread(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -457,7 +457,7 @@ void EGObject::SetStyleImageRecolorOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFla
   SetLocalStyleProperty(EG_STYLE_IMG_RECOLOR_OPA, v, SelectFlags);
 }
 
-void EGObject::SetStyleLineWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleLineWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -465,7 +465,7 @@ void EGObject::SetStyleLineWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_LINE_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleLineDashWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleLineDashWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -473,7 +473,7 @@ void EGObject::SetStyleLineDashWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFla
   SetLocalStyleProperty(EG_STYLE_LINE_DASH_WIDTH, v, SelectFlags);
 }
 
-void EGObject::SetStyleLineDashGap(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleLineDashGap(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -505,7 +505,7 @@ void EGObject::SetStyleLineOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_LINE_OPA, v, SelectFlags);
 }
 
-void EGObject::SetStyleArcWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleArcWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -537,7 +537,7 @@ void EGObject::SetStyleArcOPA(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_ARC_OPA, v, SelectFlags);
 }
 
-void EGObject::SetStylePolyWidth(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStylePolyWidth(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -609,7 +609,7 @@ void EGObject::SetStyleTextFont(const EG_Font_t *pValue, EG_StyleFlags_t SelectF
   SetLocalStyleProperty(EG_STYLE_TEXT_FONT, v, SelectFlags);
 }
 
-void EGObject::SetStyleTextKerning(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTextKerning(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -617,7 +617,7 @@ void EGObject::SetStyleTextKerning(EG_Coord_t Value, EG_StyleFlags_t SelectFlags
   SetLocalStyleProperty(EG_STYLE_TEXT_LETTER_SPACE, v, SelectFlags);
 }
 
-void EGObject::SetStyleTextLineSpace(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTextLineSpace(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -641,7 +641,7 @@ void EGObject::SetStyleTextAlign(EG_TextAlignment_t Value, EG_StyleFlags_t Selec
   SetLocalStyleProperty(EG_STYLE_TEXT_ALIGN, v, SelectFlags);
 }
 
-void EGObject::SetStyleRadius(EG_Coord_t Value, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleRadius(int32_t Value, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .Number = (int32_t)Value
@@ -673,7 +673,7 @@ void EGObject::SetStyleOPALayered(EG_OPA_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_OPA_LAYERED, v, SelectFlags);
 }
 
-void EGObject::SetStyleColorFilterDiscriptor(const EG_ColorFilterProps_t *pValue, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleColorFilterDescriptor(const EG_ColorFilterProps_t *pValue, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .pPtr = pValue
@@ -713,7 +713,7 @@ void EGObject::SetStyleAnimateSpeed(uint32_t Value, EG_StyleFlags_t SelectFlags)
   SetLocalStyleProperty(EG_STYLE_ANIM_SPEED, v, SelectFlags);
 }
 
-void EGObject::SetStyleTransition(const EG_StyleTransitionDiscriptor_t *pValue, EG_StyleFlags_t SelectFlags)
+void EGObject::SetStyleTransition(const EG_StyleTransitionDescriptor_t *pValue, EG_StyleFlags_t SelectFlags)
 {
   EG_StyleValue_t v = {
     .pPtr = pValue

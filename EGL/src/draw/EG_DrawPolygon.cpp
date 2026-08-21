@@ -17,19 +17,19 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "draw/EG_DrawPolygon.h"
 #include "misc/EG_Math.h"
 #include "misc/EG_Memory.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGDrawPolygon::EGDrawPolygon() :
-  m_pContext(nullptr),
+EGDrawPolygon::EGDrawPolygon() : EGDrawBase(),
   m_BlendMode(EG_BLEND_MODE_NORMAL),
   m_FillOPA(EG_OPA_COVER),
   m_FillColor(EG_ColorWhite()),
@@ -41,12 +41,12 @@ EGDrawPolygon::EGDrawPolygon() :
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void EGDrawPolygon::Draw(const EGDrawContext *pDrawContext, const EGPoint *pVertices, uint16_t VerticesCount)
+void EGDrawPolygon::Draw(EGDeviceContext *pDC, const EGPoint *pVertices, uint16_t VerticesCount)
 {
   if(VerticesCount < 3) return;
   if(pVertices == nullptr) return;
-  m_pContext = pDrawContext;
-  pDrawContext->DrawPolygonProc(this, pVertices, VerticesCount);
+  m_pContext = pDC;
+  pDC->DrawPolygonProc(this, pVertices, VerticesCount);
 }
 
 

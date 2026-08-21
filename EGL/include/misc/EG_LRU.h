@@ -18,7 +18,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -31,16 +32,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef enum {
+enum EG_LRU_Res_e{
     EG_LRU_OK = 0,
     EG_LRU_MISSING_CACHE,
     EG_LRU_MISSING_KEY,
     EG_LRU_MISSING_VALUE,
     EG_LRU_LOCK_ERROR,
     EG_LRU_VALUE_TOO_LARGE
-} EG_LRU_Res_e;
+} ;
 
-typedef void (lv_lru_free_t)(void * v);
+typedef void (EG_LRU_Free_t)(void * v);
 
 typedef struct EG_LRU_Item_t {
 	void *value;
@@ -52,7 +53,7 @@ typedef struct EG_LRU_Item_t {
 } EG_LRU_Item_t;
 
 
-typedef struct lv_lru_t {
+typedef struct EG_LRU_t {
     EG_LRU_Item_t ** items;
     uint64_t access_count;
     size_t free_memory;
@@ -60,16 +61,16 @@ typedef struct lv_lru_t {
     size_t average_item_length;
     size_t hash_table_size;
     uint32_t seed;
-    lv_lru_free_t * value_free;
-    lv_lru_free_t * key_free;
+    EG_LRU_Free_t * value_free;
+    EG_LRU_Free_t * key_free;
     EG_LRU_Item_t * free_items;
-} lv_lru_t;
+} EG_LRU_t;
 
 /////////////////////////////////////////////////////////////////////////////
 
-lv_lru_t*       EG_LRUCreate(size_t cache_size, size_t average_length, lv_lru_free_t * value_free, lv_lru_free_t * key_free);
-void            EG_LRUDelete(lv_lru_t * cache);
-EG_LRU_Res_e    EG_LRUSet(lv_lru_t * cache, const void * key, size_t key_length, void * value, size_t value_length);
-EG_LRU_Res_e    EG_LRUGet(lv_lru_t * cache, const void * key, size_t key_size, void ** value);
-EG_LRU_Res_e    EG_LRURemove(lv_lru_t * cache, const void * key, size_t key_size);
-void            EG_RemoveLRUItem(lv_lru_t * cache);
+EG_LRU_t*       EG_LRUCreate(size_t cache_size, size_t average_length, EG_LRU_Free_t * value_free, EG_LRU_Free_t * key_free);
+void            EG_LRUDelete(EG_LRU_t * cache);
+EG_LRU_Res_e    EG_LRUSet(EG_LRU_t * cache, const void * key, size_t key_length, void * value, size_t value_length);
+EG_LRU_Res_e    EG_LRUGet(EG_LRU_t * cache, const void * key, size_t key_size, void ** value);
+EG_LRU_Res_e    EG_LRURemove(EG_LRU_t * cache, const void * key, size_t key_size);
+void            EG_RemoveLRUItem(EG_LRU_t * cache);

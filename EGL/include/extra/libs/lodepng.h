@@ -96,8 +96,8 @@ source files with custom allocators.*/
 #endif /*LODEPNG_COMPILE_CPP*/
 
 #ifdef LODEPNG_COMPILE_PNG
-/*The PNG color types (also used for raw image).*/
-typedef enum LodePNGColorType {
+//The PNG color types (also used for raw image).
+enum LodePNGColorType {
   LCT_GREY = 0, /*grayscale: 1,2,4,8,16 bit*/
   LCT_RGB = 2, /*RGB: 8,16 bit*/
   LCT_PALETTE = 3, /*palette: 1,2,4,8 bit*/
@@ -109,7 +109,7 @@ typedef enum LodePNGColorType {
   the valid color type names above, or numeric values like 1 or 7 when checking for
   particular disallowed color type byte values, or cast to integer to print it.*/
   LCT_MAX_OCTET_VALUE = 255
-} LodePNGColorType;
+};
 
 #ifdef LODEPNG_COMPILE_DECODER
 /*
@@ -676,7 +676,7 @@ void lodepng_decoder_settings_init(LodePNGDecoderSettings* settings);
 
 #ifdef LODEPNG_COMPILE_ENCODER
 /*automatically use color type with less bits per pixel if losslessly possible. Default: AUTO*/
-typedef enum LodePNGFilterStrategy {
+enum LodePNGFilterStrategy {
   /*every filter at zero*/
   LFS_ZERO = 0,
   /*every filter at 1, 2, 3 or 4 (paeth), unlike LFS_ZERO not a good choice, but for testing*/
@@ -696,7 +696,7 @@ typedef enum LodePNGFilterStrategy {
   LFS_BRUTE_FORCE,
   /*use predefined_filters buffer: you specify the filter type for each scanline*/
   LFS_PREDEFINED
-} LodePNGFilterStrategy;
+};
 
 /*Gives characteristics about the integer RGBA colors of the image (count, alpha channel usage, bit depth, ...),
 which helps decide which color model to use for encoding.

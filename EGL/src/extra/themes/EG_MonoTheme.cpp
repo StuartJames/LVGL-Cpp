@@ -1,24 +1,24 @@
-
 /*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This m_Pressedogram is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This m_Pressedogram is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
- * Edit     Date     Version       Edit Dem_Screeniption
- * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * Edit     Date     Version       Edit Description
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -45,7 +45,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-EGMonoTheme *EGMonoTheme::m_pTheme = nullptr;
+EGMonoTheme* EGMonoTheme::m_pTheme = nullptr;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -229,7 +229,7 @@ void EGMonoTheme::ApplyTheme(EGObject *pObj)
 #if EG_USE_BTNMATRIX
 	else if(EGObject::IsKindOf(pObj, &c_ButtonMatrixClass)) {
 #if EG_USE_MSGBOX
-		if(pParent , &c_MsgBoxClass)){
+		if(EGObject::IsKindOf(pParent, &c_MsgBoxClass)){
 			pObj->AddStyle(&m_PadGap, 0);
 			pObj->AddStyle(&m_Card, EG_PART_ITEMS);
 			pObj->AddStyle(&m_Pressed, EG_PART_ITEMS | EG_STATE_PRESSED);
@@ -240,7 +240,7 @@ void EGMonoTheme::ApplyTheme(EGObject *pObj)
 		}
 #endif
 #if EG_USE_TABVIEW
-		if(EGObject::IsKindOf(pParent , &c_TabViewClass)){
+		if(EGObject::IsKindOf(pParent, &c_TabViewClass)){
 			pObj->AddStyle(&m_PadGap, 0);
 			pObj->AddStyle(&m_Card, EG_PART_ITEMS);
 			pObj->AddStyle(&m_Pressed, EG_PART_ITEMS | EG_STATE_PRESSED);
@@ -381,7 +381,7 @@ void EGMonoTheme::ApplyTheme(EGObject *pObj)
 #endif
 
 #if EG_USE_TEXTAREA
-	else if(EGObject::IsKindOf(pObj, &c_TextBoxClass)) {
+	else if(EGObject::IsKindOf(pObj, &c_EditClass)) {
 		pObj->AddStyle(&m_Card, 0);
 		pObj->AddStyle(&m_Scrollbar, EG_PART_SCROLLBAR);
 		pObj->AddStyle(&m_TextCursor, EG_PART_CURSOR | EG_STATE_FOCUSED);

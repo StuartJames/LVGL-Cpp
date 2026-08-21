@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -35,7 +36,7 @@
 #define EG_FS_MAX_PATH_LENGTH 256
 
 // Errors in the file system module.
-typedef enum : uint8_t {
+enum EG_FSResult_e : uint8_t {
     EG_FS_RES_OK = 0,
     EG_FS_RES_HW_ERR,     /*Low level hardware error*/
     EG_FS_RES_FS_ERR,     /*Error in the file system structure*/
@@ -49,22 +50,22 @@ typedef enum : uint8_t {
     EG_FS_RES_OUT_OF_MEM, /*Not enough memory for an internal operation*/
     EG_FS_RES_INV_PARAM,  /*Invalid parameter among arguments*/
     EG_FS_RES_UNKNOWN,    /*Other unknown error*/
-} EG_FSResult_e;
+};
 
 
 // File open mode.
-typedef enum : uint8_t {
+enum EG_FS_Mode_e : uint8_t {
     EG_FS_MODE_WR = 0x01,
     EG_FS_MODE_RD = 0x02,
-} EG_FS_Mode_e;
+};
 
 
 // Seek modes.
-typedef enum {
+enum EG_FS_Seek_e{
     EG_FS_SEEK_SET = 0x00,      // Set the position from absolutely (from the start of file)
     EG_FS_SEEK_CUR = 0x01,      // Set the position from the current position
     EG_FS_SEEK_END = 0x02,      // Set the position from the end of the file
-} EG_FS_Seek_e;
+} ;
 
 
 typedef struct {

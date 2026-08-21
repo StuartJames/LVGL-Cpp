@@ -1,23 +1,24 @@
-/* 
+/*
  *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
  *  Based on a design by LVGL Kft
- * 
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -28,11 +29,11 @@
 #if EG_USE_LABEL != 0
 
 #include <stdarg.h>
-#include "core/EG_Object.h"
-#include "font/EG_Font.h"
-#include "font/EG_SymbolDef.h"
-#include "misc/EG_Text.h"
-#include "draw/EG_DrawContext.h"
+#include "../core/EG_Object.h"
+#include "../font/EG_Font.h"
+#include "../font/EG_SymbolDef.h"
+#include "../misc/EG_Text.h"
+#include "../draw/EG_DeviceContext.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +48,7 @@ EG_EXPORT_CONST_INT(EG_LABEL_TEXT_SELECTION_OFF);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-// Long mode behaviors. Used in 'lv_label_ext_t'
+// Long mode behaviors.
 enum {
     EG_LABEL_LONG_WRAP,             //  Keep the object width, wrap the too long lines and expand the object height
     EG_LABEL_LONG_DOT,              //  Keep the size and write dots at the end if the text is too long

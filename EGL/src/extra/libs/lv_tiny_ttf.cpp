@@ -1,6 +1,31 @@
-#include "extra/libs/lv_tiny_ttf.h"
+/*
+ *                EGL 2025-2026 HydraSystems.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  Based on a design by LVGL Kft
+ *
+ * =====================================================================
+ *
+ * Edit     Date     Version       Edit Description
+ * ====  ==========  ======= ===========================================
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
+ *
+ */
+
+ #include "extra/libs/lv_tiny_ttf.h"
 
 #if EG_USE_TINY_TTF
+
 #include <stdio.h>
 #include "misc/EG_LRU.h"
 
@@ -74,12 +99,12 @@ typedef struct ttf_font_desc {
 	float scale;
 	int ascent;
 	int descent;
-	lv_lru_t *bitmap_cache;
+	EG_LRU_t *bitmap_cache;
 } ttf_font_desc_t;
 
 typedef struct ttf_bitmap_cache_key {
 	uint32_t unicode_letter;
-	EG_Coord_t LineHeight;
+	int32_t LineHeight;
 } ttf_bitmap_cache_key_t;
 
 static bool ttf_get_glyph_dsc_cb(const EG_Font_t *font, EG_FontGlyphProps_t *dsc_out, uint32_t unicode_letter,
@@ -171,7 +196,7 @@ static const uint8_t *ttf_get_glyph_bitmap_cb(const EG_Font_t *font, uint32_t un
 	return buffer;
 }
 
-static EG_Font_t *lv_tiny_ttf_create(const char *path, const void *data, size_t data_size, EG_Coord_t font_size,
+static EG_Font_t *lv_tiny_ttf_create(const char *path, const void *data, size_t data_size, int32_t font_size,
 																		 size_t cache_size)
 {
 	if((path == NULL && data == NULL) || 0 >= font_size) {
@@ -235,24 +260,24 @@ err_after_dsc:
 	return NULL;
 }
 #if EG_TINY_TTF_FILE_SUPPORT
-EG_Font_t *lv_tiny_ttf_create_file_ex(const char *path, EG_Coord_t font_size, size_t cache_size)
+EG_Font_t *lv_tiny_ttf_create_file_ex(const char *path, int32_t font_size, size_t cache_size)
 {
 	return lv_tiny_ttf_create(path, NULL, 0, font_size, cache_size);
 }
-EG_Font_t *lv_tiny_ttf_create_file(const char *path, EG_Coord_t font_size)
+EG_Font_t *lv_tiny_ttf_create_file(const char *path, int32_t font_size)
 {
 	return lv_tiny_ttf_create_file_ex(path, font_size, 4096);
 }
 #endif /*EG_TINY_TTF_FILE_SUPPORT*/
-EG_Font_t *lv_tiny_ttf_create_data_ex(const void *data, size_t data_size, EG_Coord_t font_size, size_t cache_size)
+EG_Font_t *lv_tiny_ttf_create_data_ex(const void *data, size_t data_size, int32_t font_size, size_t cache_size)
 {
 	return lv_tiny_ttf_create(NULL, data, data_size, font_size, cache_size);
 }
-EG_Font_t *lv_tiny_ttf_create_data(const void *data, size_t data_size, EG_Coord_t font_size)
+EG_Font_t *lv_tiny_ttf_create_data(const void *data, size_t data_size, int32_t font_size)
 {
 	return lv_tiny_ttf_create_data_ex(data, data_size, font_size, 4096);
 }
-void lv_tiny_ttf_set_size(EG_Font_t *font, EG_Coord_t font_size)
+void lv_tiny_ttf_set_size(EG_Font_t *font, int32_t font_size)
 {
 	if(font_size <= 0) {
 		EG_LOG_ERROR("invalid font size: %" PRIx32, font_size);
@@ -262,8 +287,8 @@ void lv_tiny_ttf_set_size(EG_Font_t *font, EG_Coord_t font_size)
 	dsc->scale = stbtt_ScaleForMappingEmToPixels(&dsc->info, font_size);
 	int line_gap = 0;
 	stbtt_GetFontVMetrics(&dsc->info, &dsc->ascent, &dsc->descent, &line_gap);
-	font->LineHeight = (EG_Coord_t)(dsc->scale * (dsc->ascent - dsc->descent + line_gap));
-	font->BaseLine = (EG_Coord_t)(dsc->scale * (line_gap - dsc->descent));
+	font->LineHeight = (int32_t)(dsc->scale * (dsc->ascent - dsc->descent + line_gap));
+	font->BaseLine = (int32_t)(dsc->scale * (line_gap - dsc->descent));
 }
 void lv_tiny_ttf_destroy(EG_Font_t *font)
 {

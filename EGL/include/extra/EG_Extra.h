@@ -17,18 +17,17 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #pragma once
 
 #include "./layouts/EG_Layouts.h"
-#include "./libs/lv_libs.h"
+#include "./libs/EG_Libs.h"
 #include "./others/EG_Others.h"
 #include "./themes/EG_Themes.h"
-#include "./widgets/EG_Widgets.h"
-
 
 void EG_InitialiseExtra(void);
 

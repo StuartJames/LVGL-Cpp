@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -74,7 +75,7 @@ EG_Result_t Result = EG_RES_INVALID;
 
 	EG_ZeroMem(pHeader, sizeof(EG_ImageHeader_t));
 	if(pSource == nullptr) return EG_RES_INVALID;
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 	if(SourceType == EG_IMG_SRC_VARIABLE) {
 		const EGImageBuffer *pImageBuffer = (EGImageBuffer*)pSource;
 		if(pImageBuffer->m_pData == nullptr) return EG_RES_INVALID;
@@ -93,7 +94,7 @@ EG_Result_t Result = EG_RES_INVALID;
 EG_Result_t EGImageDecoder::Open(ImageDecoderDescriptor_t *pDescriptor, const void *pSource, EG_Color_t Color, int32_t FrameIndex)
 {
 	if(pSource == nullptr) return EG_RES_INVALID;
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 	if(SourceType == EG_IMG_SRC_VARIABLE) {
 		const EGImageBuffer *pImageBuffer = (EGImageBuffer*)pSource;
 		if(pImageBuffer->m_pData == nullptr) return EG_RES_INVALID;
@@ -143,7 +144,7 @@ void EGImageDecoder::Close(ImageDecoderDescriptor_t *pDescriptor)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGImageDecoder::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGImageDecoder::ReadLine(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y, int32_t Length, uint8_t *pBuffer)
 {
   return EG_RES_INVALID;
 }
@@ -160,7 +161,7 @@ EGDecoderBuiltIn::EGDecoderBuiltIn(void)
 
 EG_Result_t EGDecoderBuiltIn::Info(const void *pSource, EG_ImageHeader_t *pHeader)
 {
-	EG_ImageSource_t SourceType = EGDrawImage::GetType(pSource);
+	EG_ImageSource_e SourceType = EGDrawImage::GetType(pSource);
 	if(SourceType == EG_IMG_SRC_VARIABLE) {
 		EG_ImageColorFormat_t ColorFormat = (EG_ImageColorFormat_t)((EGImageBuffer *)pSource)->m_Header.ColorFormat;
 		if(ColorFormat < CF_BUILT_IN_FIRST || ColorFormat > CF_BUILT_IN_LAST) return EG_RES_INVALID;
@@ -188,7 +189,7 @@ EG_Result_t EGDecoderBuiltIn::Info(const void *pSource, EG_ImageHeader_t *pHeade
 		pHeader->Width = 1;
 		pHeader->Height = 1;
 		/* Symbols always have transparent parts. Important because of cover check in the draw
-         *function. The actual value doesn't matter because lv_draw_label will draw it */
+         *function. The actual value doesn't matter because EGLabel.Draw will draw it */
 		pHeader->ColorFormat = EG_COLOR_FORMAT_ALPHA_1BIT;
 	}
 	else {
@@ -302,7 +303,7 @@ EG_Result_t EGDecoderBuiltIn::Open(ImageDecoderDescriptor_t *pDescriptor)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGDecoderBuiltIn::ReadLine(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGDecoderBuiltIn::ReadLine(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y, int32_t Length, uint8_t *pBuffer)
 {
 	EG_Result_t Result = EG_RES_INVALID;
 
@@ -343,7 +344,7 @@ void EGDecoderBuiltIn::Close(ImageDecoderDescriptor_t *pDescriptor)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGDecoderBuiltIn::TrueColor(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y,	EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGDecoderBuiltIn::TrueColor(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y,	int32_t Length, uint8_t *pBuffer)
 {
 EG_FSResult_e Result;
 
@@ -367,7 +368,7 @@ EG_FSResult_e Result;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y, int32_t Length, uint8_t *pBuffer)
 {
 	const EG_OPA_t alpha1_opa_table[2] = {0, 255};          // Opacity mapping with BitsPerPixel = 1 (Just for compatibility)
 	const EG_OPA_t alpha2_opa_table[4] = {0, 85, 170, 255}; // Opacity mapping with BitsPerPixel = 2
@@ -376,7 +377,7 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 
 	// Simply fill the buffer with the Color. Later only the alpha value will be modified.
 	EG_Color_t bg_color = pDescriptor->Color;
-	EG_Coord_t i;
+	int32_t i;
 	for(i = 0; i < Length; i++) {
 #if EG_COLOR_DEPTH == 8 || EG_COLOR_DEPTH == 1
 		pBuffer[i * EG_IMG_PX_SIZE_ALPHA_BYTE] = bg_color.full;
@@ -393,7 +394,7 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 	const EG_OPA_t *opa_table = nullptr;
 	uint8_t PixelSize = EGDrawImage::GetPixelSize((EG_ImageColorFormat_t)pDescriptor->Header.ColorFormat);
 	uint16_t mask = (1 << PixelSize) - 1; // E.g. PixelSize = 2; mask = 0x03
-	EG_Coord_t Width = 0;
+	int32_t Width = 0;
 	uint32_t ofs = 0;
 	int8_t pos = 0;
 	switch(pDescriptor->Header.ColorFormat) {
@@ -452,12 +453,12 @@ EG_Result_t EGDecoderBuiltIn::Alpha(ImageDecoderDescriptor_t *pDescriptor, EG_Co
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Result_t EGDecoderBuiltIn::Indexed(ImageDecoderDescriptor_t *pDescriptor, EG_Coord_t X, EG_Coord_t Y,EG_Coord_t Length, uint8_t *pBuffer)
+EG_Result_t EGDecoderBuiltIn::Indexed(ImageDecoderDescriptor_t *pDescriptor, int32_t X, int32_t Y,int32_t Length, uint8_t *pBuffer)
 {
 	uint8_t PixelSize = EGDrawImage::GetPixelSize((EG_ImageColorFormat_t)pDescriptor->Header.ColorFormat);
 	uint16_t mask = (1 << PixelSize) - 1; // E.g. PixelSize = 2; mask = 0x03
 
-	EG_Coord_t Width = 0;
+	int32_t Width = 0;
 	int8_t pos = 0;
 	uint32_t ofs = 0;
 	switch(pDescriptor->Header.ColorFormat) {
@@ -498,7 +499,7 @@ EG_Result_t EGDecoderBuiltIn::Indexed(ImageDecoderDescriptor_t *pDescriptor, EG_
 		m_File.Read(fs_buf, Width, nullptr);
 		data_tmp = fs_buf;
 	}
-	for(EG_Coord_t i = 0; i < Length; i++) {
+	for(int32_t i = 0; i < Length; i++) {
 		uint8_t val_act = (*data_tmp >> pos) & mask;
 
 		EG_Color_t Color = m_pPalette[val_act];

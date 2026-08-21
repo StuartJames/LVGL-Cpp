@@ -1,30 +1,31 @@
 /*
- *        Copyright (Center) 2025-2026 HydraSystems..
+ *                EGL 2025-2026 HydraSystems.
  *
- *  This program is free software; you can redistribute it and/or   
- *  modify it under the terms of the GNU General Public License as  
- *  published by the Free Software Foundation; either version 2 of  
- *  the License, or (at your option) any later version.             
- *                                                                  
- *  This program is distributed in the hope that it will be useful, 
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of  
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   
- *  GNU General Public License for more details.                    
- * 
- *  Based on Rect design by LVGL Kft
- * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  Based on a design by LVGL Kft
+ *
  * =====================================================================
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= ===========================================
- * SJ    2025/08/18   1.Rect.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
 #include "widgets/EG_Canvas.h"
 #include "misc/EG_Assert.h"
 #include "misc/EG_Math.h"
-#include "draw/EG_DrawContext.h"
+#include "draw/EG_DeviceContext.h"
 #include "core/EG_Refresh.h"
 
 #if EG_USE_CANVAS != 0
@@ -51,7 +52,7 @@ const EG_ClassType_t c_CanvasClass = {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EGCanvas::EGCanvas(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_LedClass*/) : EGObject()
+EGCanvas::EGCanvas(EGObject *pParent, const EG_ClassType_t *pClassCnfg /*= &c_CanvasClass*/) : EGObject()
 {
 	m_ImageBuffer.m_Header.AlwaysZero = 0;
 	m_ImageBuffer.m_Header.ColorFormat = EG_COLOR_FORMAT_NATIVE;
@@ -85,7 +86,7 @@ void EGCanvas::Configure(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::SetBuffer(void *pBuffer, EG_Coord_t Width, EG_Coord_t Height, EG_ImageColorFormat_t ColorFormat)
+void EGCanvas::SetBuffer(void *pBuffer, int32_t Width, int32_t Height, EG_ImageColorFormat_t ColorFormat)
 {
 	EG_ASSERT_NULL(pBuffer);
 	m_ImageBuffer.m_Header.ColorFormat = ColorFormat;
@@ -97,7 +98,7 @@ void EGCanvas::SetBuffer(void *pBuffer, EG_Coord_t Width, EG_Coord_t Height, EG_
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::SetPixelColor(EG_Coord_t X, EG_Coord_t Y, EG_Color_t Color)
+void EGCanvas::SetPixelColor(int32_t X, int32_t Y, EG_Color_t Color)
 {
 	m_ImageBuffer.SetPixelColor(X, Y, Color);
 	Invalidate();
@@ -105,7 +106,7 @@ void EGCanvas::SetPixelColor(EG_Coord_t X, EG_Coord_t Y, EG_Color_t Color)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::SetPixelOPA(EG_Coord_t X, EG_Coord_t Y, EG_OPA_t OPA)
+void EGCanvas::SetPixelOPA(int32_t X, int32_t Y, EG_OPA_t OPA)
 {
 	m_ImageBuffer.SetPixelAlpha(X, Y, OPA);
 	Invalidate();
@@ -121,7 +122,7 @@ void EGCanvas::SetPalette(uint8_t ID, EG_Color_t Color)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-EG_Color_t EGCanvas::GetPixel(EG_Coord_t X, EG_Coord_t Y)
+EG_Color_t EGCanvas::GetPixel(int32_t X, int32_t Y)
 {
 	EG_Color_t Color = GetStyleImageRecolor(EG_PART_MAIN);
 	return m_ImageBuffer.GetPixelColor(X, Y, Color);
@@ -136,18 +137,18 @@ EGImageBuffer* EGCanvas::GetImage(void)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::CopyBuffer(const void *pDest, EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t Height)
+void EGCanvas::CopyBuffer(const void *pDest, int32_t X, int32_t Y, int32_t Width, int32_t Height)
 {
 	EG_ASSERT_NULL(pDest);
-	if(X + Width - 1 >= (EG_Coord_t)m_ImageBuffer.m_Header.Width || Y + Height - 1 >= (EG_Coord_t)m_ImageBuffer.m_Header.Height) {
-		EG_LOG_WARN("lv_canvas_copy_buf: X or Y out of the canvas");
+	if(X + Width - 1 >= (int32_t)m_ImageBuffer.m_Header.Width || Y + Height - 1 >= (int32_t)m_ImageBuffer.m_Header.Height) {
+		EG_LOG_WARN("EGCanvas::CopyBuffer: X or Y out of the canvas");
 		return;
 	}
 
 	uint32_t px_size = EGDrawImage::GetPixelSize((EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat) >> 3;
 	uint32_t px = m_ImageBuffer.m_Header.Width * Y * px_size + X * px_size;
 	uint8_t *to_copy8 = (uint8_t *)pDest;
-	EG_Coord_t i;
+	int32_t i;
 	for(i = 0; i < Height; i++) {
 		EG_CopyMem((void *)&m_ImageBuffer.m_pData[px], to_copy8, Width * px_size);
 		px += m_ImageBuffer.m_Header.Width * px_size;
@@ -157,7 +158,7 @@ void EGCanvas::CopyBuffer(const void *pDest, EG_Coord_t X, EG_Coord_t Y, EG_Coor
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::Transform(EGImageBuffer *pSource, int16_t Angle, uint16_t Zoom, EG_Coord_t OffsetX, EG_Coord_t OffsetY,
+void EGCanvas::Transform(EGImageBuffer *pSource, int16_t Angle, uint16_t Zoom, int32_t OffsetX, int32_t OffsetY,
 												 int32_t PivotX, int32_t PivotY, bool Antialias)
 {
 #if EG_DRAW_COMPLEX
@@ -227,16 +228,16 @@ void EGCanvas::BlurHorizontal(const EGRect *pRect, uint16_t Radius)
 	uint16_t FrontRadius = Radius / 2;
 	if((Radius & 0x1) == 0) BackRadius--;
 	bool HasAlpha = EGDrawImage::HasAlpha((EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
-	EG_Coord_t LineWidth = m_ImageBuffer.CalculateBufferSize(m_ImageBuffer.m_Header.Width, 1, (EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
+	int32_t LineWidth = m_ImageBuffer.CalculateBufferSize(m_ImageBuffer.m_Header.Width, 1, (EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
 	EGImageBuffer LineBuffer;
 	LineBuffer.m_pData = (uint8_t *)EG_GetBufferMem(LineWidth);
 	LineBuffer.m_Header.AlwaysZero = 0;
 	LineBuffer.m_Header.Width = m_ImageBuffer.m_Header.Width;
 	LineBuffer.m_Header.Height = 1;
 	LineBuffer.m_Header.ColorFormat = m_ImageBuffer.m_Header.ColorFormat;
-	EG_Coord_t X;
-	EG_Coord_t Y;
-	EG_Coord_t SafeX;
+	int32_t X;
+	int32_t Y;
+	int32_t SafeX;
 	for(Y = Rect.GetY1(); Y <= Rect.GetY2(); Y++) {
 		uint32_t asum = 0;
 		uint32_t rsum = 0;
@@ -324,16 +325,16 @@ void EGCanvas::BlurVertical(const EGRect *pRect, uint16_t Radius)
 	uint16_t FrontRadius = Radius / 2;
 	if((Radius & 0x1) == 0) BackRadius--;
 	bool HasAlpha = EGDrawImage::HasAlpha((EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
-	EG_Coord_t ColumnWidth = m_ImageBuffer.CalculateBufferSize(1, m_ImageBuffer.m_Header.Height, (EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
+	int32_t ColumnWidth = m_ImageBuffer.CalculateBufferSize(1, m_ImageBuffer.m_Header.Height, (EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
 	EGImageBuffer LineBuffer;
 	LineBuffer.m_pData = (uint8_t *)EG_GetBufferMem(ColumnWidth);
 	LineBuffer.m_Header.AlwaysZero = 0;
 	LineBuffer.m_Header.Width = 1;
 	LineBuffer.m_Header.Height = m_ImageBuffer.m_Header.Height;
 	LineBuffer.m_Header.ColorFormat = m_ImageBuffer.m_Header.ColorFormat;
-	EG_Coord_t X;
-	EG_Coord_t Y;
-	EG_Coord_t SafeY;
+	int32_t X;
+	int32_t Y;
+	int32_t SafeY;
 	for(X = Rect.GetX1(); X <= Rect.GetX2(); X++) {
 		uint32_t asum = 0;
 		uint32_t rsum = 0;
@@ -433,14 +434,14 @@ void EGCanvas::FillBackground(EG_Color_t Color, EG_OPA_t BlurOPA)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t Height, EGDrawRect *pDrawRect)
+void EGCanvas::DrawRect(int32_t X, int32_t Y, int32_t Width, int32_t Height, EGDrawRect *pDrawRect)
 {
 
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
 		EG_LOG_WARN("Canvas DrawRect: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
-	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
+	EGDisplay FakeDisplay;	// Create dummy display.
 	EGDisplayDriver DisplayDriver;
 	EGRect ClipRect;
 	InitFakeDisplay(&FakeDisplay, &DisplayDriver, &ClipRect);
@@ -459,13 +460,13 @@ void EGCanvas::DrawRect(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Width, EG_Coord_t
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t MaxWidth, EGDrawLabel * pDrawLabel, const char *pText)
+void EGCanvas::DrawText(int32_t X, int32_t Y, int32_t MaxWidth, EGDrawLabel * pDrawLabel, const char *pText)
 {
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
 		EG_LOG_WARN("Canvas DrawText: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
-	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
+	EGDisplay FakeDisplay;	// Create dummy display.
 	EGDisplayDriver DisplayDriver;
 	EGRect ClipRect;
 	InitFakeDisplay(&FakeDisplay, &DisplayDriver, &ClipRect);
@@ -480,7 +481,7 @@ void EGCanvas::DrawText(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t MaxWidth, EGDrawL
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDrawImage * pDrawImage)
+void EGCanvas::DrawImage(int32_t X, int32_t Y, const void *pSource, EGDrawImage * pDrawImage)
 {
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
 		EG_LOG_WARN("Canvas DrawImage: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
@@ -492,7 +493,7 @@ void EGCanvas::DrawImage(EG_Coord_t X, EG_Coord_t Y, const void *pSource, EGDraw
 		EG_LOG_WARN("Canvas DrawImage: Couldn't get the image data.");
 		return;
 	}
-	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
+	EGDisplay FakeDisplay;	// Create dummy display.
 	EGDisplayDriver DisplayDriver;
 	EGRect ClipRect;
 	InitFakeDisplay(&FakeDisplay, &DisplayDriver, &ClipRect);
@@ -513,7 +514,7 @@ void EGCanvas::DrawLine(const EGPoint Points[], uint32_t PointCount, EGDrawLine 
 		EG_LOG_WARN("Canvas DrawLine: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
-	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
+	EGDisplay FakeDisplay;	// Create dummy display.
 	EGDisplayDriver DisplayDriver;
 	EGRect ClipRect;
 	InitFakeDisplay(&FakeDisplay, &DisplayDriver, &ClipRect);
@@ -539,7 +540,7 @@ void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawPo
 		EG_LOG_WARN("Canvas DrawPolygon: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
-	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
+	EGDisplay FakeDisplay;	// Create dummy display.
 	EGDisplayDriver DisplayDriver;
 	EGRect ClipRect;
 	InitFakeDisplay(&FakeDisplay, &DisplayDriver, &ClipRect);
@@ -557,14 +558,14 @@ void EGCanvas::DrawPolygon(const EGPoint Points[], uint32_t PointCount, EGDrawPo
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void EGCanvas::DrawArc(EG_Coord_t X, EG_Coord_t Y, EG_Coord_t Radius, int32_t StartAngle, int32_t EndAngle, EGDrawArc *pDrawArc)
+void EGCanvas::DrawArc(int32_t X, int32_t Y, int32_t Radius, int32_t StartAngle, int32_t EndAngle, EGDrawArc *pDrawArc)
 {
 #if EG_DRAW_COMPLEX
 	if(m_ImageBuffer.m_Header.ColorFormat >= EG_COLOR_FORMAT_INDEXED_1BIT && m_ImageBuffer.m_Header.ColorFormat <= EG_COLOR_FORMAT_INDEXED_8BIT) {
 		EG_LOG_WARN("Canvas DrawArc: can't draw to EG_COLOR_FORMAT_INDEXED canvas");
 		return;
 	}
-	EGDisplay FakeDisplay;	// Create dummy display to fool the lv_draw function.
+	EGDisplay FakeDisplay;	// Create dummy display.
 	EGDisplayDriver DisplayDriver;
 	EGRect ClipRect;
 	InitFakeDisplay(&FakeDisplay, &DisplayDriver, &ClipRect);
@@ -595,13 +596,13 @@ void EGCanvas::InitFakeDisplay(EGDisplay *pDisplay, EGDisplayDriver *pDriver, EG
 	pDisplay->InitialiseDriver(pDisplay->m_pDriver);
 	pDisplay->m_pDriver->m_HorizontalRes = m_ImageBuffer.m_Header.Width;
 	pDisplay->m_pDriver->m_VerticalRes = m_ImageBuffer.m_Header.Height;
-	EGSoftContext *pContext =  new EGSoftContext;
-	if(pContext == nullptr) return;
-	pContext->InitialiseContext();
-	pDisplay->m_pDriver->m_pContext = pContext;
-	pContext->m_pClipRect = ClipRect;
-	pContext->m_pDrawRect = ClipRect;
-	pContext->m_pDrawBuffer = (void*)m_ImageBuffer.m_pData;
+	EGSoftContext *pDC =  new EGSoftContext;
+	if(pDC == nullptr) return;
+	pDC->InitialiseContext();
+	pDisplay->m_pDriver->m_pContext = pDC;
+	pDC->m_pClipRect = ClipRect;
+	pDC->m_pDrawRect = ClipRect;
+	pDC->m_pDrawBuffer = (void*)m_ImageBuffer.m_pData;
 	pDisplay->UseGenericSetPixelCB(pDisplay->m_pDriver, (EG_ImageColorFormat_t)m_ImageBuffer.m_Header.ColorFormat);
 	if(EG_COLOR_SCREEN_TRANSP && m_ImageBuffer.m_Header.ColorFormat != EG_COLOR_FORMAT_NATIVE_ALPHA) {
 		pDriver->m_ScreenTransparent = 0;

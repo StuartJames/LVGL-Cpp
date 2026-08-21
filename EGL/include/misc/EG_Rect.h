@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -34,7 +35,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum EG_AlignType_e{
+enum EG_AlignType_e{
   EG_ALIGN_DEFAULT = 0,       // (00)
   EG_ALIGN_TOP_LEFT,          // (01)
   EG_ALIGN_TOP_MID,           // (02)
@@ -57,18 +58,18 @@ typedef enum EG_AlignType_e{
   EG_ALIGN_OUT_RIGHT_TOP,     // (19)
   EG_ALIGN_OUT_RIGHT_MID,     // (20)
   EG_ALIGN_OUT_RIGHT_BOTTOM,  // (21)
-} EG_AlignType_e;
+};
 
-typedef enum : uint8_t{
+enum EG_DirType_e{
 	EG_DIR_NONE   = 0x00,
-	EG_DIR_LEFT   = (1 << 0),
-	EG_DIR_RIGHT  = (1 << 1),
-	EG_DIR_TOP    = (1 << 2),
-	EG_DIR_BOTTOM = (1 << 3),
+	EG_DIR_LEFT   = 0x01,
+	EG_DIR_RIGHT  = 0x02,
+	EG_DIR_TOP    = 0x04,
+	EG_DIR_BOTTOM = 0x08,
 	EG_DIR_HOR    = EG_DIR_LEFT | EG_DIR_RIGHT,
 	EG_DIR_VER    = EG_DIR_TOP | EG_DIR_BOTTOM,
 	EG_DIR_ALL    = EG_DIR_HOR | EG_DIR_VER,
-} EG_DirType_e;
+};
 
 typedef uint8_t EG_DirType_t;
 
@@ -80,55 +81,58 @@ public:
                       EGRect(void);
 	                    EGRect(const EGRect &InRect);
 	                    EGRect(const EGRect *pInRect);
-	                    EGRect(EG_Coord_t x1, EG_Coord_t y1, EG_Coord_t x2, EG_Coord_t y2);
+	                    EGRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2);
   void                Zero(void);
-	void                Set(EG_Coord_t x1, EG_Coord_t y1, EG_Coord_t x2, EG_Coord_t y2);
-	void                SetWidth(EG_Coord_t w);
-	void                SetHeight(EG_Coord_t h);
-	void                SetPosition(EG_Coord_t x, EG_Coord_t y);
+	void                Set(int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+	void                SetWidth(int32_t w);
+	void                SetHeight(int32_t h);
+	void                SetPosition(int32_t x, int32_t y);
 	uint32_t            GetSize(void) const;
-  EG_Coord_t          GetWidth(void) const; 
-  EG_Coord_t          GetHeight(void) const;
-  EG_Coord_t          GetMinAxis(void) const;
-  EG_Coord_t          GetMaxAxis(void) const;
+  int32_t             GetWidth(void) const;
+  int32_t             GetHeight(void) const;
+  int32_t             GetMinAxis(void) const;
+  int32_t             GetMaxAxis(void) const;
+  EGPoint             GetOffset(const EGRect *pRect) const;
   EGPoint             BottomLeft(void) const;
   EGPoint             TopRight(void) const;
   EGPoint             Center(void) const;
   void                Copy(EGRect *pDest) const;
-	void                Inflate(EG_Coord_t Width, EG_Coord_t Height);
-	void                Inflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord_t Bottom);
-	void                Deflate(EG_Coord_t Width, EG_Coord_t Height);
-	void                Deflate(EG_Coord_t Left, EG_Coord_t Right, EG_Coord_t Top, EG_Coord_t Bottom);
-	void                Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY);
-	void                Move(EG_Coord_t OffsetX, EG_Coord_t OffsetY, EG_Coord_t OffsetX2, EG_Coord_t OffsetY2);
+	void                Inflate(const EGRect *pInRect);
+	void                Inflate(int32_t Width, int32_t Height);
+	void                Inflate(int32_t Left, int32_t Right, int32_t Top, int32_t Bottom);
+	void                Deflate(int32_t Width, int32_t Height);
+	void                Deflate(int32_t Left, int32_t Right, int32_t Top, int32_t Bottom);
+	void                Move(int32_t OffsetX, int32_t OffsetY);
+	void                Move(int32_t OffsetX, int32_t OffsetY, int32_t OffsetX2, int32_t OffsetY2);
   void                Normalise(void);
 	bool                Intersect(const EGRect *pRect);
 	bool                Intersect(const EGRect *pRectA, const EGRect *pRectB);
 	void                Join(EGRect *pJoined, const EGRect *pRect);
-	bool                IsPointIn(const EGPoint *pPoint, EG_Coord_t Radius) const;
+	bool                IsPointIn(const EGPoint *pPoint, int32_t Radius) const;
 	bool                IsOn(const EGRect *pRect) const;
-	bool                IsInside(const EGRect *pRect, EG_Coord_t Radius) const;
-	bool                IsOutside(const EGRect *pRect, EG_Coord_t Radius) const;
-	bool                IsEqualTo(const EGRect *a, const EGRect *b);
+	bool                IsInside(const EGRect *pRect, int32_t Radius) const;
+	bool                IsOutside(const EGRect *pRect, int32_t Radius) const;
+	bool                IsEqualTo(const EGRect *pRect);
 	int8_t              Difference(EGRect *pResult, const EGRect *pRect);
-	void                Align(EGRect *pRectToAlign, EG_AlignType_e AlignType, EG_Coord_t OffsetX, EG_Coord_t OffsetY);
-  void                SetX1(EG_Coord_t x){ m_X1 = x; };
-  void                SetY1(EG_Coord_t y){ m_Y1 = y; };
-  void                SetX2(EG_Coord_t x){ m_X2 = x; };
-  void                SetY2(EG_Coord_t y){ m_Y2 = y; };
-  EG_Coord_t          GetX1() const { return m_X1;};
-  EG_Coord_t          GetY1() const { return m_Y1;};
-  EG_Coord_t          GetX2() const { return m_X2;};
-  EG_Coord_t          GetY2() const { return m_Y2;};
-  void                IncX1(EG_Coord_t n){ m_X1 += n;};
-  void                IncY1(EG_Coord_t n){ m_Y1 += n;};
-  void                IncX2(EG_Coord_t n){ m_X2 += n;};
-  void                IncY2(EG_Coord_t n){ m_Y2 += n;};
-  void                DecX1(EG_Coord_t n){ m_X1 -= n;};
-  void                DecY1(EG_Coord_t n){ m_Y1 -= n;};
-  void                DecX2(EG_Coord_t n){ m_X2 -= n;};
-  void                DecY2(EG_Coord_t n){ m_Y2 -= n;};
+	void                Align(EGRect *pRectToAlign, EG_AlignType_e AlignType, int32_t OffsetX, int32_t OffsetY) const;
+  void                SetX1(int32_t x){ m_X1 = x; };
+  void                SetY1(int32_t y){ m_Y1 = y; };
+  void                SetX2(int32_t x){ m_X2 = x; };
+  void                SetY2(int32_t y){ m_Y2 = y; };
+  int32_t             GetX1() const { return m_X1;};
+  int32_t             GetY1() const { return m_Y1;};
+  int32_t             GetX2() const { return m_X2;};
+  int32_t             GetY2() const { return m_Y2;};
+  void                IncX1(int32_t n){ m_X1 += n;};
+  void                IncY1(int32_t n){ m_Y1 += n;};
+  void                IncX2(int32_t n){ m_X2 += n;};
+  void                IncY2(int32_t n){ m_Y2 += n;};
+  void                DecX1(int32_t n){ m_X1 -= n;};
+  void                DecY1(int32_t n){ m_Y1 -= n;};
+  void                DecX2(int32_t n){ m_X2 -= n;};
+  void                DecY2(int32_t n){ m_Y2 -= n;};
   void                operator = (const EGRect &rval);
+  bool                operator == (const EGRect &rval);
 	void                operator += (const EGRect rval);
 	void                operator -= (const EGRect rval);
 	void                operator++ (void);
@@ -137,17 +141,17 @@ public:
 private:
   bool                PointWithinCircle(const EGPoint *pPoint);
 
-  EG_Coord_t          m_X1;
-	EG_Coord_t          m_Y1;
-	EG_Coord_t          m_X2;
-	EG_Coord_t          m_Y2;
+  int32_t             m_X1;
+	int32_t             m_Y1;
+	int32_t             m_X2;
+	int32_t             m_Y2;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
 
-// Convert a percentage value to `EG_Coord_t`.
+// Convert a percentage value to `int32_t`.
 // Percentage values are stored in special range
-inline EG_Coord_t EG_PCT(EG_Coord_t x)
+inline int32_t EG_PCT(int32_t x)
 {
 	return _EG_PCT(x);
 }
@@ -164,16 +168,23 @@ inline void EGRect::Copy(EGRect *pRect) const
 
 //////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EGRect::GetWidth(void) const
+inline int32_t EGRect::GetWidth(void) const
 {
 	return (m_X2 - m_X1 + 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EGRect::GetHeight(void) const
+inline int32_t EGRect::GetHeight(void) const
 {
 	return (m_Y2 - m_Y1 + 1);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+inline EGPoint EGRect::GetOffset(const EGRect *pRect) const
+{
+	return EGPoint(m_X1 - pRect->m_X1, m_Y1 - pRect->m_Y1);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -198,14 +209,14 @@ inline EGPoint EGRect::Center(void) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EGRect::GetMinAxis(void) const
+inline int32_t EGRect::GetMinAxis(void) const
 {
   return EG_MIN(m_X2 - m_X1, m_Y2 - m_Y1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline EG_Coord_t EGRect::GetMaxAxis(void) const
+inline int32_t EGRect::GetMaxAxis(void) const
 {
   return EG_MAX(m_X2 - m_X1, m_Y2 - m_Y1);
 }

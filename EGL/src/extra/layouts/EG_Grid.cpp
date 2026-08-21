@@ -17,7 +17,8 @@
  *
  * Edit     Date     Version       Edit Description
  * ====  ==========  ======= =====================================================
- * SJ    2025/08/18   1.a.1    Original by LVGL Kft
+ * SJ    2025/08/18   8.4.0    Original by LVGL Kft
+ * SJ    2026/07/20   8.6.0    Modified file layoout & class naming
  *
  */
 
@@ -91,7 +92,7 @@ void EGGridLayout::Clear(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGGridLayout::SetObjGridParams(EGObject *pObj, const EG_Coord_t ColumnProps[], const EG_Coord_t RowProps[])
+void EGGridLayout::SetObjGridParams(EGObject *pObj, const int32_t ColumnProps[], const int32_t RowProps[])
 {
 	SetObjStyleColumnParams(pObj, ColumnProps, 0);
 	SetObjStyleRowParams(pObj, RowProps, 0);
@@ -123,7 +124,7 @@ void EGGridLayout::SetObjCell(EGObject *pObj, EG_GridAlign_e AlignX, uint8_t Col
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGGridLayout::SetStyleRowParams(EGStyle *pStyle, const EG_Coord_t Value[])
+void EGGridLayout::SetStyleRowParams(EGStyle *pStyle, const int32_t Value[])
 {
 EG_StyleValue_t v = {
 	.pPtr = (const void *)Value
@@ -134,7 +135,7 @@ EG_StyleValue_t v = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGGridLayout::SetStyleColumnParams(EGStyle *pStyle, const EG_Coord_t Value[])
+void EGGridLayout::SetStyleColumnParams(EGStyle *pStyle, const int32_t Value[])
 {
 EG_StyleValue_t v = {
 	.pPtr = (const void *)Value
@@ -233,7 +234,7 @@ EG_StyleValue_t v = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGGridLayout::SetObjStyleRowParams(EGObject *pObj, const EG_Coord_t Value[], EG_StyleFlags_t SelectFlags)
+void EGGridLayout::SetObjStyleRowParams(EGObject *pObj, const int32_t Value[], EG_StyleFlags_t SelectFlags)
 {
 EG_StyleValue_t v = {
 	.pPtr = (const void *)Value
@@ -244,7 +245,7 @@ EG_StyleValue_t v = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void EGGridLayout::SetObjStyleColumnParams(EGObject *pObj, const EG_Coord_t Value[], EG_StyleFlags_t SelectFlags)
+void EGGridLayout::SetObjStyleColumnParams(EGObject *pObj, const int32_t Value[], EG_StyleFlags_t SelectFlags)
 {
 EG_StyleValue_t v = {
 	.pPtr = (const void *)Value
@@ -348,16 +349,16 @@ void EGGridLayout::UpdateCB(EGObject *pObj, void *pUserData)
 EGGridLayout Grid;
 
 	EG_LOG_INFO("update %p content", (void *)pObj);
-//	const EG_Coord_t *pColumnParams = Grid.GetColumnParams(pObj);
-//	const EG_Coord_t *pRowParams = Grid.GetRowParams(pObj);
+//	const int32_t *pColumnParams = Grid.GetColumnParams(pObj);
+//	const int32_t *pRowParams = Grid.GetRowParams(pObj);
 //	if(pColumnParams == nullptr || pRowParams == nullptr) return;
 	Grid.Calculate(pObj);
 	EGPoint GridPosition;
 	// Calculate the grids absolute x and y coordinates. It will be used as helper during item
   // repositioning to avoid calculating this value for every child
-	EG_Coord_t BorderWidth = pObj->GetStyleBorderWidth(EG_PART_MAIN);
-	EG_Coord_t LeftPadding = pObj->GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
-	EG_Coord_t TopPadding = pObj->GetStylePadTop(EG_PART_MAIN) + BorderWidth;
+	int32_t BorderWidth = pObj->GetStyleBorderWidth(EG_PART_MAIN);
+	int32_t LeftPadding = pObj->GetStylePadLeft(EG_PART_MAIN) + BorderWidth;
+	int32_t TopPadding = pObj->GetStylePadTop(EG_PART_MAIN) + BorderWidth;
 	GridPosition.m_X = LeftPadding + pObj->m_Rect.GetX1() - pObj->GetScrollX();
 	GridPosition.m_Y = TopPadding + pObj->m_Rect.GetY1() - pObj->GetScrollY();
 	for(uint32_t i = 0; i < pObj->m_pAttributes->ChildCount; i++) {
@@ -365,8 +366,8 @@ EGGridLayout Grid;
 		Grid.RepositionItem(pItem, &GridPosition);
 	}
 	Grid.FreeBuffers();
-	EG_Coord_t WidthSet = pObj->GetStyleWidth(EG_PART_MAIN);
-	EG_Coord_t HeightSet = pObj->GetStyleHeight(EG_PART_MAIN);
+	int32_t WidthSet = pObj->GetStyleWidth(EG_PART_MAIN);
+	int32_t HeightSet = pObj->GetStyleHeight(EG_PART_MAIN);
 	if(WidthSet == EG_SIZE_CONTENT || HeightSet == EG_SIZE_CONTENT) {
 		pObj->RefreshSize();
 	}
@@ -384,16 +385,16 @@ void EGGridLayout::Calculate(EGObject *pObj)
   }
 	CalculateRows(pObj);
 	CalculateColumns(pObj);
-	EG_Coord_t ColumnGap = pObj->GetStylePadColumn(EG_PART_MAIN);
-	EG_Coord_t RowGap = pObj->GetStylePadRow(EG_PART_MAIN);
+	int32_t ColumnGap = pObj->GetStylePadColumn(EG_PART_MAIN);
+	int32_t RowGap = pObj->GetStylePadRow(EG_PART_MAIN);
 	bool Reverse = pObj->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL ? true : false;
-	EG_Coord_t WidthSet = pObj->GetStyleWidth(EG_PART_MAIN);
-	EG_Coord_t HeightSet = pObj->GetStyleHeight(EG_PART_MAIN);
+	int32_t WidthSet = pObj->GetStyleWidth(EG_PART_MAIN);
+	int32_t HeightSet = pObj->GetStyleHeight(EG_PART_MAIN);
 	bool AutoWidth = ((WidthSet == EG_SIZE_CONTENT) && !pObj->m_WidthLayout) ? true : false;
-	EG_Coord_t ContentWidth = pObj->GetContentWidth();
+	int32_t ContentWidth = pObj->GetContentWidth();
 	m_GridWidth = GridAlign(ContentWidth, AutoWidth, GetColumnAlign(pObj), ColumnGap, m_ColumCount, m_pColumnWidths, m_pColumnPositions, Reverse);
 	bool AutoHeight = (HeightSet == EG_SIZE_CONTENT && !pObj->m_HeightLayout) ? true : false;
-	EG_Coord_t ContentHeight = pObj->GetContentHeight();
+	int32_t ContentHeight = pObj->GetContentHeight();
 	m_GridHeight = GridAlign(ContentHeight, AutoHeight, GetRowAlign(pObj), RowGap, m_RowCount, m_pRowHeights, m_pRowPositions, false);
 	EG_ASSERT_MEM_INTEGRITY();
 }
@@ -414,9 +415,9 @@ void EGGridLayout::CalculateColumns(EGObject *pObj)
 {
 uint32_t i;
 bool SubGrid = false;
-EG_Coord_t *pSubColumn;
+int32_t *pSubColumn = nullptr;
 
-	const EG_Coord_t *pColumnParams = GetColumnParams(pObj);
+	const int32_t *pColumnParams = GetColumnParams(pObj);
   if(pColumnParams == nullptr) {
     EGObject *pParent = pObj->GetParent();
     pColumnParams = GetColumnParams(pParent);
@@ -424,20 +425,20 @@ EG_Coord_t *pSubColumn;
       EG_LOG_WARN("No col descriptor found even on the parent");
       return;
     }
-    EG_Coord_t ColumnPosition = GetColumnPosition(pObj);
-    EG_Coord_t ColumnSpan = GetColumnSpan(pObj);
-    pSubColumn = (EG_Coord_t*)EG_AllocMem(sizeof(EG_Coord_t) * (ColumnSpan + 1));
-    EG_CopyMem(pSubColumn, &pColumnParams[ColumnPosition], sizeof(EG_Coord_t) * ColumnSpan);
+    int32_t ColumnPosition = GetColumnPosition(pObj);
+    int32_t ColumnSpan = GetColumnSpan(pObj);
+    pSubColumn = (int32_t*)EG_AllocMem(sizeof(int32_t) * (ColumnSpan + 1));
+    EG_CopyMem(pSubColumn, &pColumnParams[ColumnPosition], sizeof(int32_t) * ColumnSpan);
     pSubColumn[ColumnSpan] = EG_GRID_TEMPLATE_LAST;
     pColumnParams = pSubColumn;
     SubGrid = true;
   }
-	EG_Coord_t ContentWidth = pObj->GetContentWidth();
+	int32_t ContentWidth = pObj->GetContentWidth();
 	m_ColumCount = CountTracks(pColumnParams);
-	m_pColumnPositions = (EG_Coord_t*)EG_AllocMem(sizeof(EG_Coord_t) * m_ColumCount);
-	m_pColumnWidths = (EG_Coord_t*)EG_AllocMem(sizeof(EG_Coord_t) * m_ColumCount);
+	m_pColumnPositions = (int32_t*)EG_AllocMem(sizeof(int32_t) * m_ColumCount);
+	m_pColumnWidths = (int32_t*)EG_AllocMem(sizeof(int32_t) * m_ColumCount);
 	for(i = 0; i < m_ColumCount; i++) {    // Set sizes for CONTENT cells
-		EG_Coord_t Size = EG_COORD_MIN;
+		int32_t Size = EG_COORD_MIN;
 		if(IS_CONTENT(pColumnParams[i])) {
 			for(uint32_t j = 0; j < pObj->GetChildCount(); j++) {			// Check the Size of children of this cell
 				EGObject *pItem = pObj->GetChild(j);
@@ -451,9 +452,9 @@ EG_Coord_t *pSubColumn;
 		}
 	}
 	uint32_t ColumnFRCount = 0;
-	EG_Coord_t GridWidth = 0;
+	int32_t GridWidth = 0;
 	for(i = 0; i < m_ColumCount; i++) {
-		EG_Coord_t x = pColumnParams[i];
+		int32_t x = pColumnParams[i];
 		if(IS_FR(x)) {
 			ColumnFRCount += GET_FR(x);
 		}
@@ -465,14 +466,14 @@ EG_Coord_t *pSubColumn;
 			GridWidth += x;
 		}
 	}
-	EG_Coord_t ColumnGap = pObj->GetStylePadColumn(EG_PART_MAIN);
+	int32_t ColumnGap = pObj->GetStylePadColumn(EG_PART_MAIN);
 	ContentWidth -= ColumnGap * (m_ColumCount - 1);
-	EG_Coord_t FreeWidth = ContentWidth - GridWidth;
+	int32_t FreeWidth = ContentWidth - GridWidth;
 	if(FreeWidth < 0) FreeWidth = 0;
 	for(i = 0; i < m_ColumCount && ColumnFRCount; i++) {
-		EG_Coord_t x = pColumnParams[i];
+		int32_t x = pColumnParams[i];
 		if(IS_FR(x)) {
-			EG_Coord_t f = GET_FR(x);
+			int32_t f = GET_FR(x);
 			m_pColumnWidths[i] = DivRoundClosest(FreeWidth * f, ColumnFRCount);
       ColumnFRCount -= f;
       FreeWidth -= m_pColumnWidths[i]; 
@@ -487,9 +488,9 @@ void EGGridLayout::CalculateRows(EGObject *pObj)
 {
 uint32_t i;
 bool SubGrid = false;
-EG_Coord_t *pSubRow;
+int32_t *pSubRow = nullptr;
 
-	const EG_Coord_t *pRowParams = GetRowParams(pObj);
+	const int32_t *pRowParams = GetRowParams(pObj);
   if(pRowParams == nullptr) {
       EGObject *pParent = pObj->GetParent();
       pRowParams = GetRowParams(pParent);
@@ -497,19 +498,19 @@ EG_Coord_t *pSubRow;
           EG_LOG_WARN("No row descriptor found even on the parent");
           return;
       }
-      EG_Coord_t RowPosition = GetRowPosition(pObj);
-      EG_Coord_t RowSpan = GetRowSpan(pObj);
-      pSubRow = (EG_Coord_t*)EG_AllocMem(sizeof(EG_Coord_t) * (RowSpan + 1));
+      int32_t RowPosition = GetRowPosition(pObj);
+      int32_t RowSpan = GetRowSpan(pObj);
+      pSubRow = (int32_t*)EG_AllocMem(sizeof(int32_t) * (RowSpan + 1));
       EG_CopyMem(pSubRow, &pRowParams[RowPosition], sizeof(int32_t) * RowSpan);
       pSubRow[RowSpan] = EG_GRID_TEMPLATE_LAST;
       pRowParams = pSubRow;
       SubGrid = true;
   }
 	m_RowCount = CountTracks(pRowParams);
-	m_pRowPositions = (EG_Coord_t*)EG_AllocMem(sizeof(EG_Coord_t) * m_RowCount);
-	m_pRowHeights = (EG_Coord_t*)EG_AllocMem(sizeof(EG_Coord_t) * m_RowCount);
+	m_pRowPositions = (int32_t*)EG_AllocMem(sizeof(int32_t) * m_RowCount);
+	m_pRowHeights = (int32_t*)EG_AllocMem(sizeof(int32_t) * m_RowCount);
 	for(i = 0; i < m_RowCount; i++) {	// Set sizes for CONTENT cells
-		EG_Coord_t Size = EG_COORD_MIN;
+		int32_t Size = EG_COORD_MIN;
 		if(IS_CONTENT(pRowParams[i])) {
 			for(uint32_t j = 0; j < pObj->GetChildCount(); j++) {	// Check the Size of children of this cell
 				EGObject *pItem = pObj->GetChild(j);
@@ -523,9 +524,9 @@ EG_Coord_t *pSubRow;
 		}
 	}
 	uint32_t RowFRCount = 0;
-	EG_Coord_t GridHeight = 0;
+	int32_t GridHeight = 0;
 	for(i = 0; i < m_RowCount; i++) {
-		EG_Coord_t x = pRowParams[i];
+		int32_t x = pRowParams[i];
 		if(IS_FR(x)) {
 			RowFRCount += GET_FR(x);
 		}
@@ -537,14 +538,14 @@ EG_Coord_t *pSubRow;
 			GridHeight += x;
 		}
 	}
-	EG_Coord_t RowGap = pObj->GetStylePadRow(EG_PART_MAIN);
-	EG_Coord_t ContentHeight = pObj->GetContentHeight() - RowGap * (m_RowCount - 1);
-	EG_Coord_t FreeHeight = ContentHeight - GridHeight;
+	int32_t RowGap = pObj->GetStylePadRow(EG_PART_MAIN);
+	int32_t ContentHeight = pObj->GetContentHeight() - RowGap * (m_RowCount - 1);
+	int32_t FreeHeight = ContentHeight - GridHeight;
 	if(FreeHeight < 0) FreeHeight = 0;
 	for(i = 0; i < m_RowCount && RowFRCount; i++) {
-		EG_Coord_t x = pRowParams[i];
+		int32_t x = pRowParams[i];
 		if(IS_FR(x)) {
-			EG_Coord_t f = GET_FR(x);
+			int32_t f = GET_FR(x);
 			m_pRowHeights[i] = DivRoundClosest(FreeHeight * f, RowFRCount);
       RowFRCount -= f;
       FreeHeight -= m_pRowHeights[i]; 
@@ -565,19 +566,19 @@ void EGGridLayout::RepositionItem(EGObject *pItem, EGPoint *pGridPosition)
 	uint32_t RowPosition = GetRowPosition(pItem);
 	EG_GridAlign_e ColumnAlign = (EG_GridAlign_e)GetCellColumnAlign(pItem);
 	EG_GridAlign_e RowAlign = (EG_GridAlign_e)GetCellRowAlign(pItem);
-	EG_Coord_t ColumnLeft = m_pColumnPositions[ColumnPosition];
-	EG_Coord_t ColumnRight = m_pColumnPositions[ColumnPosition + ColumnSpan - 1] + m_pColumnWidths[ColumnPosition + ColumnSpan - 1];
-	EG_Coord_t ColumnWidth = ColumnRight - ColumnLeft;
-	EG_Coord_t RowTop = m_pRowPositions[RowPosition];
-	EG_Coord_t RowBottom = m_pRowPositions[RowPosition + RowSpan - 1] + m_pRowHeights[RowPosition + RowSpan - 1];
-	EG_Coord_t RowHeight = RowBottom - RowTop;
+	int32_t ColumnLeft = m_pColumnPositions[ColumnPosition];
+	int32_t ColumnRight = m_pColumnPositions[ColumnPosition + ColumnSpan - 1] + m_pColumnWidths[ColumnPosition + ColumnSpan - 1];
+	int32_t ColumnWidth = ColumnRight - ColumnLeft;
+	int32_t RowTop = m_pRowPositions[RowPosition];
+	int32_t RowBottom = m_pRowPositions[RowPosition + RowSpan - 1] + m_pRowHeights[RowPosition + RowSpan - 1];
+	int32_t RowHeight = RowBottom - RowTop;
  	if(pItem->GetStyleBaseDirection(EG_PART_MAIN) == EG_BASE_DIR_RTL) {	//If the pItem has RTL base dir switch start and end
 		if(ColumnAlign == EG_GRID_ALIGN_START) ColumnAlign = EG_GRID_ALIGN_END;
 		else if(ColumnAlign == EG_GRID_ALIGN_END)	ColumnAlign = EG_GRID_ALIGN_START;
 	}
-	EG_Coord_t x, y;
-	EG_Coord_t ItemWidth = pItem->GetWidth();
-	EG_Coord_t ItemHeight = pItem->GetHeight();
+	int32_t x, y;
+	int32_t ItemWidth = pItem->GetWidth();
+	int32_t ItemHeight = pItem->GetHeight();
 	switch(ColumnAlign) {
 		default:
 		case EG_GRID_ALIGN_START:
@@ -627,14 +628,14 @@ void EGGridLayout::RepositionItem(EGObject *pItem, EGPoint *pGridPosition)
 		EGEvent::EventSend(pItem, EG_EVENT_SIZE_CHANGED, &Rect);
 		EGEvent::EventSend(pItem->GetParent(), EG_EVENT_CHILD_CHANGED, pItem);
 	}
-	EG_Coord_t TrackX = pItem->GetStyleTranslateX(EG_PART_MAIN);	// Handle percentage value of translate
-	EG_Coord_t TrackY = pItem->GetStyleTranslateY(EG_PART_MAIN);
+	int32_t TrackX = pItem->GetStyleTranslateX(EG_PART_MAIN);	// Handle percentage value of translate
+	int32_t TrackY = pItem->GetStyleTranslateY(EG_PART_MAIN);
 	if(EG_COORD_IS_PCT(TrackX)) TrackX = (pItem->GetWidth() * EG_COORD_GET_PCT(TrackX)) / 100;
 	if(EG_COORD_IS_PCT(TrackY)) TrackY = (pItem->GetHeight() * EG_COORD_GET_PCT(TrackY)) / 100;
 	x += TrackX;
 	y += TrackY;
-	EG_Coord_t DiffX = pGridPosition->m_X + x - pItem->m_Rect.GetX1();
-	EG_Coord_t DiffY = pGridPosition->m_Y + y - pItem->m_Rect.GetY1();
+	int32_t DiffX = pGridPosition->m_X + x - pItem->m_Rect.GetX1();
+	int32_t DiffY = pGridPosition->m_Y + y - pItem->m_Rect.GetY1();
 	if(DiffX || DiffY) {
 		pItem->Invalidate();
 		pItem->m_Rect.Move(DiffX, DiffY);
@@ -645,10 +646,10 @@ void EGGridLayout::RepositionItem(EGObject *pItem, EGPoint *pGridPosition)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EG_Coord_t EGGridLayout::GridAlign(EG_Coord_t ContentSize, bool AutoSize, uint8_t Alignment, EG_Coord_t Gap, uint32_t TrackCount,
-														 EG_Coord_t *pSizeArray, EG_Coord_t *pPositionArray, bool Reverse)
+int32_t EGGridLayout::GridAlign(int32_t ContentSize, bool AutoSize, uint8_t Alignment, int32_t Gap, uint32_t TrackCount,
+														 int32_t *pSizeArray, int32_t *pPositionArray, bool Reverse)
 {
-EG_Coord_t GridSize = 0;
+int32_t GridSize = 0;
 uint32_t i;
 
 	if(AutoSize) {
@@ -675,14 +676,14 @@ uint32_t i;
 				break;
 			case EG_GRID_ALIGN_SPACE_BETWEEN:
 				pPositionArray[0] = 0;
-				Gap = (EG_Coord_t)(ContentSize - GridSize) / (EG_Coord_t)(TrackCount - 1);
+				Gap = (int32_t)(ContentSize - GridSize) / (int32_t)(TrackCount - 1);
 				break;
 			case EG_GRID_ALIGN_SPACE_AROUND:
-				Gap = (EG_Coord_t)(ContentSize - GridSize) / (EG_Coord_t)(TrackCount);
+				Gap = (int32_t)(ContentSize - GridSize) / (int32_t)(TrackCount);
 				pPositionArray[0] = Gap / 2;
 				break;
 			case EG_GRID_ALIGN_SPACE_EVENLY:
-				Gap = (EG_Coord_t)(ContentSize - GridSize) / (EG_Coord_t)(TrackCount + 1);
+				Gap = (int32_t)(ContentSize - GridSize) / (int32_t)(TrackCount + 1);
 				pPositionArray[0] = Gap;
 				break;
 		}
@@ -690,7 +691,7 @@ uint32_t i;
 	for(i = 0; i < TrackCount - 1; i++) {	// Set the position of all tracks from the start position, gaps and track sizes
 		pPositionArray[i + 1] = pPositionArray[i] + pSizeArray[i] + Gap;
 	}
-	EG_Coord_t TotalGridSize = pPositionArray[TrackCount - 1] + pSizeArray[TrackCount - 1] - pPositionArray[0];
+	int32_t TotalGridSize = pPositionArray[TrackCount - 1] + pSizeArray[TrackCount - 1] - pPositionArray[0];
 	if(Reverse) {
 		for(i = 0; i < TrackCount; i++) {
 			pPositionArray[i] = ContentSize - pPositionArray[i] - pSizeArray[i];
@@ -701,7 +702,7 @@ uint32_t i;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uint32_t EGGridLayout::CountTracks(const EG_Coord_t *pTracks)
+uint32_t EGGridLayout::CountTracks(const int32_t *pTracks)
 {
 uint32_t i;
 
