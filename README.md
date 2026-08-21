@@ -12,12 +12,12 @@ EGL (Embeded Graphics Library).
   This is a rewritten version of LVGL based on version 8.4.4. I chose to rename it to indicate that
   a large amount of the interface is different from that of LVGL and requires interpretaion from direct
   function calls 'Func(Obj, Arg)' to class calls 'Obj->Func(Arg). It is object based with a conventional
-  class structure. I have adhered to the same function naming as LVGL as much as possible but using 
+  class structure. I have adhered to the same function naming as LVGL as much as possible but using
   'medial case' format.
   I have also expanded some of the ambiguous abbreviations for clarity and readability.
 
 
-![Alt text](EGL_Class_Hierarchy.jpg)
+![Alt text](EGL_Class_Hierarchy_v2.jpg)
 
 Key Features
 ============
